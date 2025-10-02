@@ -1,0 +1,15 @@
+node_modules/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+dist/
+.DS_Store
+*.log
+.vite/
+
+# Large data files - GPS/Map data
+shared_util/managers/gps_mngr/map_tile_extraction/
+shared_util/managers/gps_mngr/osm_env/
+__pycache__/

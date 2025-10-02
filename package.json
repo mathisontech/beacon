@@ -1,0 +1,46 @@
+{
+  "name": "beacon-emergency-gps",
+  "version": "1.0.0",
+  "description": "Beacon - Emergency GPS Navigation System with OpenStreetMap integration",
+  "main": "frontend/src/main.jsx",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron": "electron .",
+    "electron-dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && NODE_ENV=development electron .\"",
+    "electron-build": "npm run build && electron .",
+    "start": "npm run dev"
+  },
+  "keywords": [
+    "gps",
+    "emergency",
+    "navigation",
+    "openstreetmap",
+    "react",
+    "weather-alerts"
+  ],
+  "author": "Mathison",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.8.2",
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^5.0.0",
+    "axios": "^1.11.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.1",
+    "vite": "^7.1.4",
+    "electron": "^37.3.1",
+    "concurrently": "^9.2.1",
+    "wait-on": "^8.0.4"
+  },
+  "homepage": "./",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mathison/beacon-gps"
+  }
+}
