@@ -1,5 +1,6 @@
 .contacts-page {
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   background-color: #f5f5f5;
@@ -232,15 +233,43 @@
   font-weight: 600;
 }
 
-/* Split Layout: Chat (top) | Status Feed (bottom) */
-.split-layout {
+/* Main Layout: Left Panel (Chat + Status) | Right Panel (Map) */
+.main-layout {
   display: flex;
-  flex-direction: column;
   flex: 1;
   overflow: hidden;
+  width: 100%;
 }
 
-/* Chat Section (Top half of left) */
+/* Left Panel - Contains Chat and Status */
+.left-panel {
+  width: 50%;
+  flex: 0 0 50%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e5e7eb;
+  min-width: 0;
+  max-width: 50%;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* Right Panel - Contains Map */
+.right-panel {
+  width: 50%;
+  flex: 0 0 50%;
+  display: flex !important;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 50%;
+  background-color: #ff0000 !important; /* DEBUG: Red background to see if it's there */
+  border: 5px solid yellow !important; /* DEBUG: Yellow border */
+  position: relative;
+  z-index: 999 !important;
+}
+
+/* Chat Section (Top half of left panel) */
 .chat-section {
   flex: 1;
   display: flex;
@@ -249,7 +278,7 @@
   min-height: 0;
 }
 
-/* Status Section (Bottom half of left) */
+/* Status Section (Bottom half of left panel) */
 .status-section {
   flex: 1;
   display: flex;
@@ -257,6 +286,14 @@
   min-height: 0;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Map Section (Right panel) */
+.map-section {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .section-title {
@@ -420,26 +457,32 @@
   line-height: 1.5;
 }
 
-/* Map Container */
-.map-container {
+/* Map Container and Placeholder */
+.map-section .map-placeholder {
   flex: 1;
-  overflow-y: auto;
-  background-color: #f8fafc;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-
-.map-placeholder {
   text-align: center;
   color: #64748b;
-  max-width: 400px;
-  padding: 20px;
+  padding: 40px 20px;
+  background-color: #f8fafc;
 }
 
-.map-placeholder > p:first-child {
-  font-size: 48px;
-  margin-bottom: 12px;
+.map-section .map-placeholder > p:first-child {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.map-section .map-placeholder > p:last-child {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.contact-map {
+  width: 100%;
+  height: 100%;
 }
 
 .location-info {

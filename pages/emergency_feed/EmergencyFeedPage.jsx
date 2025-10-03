@@ -8,6 +8,7 @@ import { STATUS_TYPES, getStatusById } from '../../shared_util/data/userStatusUp
 import { LOCATION_ALERTS } from '../../shared_util/data/locationAlerts'
 import LocationAvailableIcon from '../../shared_util/managers/gps_mngr/location_available_icon.svg'
 import LocationNotAvailableIcon from '../../shared_util/managers/gps_mngr/location_not_available_icon.svg'
+import SimpleMap from '../../shared_util/components/map/SimpleMap'
 
 function EmergencyFeedPage({ user }) {
   const [beaconActive, setBeaconActive] = useState(false)
@@ -258,9 +259,9 @@ function EmergencyFeedPage({ user }) {
           </div>
         </div>
 
-        {/* 2-Panel Layout: Chat (top 50%) and Status Feed (bottom 50%) */}
-        <div className="two-panel-container">
-          {/* Top: Chat (50% height) */}
+        {/* 3-Panel Layout: Chat (left) | Status Feed (middle) | Map (right) */}
+        <div className="three-panel-container">
+          {/* Left: Chat */}
           <div className="chat-panel">
             <div className="panel-title">Chat</div>
             <div className="chat-messages-area">
@@ -296,7 +297,7 @@ function EmergencyFeedPage({ user }) {
             </div>
           </div>
 
-          {/* Bottom: Status Feed (50% height) */}
+          {/* Middle: Status Feed */}
           <div className="status-panel">
             <div className="panel-title">Status Feed</div>
             <div className="status-feed-area-detail">
@@ -346,6 +347,26 @@ function EmergencyFeedPage({ user }) {
                     )
                   })}
                 </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right: Map */}
+          <div className="map-panel">
+            <div className="panel-title">🗺️ Location</div>
+            <div className="map-container-emergency">
+              {selectedEntity.location ? (
+                <SimpleMap
+                  userLocation={{
+                    latitude: selectedEntity.location.lat,
+                    longitude: selectedEntity.location.lng,
+                    timestamp: selectedEntity.lastUpdate
+                  }}
+                  emergencyMode={true}
+                  className="emergency-map"
+                />
+              ) : (
+                <div className="no-content">No location data available</div>
               )}
             </div>
           </div>

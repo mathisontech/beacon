@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import './ContactsPage.css'
 import { STATUS_TYPES, getStatusById } from '../../shared_util/data/userStatusUpdates'
 import { LOCATION_ALERTS } from '../../shared_util/data/locationAlerts'
+import SimpleMap from '../../shared_util/components/map/SimpleMap'
 
 function ContactsPage({ user }) {
   const [activeView, setActiveView] = useState('list')
@@ -396,8 +397,11 @@ function ContactsPage({ user }) {
   }
 
   const handleOpenChat = (contact) => {
+    alert('CLICK DETECTED: ' + contact.name)
+    console.log('handleOpenChat called with contact:', contact)
     setSelectedContact(contact)
     setActiveView('chat')
+    console.log('activeView set to: chat')
   }
 
   const handleSendMessage = () => {
@@ -504,13 +508,28 @@ function ContactsPage({ user }) {
   )
 
   const renderChatView = () => {
-    if (!selectedContact) return null
+    console.log('renderChatView called, selectedContact:', selectedContact)
+    console.log('activeView:', activeView)
+
+    if (!selectedContact) {
+      console.log('No selected contact, returning null')
+      return null
+    }
 
     const chatMessages = messages[selectedContact.id] || []
     const contactStatusUpdates = statusUpdates[selectedContact.id] || []
 
+    // Get contact's location from their latest status update
+    const latestUpdate = contactStatusUpdates.length > 0
+      ? contactStatusUpdates[contactStatusUpdates.length - 1]
+      : null
+    const contactLocation = latestUpdate?.location
+
+    console.log('Rendering chat view for:', selectedContact.name)
+    console.log('contactLocation:', contactLocation)
+
     return (
-      <div className="contact-view">
+      <div className="contact-view" style={{ backgroundColor: 'pink', padding: '20px' }}>
         <div className="contact-header">
           <button className="back-btn" onClick={() => setActiveView('list')}>
             ← Back
@@ -526,78 +545,106 @@ function ContactsPage({ user }) {
           </div>
         </div>
 
-        <div className="split-layout">
-          <div className="chat-section">
-            <div className="section-title">💬 Chat</div>
-            <div className="chat-messages">
-              {chatMessages.length === 0 ? (
-                <div className="empty-state">No messages yet</div>
-              ) : (
-                chatMessages.map(message => {
-                  const isMyMessage = message.senderId === user?.id
-                  return (
-                    <div key={message.id} className={`message ${isMyMessage ? 'my-message' : 'their-message'}`}>
-                      <div className="message-content">
-                        <div className="message-text">{message.content}</div>
-                        <div className="message-time">{formatTimeAgo(message.timestamp)}</div>
+        <h1 style={{ color: 'red', fontSize: '72px', backgroundColor: 'yellow' }}>BEFORE MAIN LAYOUT</h1>
+
+        <div className="main-layout" style={{ display: 'flex', width: '100%', height: '500px', border: '3px solid blue' }}>
+          <div className="left-panel" style={{ width: '50%', backgroundColor: 'lightblue' }}>
+            <p>LEFT PANEL VISIBLE</p>
+            <div className="chat-section">
+              <div className="section-title">💬 Chat</div>
+              <div className="chat-messages">
+                {chatMessages.length === 0 ? (
+                  <div className="empty-state">No messages yet</div>
+                ) : (
+                  chatMessages.map(message => {
+                    const isMyMessage = message.senderId === user?.id
+                    return (
+                      <div key={message.id} className={`message ${isMyMessage ? 'my-message' : 'their-message'}`}>
+                        <div className="message-content">
+                          <div className="message-text">{message.content}</div>
+                          <div className="message-time">{formatTimeAgo(message.timestamp)}</div>
+                        </div>
                       </div>
-                    </div>
-                  )
-                })
-              )}
+                    )
+                  })
+                )}
+              </div>
+              <div className="chat-input-container">
+                <input
+                  type="text"
+                  className="chat-input"
+                  placeholder={`Message ${selectedContact.name}...`}
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                />
+                <button className="send-btn" onClick={handleSendMessage}>Send</button>
+              </div>
             </div>
-            <div className="chat-input-container">
-              <input
-                type="text"
-                className="chat-input"
-                placeholder={`Message ${selectedContact.name}...`}
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              />
-              <button className="send-btn" onClick={handleSendMessage}>Send</button>
+
+            <div className="status-section">
+              <div className="section-title">📢 Status Feed</div>
+              <div className="status-feed">
+                {contactStatusUpdates.length === 0 ? (
+                  <div className="empty-state">No status updates</div>
+                ) : (
+                  <div className="status-updates-list">
+                    {[...contactStatusUpdates].reverse().map(update => {
+                      let icon, name, color, category
+
+                      if (update.type === 'location_alert') {
+                        const alertData = getAlertByVariantId(update.alertId)
+                        if (!alertData) return null
+
+                        icon = alertData.icon
+                        name = alertData.variant ? alertData.variant.name : alertData.name
+                        color = alertData.color
+                        category = alertData.category
+                      } else {
+                        const statusData = getStatusById(update.statusType)
+                        if (!statusData) return null
+
+                        icon = statusData.icon
+                        name = statusData.name
+                        color = statusData.color
+                        category = statusData.category
+                      }
+
+                      return (
+                        <div key={update.id} className="status-update" style={{ borderLeftColor: color }}>
+                          <div className="status-header">
+                            <span className="status-icon">{icon}</span>
+                            <span className="status-name">{name}</span>
+                            <span className="status-time">{formatTimeAgo(update.timestamp)}</span>
+                          </div>
+                          {update.userMessage && <div className="status-message">{update.userMessage}</div>}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="status-section">
-            <div className="section-title">📢 Status Feed</div>
-            <div className="status-feed">
-              {contactStatusUpdates.length === 0 ? (
-                <div className="empty-state">No status updates</div>
+          <div className="right-panel" style={{ backgroundColor: 'red', border: '10px solid yellow' }}>
+            <h1 style={{ color: 'white', fontSize: '48px' }}>RIGHT PANEL TEST</h1>
+            <div className="section-title">🗺️ Location</div>
+            <div className="map-section">
+              {contactLocation ? (
+                <SimpleMap
+                  userLocation={{
+                    latitude: contactLocation.lat,
+                    longitude: contactLocation.lng,
+                    timestamp: latestUpdate.timestamp
+                  }}
+                  emergencyMode={selectedContact.needsHelp}
+                  className="contact-map"
+                />
               ) : (
-                <div className="status-updates-list">
-                  {[...contactStatusUpdates].reverse().map(update => {
-                    let icon, name, color, category
-
-                    if (update.type === 'location_alert') {
-                      const alertData = getAlertByVariantId(update.alertId)
-                      if (!alertData) return null
-
-                      icon = alertData.icon
-                      name = alertData.variant ? alertData.variant.name : alertData.name
-                      color = alertData.color
-                      category = alertData.category
-                    } else {
-                      const statusData = getStatusById(update.statusType)
-                      if (!statusData) return null
-
-                      icon = statusData.icon
-                      name = statusData.name
-                      color = statusData.color
-                      category = statusData.category
-                    }
-
-                    return (
-                      <div key={update.id} className="status-update" style={{ borderLeftColor: color }}>
-                        <div className="status-header">
-                          <span className="status-icon">{icon}</span>
-                          <span className="status-name">{name}</span>
-                          <span className="status-time">{formatTimeAgo(update.timestamp)}</span>
-                        </div>
-                        {update.userMessage && <div className="status-message">{update.userMessage}</div>}
-                      </div>
-                    )
-                  })}
+                <div className="map-placeholder">
+                  <p>📍</p>
+                  <p>No location data available for {selectedContact.name}</p>
                 </div>
               )}
             </div>
@@ -606,6 +653,8 @@ function ContactsPage({ user }) {
       </div>
     )
   }
+
+  console.log('ContactsPage render - activeView:', activeView, 'selectedContact:', selectedContact)
 
   return (
     <div className="contacts-page">

@@ -8,14 +8,19 @@ import NewCreateAccountPage from '../../shared_util/components/auth/NewCreateAcc
 import MapPage from '../map/MapPage'
 import EmergencyFeedPage from '../emergency_feed/EmergencyFeedPage'
 import AlertsPage from '../alerts/AlertsPage'
+import ContactsPage from '../contacts/ContactsPage'
 import ProfilePage from '../profile/ProfilePage'
+import MapIcon from './icons/map.png'
+import EmergencyIcon from './icons/community.png'
+import AlertsIcon from './icons/alerts.png'
+import ProfileIcon from './icons/profile.png'
 import './BeaconDashboard.css'
 
 function BeaconDashboard({ user, onExit }) {
   const [currentUser, setCurrentUser] = useState(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [showCreateAccount, setShowCreateAccount] = useState(false)
-  const [activePage, setActivePage] = useState('map') // 'map', 'feed', 'alerts', 'profile'
+  const [activePage, setActivePage] = useState('map') // 'map', 'feed', 'alerts', 'contacts', 'profile'
   const [beaconActive, setBeaconActive] = useState(false)
   const [beaconStatus, setBeaconStatus] = useState('inactive') // inactive, safe, sheltering, help
   const [userLocation, setUserLocation] = useState(null)
@@ -134,6 +139,10 @@ function BeaconDashboard({ user, onExit }) {
             <AlertsPage user={currentUser} userLocation={userLocation} />
           )}
 
+          {activePage === 'contacts' && (
+            <ContactsPage user={currentUser} />
+          )}
+
           {activePage === 'profile' && (
             <ProfilePage user={currentUser} onLogout={handleLogout} />
           )}
@@ -145,32 +154,43 @@ function BeaconDashboard({ user, onExit }) {
             className={`nav-tab ${activePage === 'map' ? 'active' : ''}`}
             onClick={() => setActivePage('map')}
           >
-            <div className="nav-icon">🗺️</div>
-            <div className="nav-label">Map</div>
+            <div className="nav-icon">
+              <img src={MapIcon} alt="Map" className="nav-icon-image" />
+            </div>
           </button>
 
           <button
             className={`nav-tab ${activePage === 'feed' ? 'active' : ''}`}
             onClick={() => setActivePage('feed')}
           >
-            <div className="nav-icon">🚨</div>
-            <div className="nav-label">Emergency</div>
+            <div className="nav-icon">
+              <img src={EmergencyIcon} alt="Emergency" className="nav-icon-image" />
+            </div>
           </button>
 
           <button
             className={`nav-tab ${activePage === 'alerts' ? 'active' : ''}`}
             onClick={() => setActivePage('alerts')}
           >
-            <div className="nav-icon">📢</div>
-            <div className="nav-label">Alerts</div>
+            <div className="nav-icon">
+              <img src={AlertsIcon} alt="Alerts" className="nav-icon-image" />
+            </div>
+          </button>
+
+          <button
+            className={`nav-tab ${activePage === 'contacts' ? 'active' : ''}`}
+            onClick={() => setActivePage('contacts')}
+          >
+            <div className="nav-icon">👥</div>
           </button>
 
           <button
             className={`nav-tab ${activePage === 'profile' ? 'active' : ''}`}
             onClick={() => setActivePage('profile')}
           >
-            <div className="nav-icon">👤</div>
-            <div className="nav-label">Profile</div>
+            <div className="nav-icon">
+              <img src={ProfileIcon} alt="Profile" className="nav-icon-image" />
+            </div>
           </button>
         </div>
     </div>
