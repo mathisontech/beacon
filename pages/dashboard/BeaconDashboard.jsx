@@ -6,12 +6,9 @@ import React, { useState, useEffect } from 'react'
 import BeaconSignInPage from '../auth/SignInPage'
 import NewCreateAccountPage from '../../shared_util/components/auth/NewCreateAccountPage'
 import MapPage from '../map/MapPage'
-import EmergencyFeedPage from '../emergency_feed/EmergencyFeedPage'
 import AlertsPage from '../alerts/AlertsPage'
-import ContactsPage from '../contacts/ContactsPage'
 import ProfilePage from '../profile/ProfilePage'
 import MapIcon from './icons/map.png'
-import EmergencyIcon from './icons/community.png'
 import AlertsIcon from './icons/alerts.png'
 import ProfileIcon from './icons/profile.png'
 import './BeaconDashboard.css'
@@ -20,7 +17,7 @@ function BeaconDashboard({ user, onExit }) {
   const [currentUser, setCurrentUser] = useState(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [showCreateAccount, setShowCreateAccount] = useState(false)
-  const [activePage, setActivePage] = useState('map') // 'map', 'feed', 'alerts', 'contacts', 'profile'
+  const [activePage, setActivePage] = useState('map') // 'map', 'alerts', 'profile'
   const [beaconActive, setBeaconActive] = useState(false)
   const [beaconStatus, setBeaconStatus] = useState('inactive') // inactive, safe, sheltering, help
   const [userLocation, setUserLocation] = useState(null)
@@ -131,16 +128,8 @@ function BeaconDashboard({ user, onExit }) {
             <MapPage user={currentUser} />
           )}
 
-          {activePage === 'feed' && (
-            <EmergencyFeedPage user={currentUser} />
-          )}
-
           {activePage === 'alerts' && (
             <AlertsPage user={currentUser} userLocation={userLocation} />
-          )}
-
-          {activePage === 'contacts' && (
-            <ContactsPage user={currentUser} />
           )}
 
           {activePage === 'profile' && (
@@ -160,28 +149,12 @@ function BeaconDashboard({ user, onExit }) {
           </button>
 
           <button
-            className={`nav-tab ${activePage === 'feed' ? 'active' : ''}`}
-            onClick={() => setActivePage('feed')}
-          >
-            <div className="nav-icon">
-              <img src={EmergencyIcon} alt="Emergency" className="nav-icon-image" />
-            </div>
-          </button>
-
-          <button
             className={`nav-tab ${activePage === 'alerts' ? 'active' : ''}`}
             onClick={() => setActivePage('alerts')}
           >
             <div className="nav-icon">
               <img src={AlertsIcon} alt="Alerts" className="nav-icon-image" />
             </div>
-          </button>
-
-          <button
-            className={`nav-tab ${activePage === 'contacts' ? 'active' : ''}`}
-            onClick={() => setActivePage('contacts')}
-          >
-            <div className="nav-icon">👥</div>
           </button>
 
           <button
