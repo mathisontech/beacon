@@ -34,7 +34,7 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
   const monitoring = volcano ? getMonitoring(volcano.id) : undefined;
   const sparse = !history && !monitoring;
 
-  const { quakes, loading, error } = useVolcanoQuakes(
+  const { quakes, loading, error, source: quakeSource } = useVolcanoQuakes(
     volcano?.lat ?? null,
     volcano?.lng ?? null,
     { radiusKm: QUAKE_RADIUS_KM, days: QUAKE_DAYS }
@@ -78,13 +78,18 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
               <div className="vp-sparse-body">
                 The operating observatory almost certainly publishes
                 real-time monitoring data and eruption history — Beacon
-                just hasn&apos;t imported it into this panel yet. The
-                quakes section below pulls from the USGS global catalog
-                (M ~4.5+), which misses smaller volcanic earthquakes
-                that regional observatories track. Use the Smithsonian
-                GVP page for authoritative eruption history and the
-                operator link (under &quot;More location info&quot;)
-                for live bulletins.
+                just hasn&apos;t imported it into this panel yet.
+                {quakeSource && quakeSource.id === "usgs" ? (
+                  <> Quakes below are from the USGS global catalog
+                  (M ~4.5+), which misses smaller volcanic earthquakes
+                  that regional observatories track.</>
+                ) : quakeSource ? (
+                  <> Quakes below come from {quakeSource.name}, the
+                  regional observatory.</>
+                ) : null}
+                {" "}Use the Smithsonian GVP page for authoritative
+                eruption history and the operator link (under
+                &quot;More location info&quot;) for live bulletins.
               </div>
               <a
                 href={`https://volcano.si.edu/volcano.cfm?vn=${encodeURIComponent(volcano.name)}`}
@@ -109,6 +114,7 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
               radiusKm={QUAKE_RADIUS_KM}
               days={QUAKE_DAYS}
               baseline={history?.quakeBaseline}
+              source={quakeSource}
             />
             <DeformationSection
               detail={detail}

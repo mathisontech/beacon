@@ -11,6 +11,13 @@ export interface VolcanoQuake {
   lat: number;
   lng: number;
   url: string;
+  source?: string;
+}
+
+export interface QuakeSourceInfo {
+  id: string;
+  name: string;
+  url: string;
 }
 
 interface QuakesResponse {
@@ -18,6 +25,7 @@ interface QuakesResponse {
   center: { lat: number; lng: number };
   radiusKm: number;
   days: number;
+  source: QuakeSourceInfo;
   count: number;
   quakes: VolcanoQuake[];
 }
@@ -27,25 +35,29 @@ interface State {
   loading: boolean;
   error: string | null;
   fetchedAt: number | null;
+  source: QuakeSourceInfo | null;
 }
 
 // Fetches recent quakes within radiusKm of (lat,lng) for the last
-// `days` days. Null args disable the fetch.
+// `days` days. The backend picks the best regional feed (INGV,
+// GeoNet, IPGP, …) and falls back to USGS globally. Null args
+// disable the fetch.
 export function useVolcanoQuakes(
   lat: number | null,
   lng: number | null,
-  opts?: { radiusKm?: number; days?: number }
+  opts?: { radiusKm?: number; days?: number },
 ): State {
   const [state, setState] = useState<State>({
     quakes: [],
     loading: false,
     error: null,
     fetchedAt: null,
+    source: null,
   });
 
   useEffect(() => {
     if (lat == null || lng == null) {
-      setState({ quakes: [], loading: false, error: null, fetchedAt: null });
+      setState({ quakes: [], loading: false, error: null, fetchedAt: null, source: null });
       return;
     }
     const controller = new AbortController();
@@ -74,6 +86,7 @@ export function useVolcanoQuakes(
           loading: false,
           error: null,
           fetchedAt: data.at,
+          source: data.source,
         });
       })
       .catch((err) => {
@@ -83,6 +96,7 @@ export function useVolcanoQuakes(
           loading: false,
           error: err instanceof Error ? err.message : "fetch failed",
           fetchedAt: null,
+          source: null,
         });
       });
 

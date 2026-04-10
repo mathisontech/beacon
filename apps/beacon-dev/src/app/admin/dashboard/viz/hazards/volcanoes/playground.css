@@ -1211,3 +1211,16 @@
   font-weight: 600;
 }
 .vp-root .vp-sparse-link:hover { text-decoration: underline; }
+
+/* ───────── TWEAK ZONE 14 — quake source attribution ───────── */
+
+.vp-root .vp-quake-source {
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  margin: 2px 0 6px;
+}
+.vp-root .vp-quake-source a {
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+}
+.vp-root .vp-quake-source a:hover { text-decoration: underline; }

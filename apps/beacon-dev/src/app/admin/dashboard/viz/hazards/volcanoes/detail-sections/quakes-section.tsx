@@ -1,6 +1,6 @@
 "use client";
 
-import type { VolcanoQuake } from "../use-volcano-quakes";
+import type { VolcanoQuake, QuakeSourceInfo } from "../use-volcano-quakes";
 
 interface Props {
   quakes: VolcanoQuake[];
@@ -9,6 +9,7 @@ interface Props {
   radiusKm: number;
   days: number;
   baseline?: string;
+  source?: QuakeSourceInfo | null;
 }
 
 function formatTimeAgo(ms: number): string {
@@ -28,7 +29,16 @@ function magClass(mag: number | null): string {
   return "mag-low";
 }
 
-export function QuakesSection({ quakes, loading, error, radiusKm, days, baseline }: Props) {
+export function QuakesSection({
+  quakes,
+  loading,
+  error,
+  radiusKm,
+  days,
+  baseline,
+  source,
+}: Props) {
+  const sourceName = source?.name ?? "feed";
   return (
     <section className="vp-section">
       <header className="vp-section-head">
@@ -37,13 +47,21 @@ export function QuakesSection({ quakes, loading, error, radiusKm, days, baseline
           {radiusKm} km · last {days}d
         </span>
       </header>
+      {source && (
+        <div className="vp-quake-source">
+          Source:{" "}
+          <a href={source.url} target="_blank" rel="noopener noreferrer">
+            {source.name}
+          </a>
+        </div>
+      )}
       {baseline && (
         <div className="vp-baseline">
-          <div className="vp-baseline-label">What's normal</div>
+          <div className="vp-baseline-label">What&apos;s normal</div>
           <div className="vp-baseline-text">{baseline}</div>
         </div>
       )}
-      {loading && <div className="vp-note">Loading USGS feed…</div>}
+      {loading && <div className="vp-note">Loading {sourceName} feed…</div>}
       {error && <div className="vp-note vp-error">Error: {error}</div>}
       {!loading && !error && quakes.length === 0 && (
         <div className="vp-note">No quakes in range.</div>
