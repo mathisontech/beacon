@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@beacon/data-sources": ["../../packages/data-sources/src/index.ts"],
+      "@beacon/event-engine": ["../../packages/event-engine/src/index.ts"]
+    },
+    "ignoreDeprecations": "6.0"
+  }
+}
