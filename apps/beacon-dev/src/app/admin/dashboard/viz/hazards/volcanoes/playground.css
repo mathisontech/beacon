@@ -1195,6 +1195,14 @@
   line-height: 1.5;
   color: rgba(255,230,180,0.85);
 }
+.vp-root .vp-sparse-title {
+  font-weight: 600;
+  color: rgba(255,220,150,0.98);
+  margin-bottom: 4px;
+}
+.vp-root .vp-sparse-body {
+  color: rgba(255,230,180,0.78);
+}
 .vp-root .vp-sparse-link {
   display: inline-block;
   margin-top: 6px;

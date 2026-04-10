@@ -898,6 +898,66 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     deformationBaseline:
       "GPS + tiltmeter network. Showed clear inflation before 2006.",
   },
+
+  "campi-flegrei": {
+    id: "campi-flegrei",
+    eruptions: [
+      { year: 1538, display: "1538", vei: 2, notes: "Monte Nuovo — a new cone grew in one week near Pozzuoli. Last eruption of the caldera." },
+      { year: -8000, display: "~10,000 years ago", vei: 4, notes: "Agnano-Monte Spina — explosive eruption in the current caldera cycle" },
+      { year: -13000, display: "~15,000 years ago", vei: 6, notes: "Neapolitan Yellow Tuff — formed the inner caldera" },
+      { year: -37000, display: "~39,000 years ago", vei: 7, notes: "Campanian Ignimbrite — a supereruption that buried Southern Italy and is linked to climate cooling across Europe" },
+    ],
+    returnIntervalYears: 500,
+    returnIntervalNote: "Very irregular. ~70 eruptions in the last 15,000 years, clustered in 3 epochs, separated by long quiet periods. The system has been quiet (for eruptions) since 1538, but is bradyseismically active.",
+    style: "explosive",
+    styleDescription:
+      "Campi Flegrei produces short, violent explosive eruptions from shifting vents inside the caldera. Monte Nuovo (1538) was a small phreatomagmatic event; Neapolitan Yellow Tuff (~15 ka) was caldera-forming. The worry isn't continuous activity — it's the uncertainty about which vent goes next.",
+    danger: "extreme",
+    dangerExplanation:
+      "Around 500,000 people live inside the Italian Civil Protection Red Zone (pyroclastic-flow evacuation area), and ~1.5 million more inside the Yellow Zone (ashfall). The metro Naples area is among the most densely populated volcanic regions on earth. Even a Monte Nuovo-scale eruption would be a mass-casualty event.",
+    altStyles: [
+      {
+        kind: "hydrothermal",
+        frequency: "usually",
+        danger: "moderate",
+        description:
+          "Solfatara and Pisciarelli fumaroles are continuously active with high CO₂ and H₂S. Pisciarelli has hosted small phreatic events and scalding mudflows; access is restricted.",
+      },
+      {
+        kind: "caldera",
+        frequency: "historical",
+        danger: "extreme",
+        description:
+          "The Campanian Ignimbrite ~39,000 years ago was a VEI 7 supereruption that deposited ash across Eastern Europe. No sign of imminent supereruption, but the system is geologically capable.",
+      },
+    ],
+    capabilities: [
+      {
+        label: "Bradyseism (ground uplift + quakes)",
+        imminence: "high",
+        signs: "Active crisis since 2005, sharply accelerated since 2022. Caldera floor has risen more than 1 meter in Pozzuoli; seismic swarms of hundreds of small quakes (M1–4) are routine. INGV keeps the volcanic alert at Yellow. Uplift is driven by fluid pressure — whether it turns into magma intrusion is the open question.",
+      },
+      {
+        label: "Phreatomagmatic eruption (Monte Nuovo type)",
+        imminence: "moderate",
+        signs: "1538 was preceded by years of uplift + earthquakes + ground cracking. The current pattern has some parallels but no deep long-period earthquakes or strong gas anomaly shift yet. INGV watches for changes in CO₂/H₂O ratio at Pisciarelli as a key precursor.",
+      },
+      {
+        label: "VEI 7 supereruption",
+        imminence: "none",
+        signs: "Would require massive magma accumulation over centuries — nothing currently observed at that scale. Historical precedent exists (Campanian Ignimbrite ~39 ka), but no imminence.",
+      },
+      {
+        label: "Hydrothermal blast",
+        imminence: "moderate",
+        signs: "Pisciarelli has had small steam blasts and scalding mud flows in recent years. Solfatara CO₂ flux is at a multi-decade high. Localised hazard to visitors and nearby residents; not a wider evacuation trigger.",
+      },
+    ],
+    quakeBaseline:
+      "Bradyseismic crisis: hundreds to thousands of small quakes per month (M0–3), with occasional M4 events. The ongoing uplift means this is NOT background — it's elevated, and has been rising since 2005. INGV publishes the full catalog at ov.ingv.it.",
+    deformationBaseline:
+      "The caldera has risen more than 1 meter at the Rione Terra tide gauge in Pozzuoli since 2005, with the rate accelerating since 2022 (tens of cm per year). This is the most rapid uplift of any major urban caldera in the world. Driven by fluid pressure from the shallow hydrothermal/magmatic system.",
+  },
 };
 
 // Compute years since the most recent eruption. Uses the `year`

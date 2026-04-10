@@ -72,10 +72,20 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
 
           {sparse && (
             <div className="vp-sparse-banner">
-              Curated Beacon data for this volcano is limited. Live
-              earthquake data will load from USGS FDSN below; for
-              eruption history and monitoring details use the
-              Smithsonian Global Volcanism Program link.
+              <div className="vp-sparse-title">
+                Beacon hasn&apos;t curated this volcano yet
+              </div>
+              <div className="vp-sparse-body">
+                The operating observatory almost certainly publishes
+                real-time monitoring data and eruption history — Beacon
+                just hasn&apos;t imported it into this panel yet. The
+                quakes section below pulls from the USGS global catalog
+                (M ~4.5+), which misses smaller volcanic earthquakes
+                that regional observatories track. Use the Smithsonian
+                GVP page for authoritative eruption history and the
+                operator link (under &quot;More location info&quot;)
+                for live bulletins.
+              </div>
               <a
                 href={`https://volcano.si.edu/volcano.cfm?vn=${encodeURIComponent(volcano.name)}`}
                 target="_blank"
