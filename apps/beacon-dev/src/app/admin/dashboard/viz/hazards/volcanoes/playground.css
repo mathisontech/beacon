@@ -1182,3 +1182,24 @@
 .vp-root .vp-mon-updated {
   color: rgba(255,255,255,0.4);
 }
+
+/* ───────── TWEAK ZONE 13 — sparse-data banner ───────── */
+
+.vp-root .vp-sparse-banner {
+  margin: 12px 16px 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,210,120,0.25);
+  background: rgba(255,210,120,0.06);
+  border-radius: 8px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: rgba(255,230,180,0.85);
+}
+.vp-root .vp-sparse-link {
+  display: inline-block;
+  margin-top: 6px;
+  color: rgba(255,210,120,0.95);
+  text-decoration: none;
+  font-weight: 600;
+}
+.vp-root .vp-sparse-link:hover { text-decoration: underline; }

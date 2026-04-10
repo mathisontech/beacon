@@ -32,6 +32,7 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
   const history = volcano ? VOLCANO_HISTORY[volcano.id] : undefined;
   const cams = volcano ? getCams(volcano.id) : [];
   const monitoring = volcano ? getMonitoring(volcano.id) : undefined;
+  const sparse = !history && !monitoring;
 
   const { quakes, loading, error } = useVolcanoQuakes(
     volcano?.lat ?? null,
@@ -68,6 +69,23 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
           )}
 
           <LocationDropdown volcano={volcano} />
+
+          {sparse && (
+            <div className="vp-sparse-banner">
+              Curated Beacon data for this volcano is limited. Live
+              earthquake data will load from USGS FDSN below; for
+              eruption history and monitoring details use the
+              Smithsonian Global Volcanism Program link.
+              <a
+                href={`https://volcano.si.edu/volcano.cfm?vn=${encodeURIComponent(volcano.name)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="vp-sparse-link"
+              >
+                Smithsonian GVP ↗
+              </a>
+            </div>
+          )}
 
           <div className="vp-panel-body">
             {monitoring && <MonitoringSection monitoring={monitoring} />}

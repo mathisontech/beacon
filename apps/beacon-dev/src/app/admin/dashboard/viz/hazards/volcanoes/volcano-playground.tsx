@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./playground.css";
 import type { AlertLevel, Volcano } from "./types";
-import { VOLCANOES } from "./volcano-data";
+import { ALL_VOLCANOES } from "./all-volcanoes";
 import { LEVELS } from "./volcano-levels";
 import { makePinIcon } from "./make-pin-icon";
 import { useLeafletCdn } from "./use-leaflet-cdn";
@@ -55,12 +55,12 @@ export function VolcanoPlayground() {
   const counts = useMemo(() => {
     const out: Record<string, number> = {};
     LEVELS.forEach((l) => (out[l.id] = 0));
-    VOLCANOES.forEach((v) => (out[v.level] = (out[v.level] || 0) + 1));
+    ALL_VOLCANOES.forEach((v) => (out[v.level] = (out[v.level] || 0) + 1));
     return out;
   }, []);
 
   const visibleCount = useMemo(
-    () => VOLCANOES.filter((v) => !offLevels.has(v.level)).length,
+    () => ALL_VOLCANOES.filter((v) => !offLevels.has(v.level)).length,
     [offLevels]
   );
 
@@ -73,7 +73,7 @@ export function VolcanoPlayground() {
     const map = L.map(mapDivRef.current, {
       zoomControl: true,
       worldCopyJump: true,
-    }).setView([40, -130], 4);
+    }).setView([15, 30], 2);
 
     L.tileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
@@ -90,7 +90,7 @@ export function VolcanoPlayground() {
       LEVELS.map((l) => [l.id, L.layerGroup().addTo(map)])
     ) as Record<AlertLevel, LLayerGroup>;
 
-    VOLCANOES.forEach((v) => {
+    ALL_VOLCANOES.forEach((v) => {
       const icon = makePinIcon(L, v.level);
       const m = L.marker([v.lat, v.lng], { icon });
       m.on("click", () => setSelected(v));
@@ -145,7 +145,7 @@ export function VolcanoPlayground() {
       <div className="vp-header">
         <div className="title">Beacon · Volcano Layer</div>
         <div className="stat">
-          <b>{visibleCount}</b> of {VOLCANOES.length} volcanoes
+          <b>{visibleCount}</b> of {ALL_VOLCANOES.length} volcanoes
         </div>
       </div>
 

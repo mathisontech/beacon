@@ -50,6 +50,8 @@ function CamTile({ cam }: { cam: VolcanoCam }) {
 }
 
 export function WebcamSection({ cams }: Props) {
+  if (cams.length === 0) return null;
+
   return (
     <section className="vp-section">
       <header className="vp-section-head">
@@ -58,21 +60,15 @@ export function WebcamSection({ cams }: Props) {
           <span className="vp-section-meta">{cams.length} views</span>
         )}
       </header>
-      {cams.length === 0 ? (
-        <div className="vp-note">
-          No webcams published for this volcano.
-        </div>
-      ) : (
-        <div className="vp-cam-grid">
-          {cams.map((c, i) => (
-            <CamTile key={`${c.label}-${i}`} cam={c} />
-          ))}
-        </div>
-      )}
+      <div className="vp-cam-grid">
+        {cams.map((c, i) => (
+          <CamTile key={`${c.label}-${i}`} cam={c} />
+        ))}
+      </div>
       <p className="vp-note">
-        Images are pulled live from USGS / AVO / HVO webcam servers.
-        If a frame shows "not embeddable", use the link to open the
-        observatory page in a new tab.
+        Images are pulled live from the operating observatory. If a
+        frame shows &quot;not embeddable&quot;, use the link to open
+        the observatory page in a new tab.
       </p>
     </section>
   );
