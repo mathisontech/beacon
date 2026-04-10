@@ -1,9 +1,9 @@
 import type { AlertLevel } from "./types";
+import { volcanoSvg } from "./volcano-svg";
 
 // Returns a Leaflet divIcon for a given alert level.
-// Shape is pure HTML+CSS — see playground.css TWEAK ZONE 3 to restyle.
-// Typed against a minimal Leaflet shape so we don't import leaflet
-// types at module-load (Leaflet is loaded from CDN in the browser).
+// Shape is the shared shaded-volcano SVG — see volcano-svg.ts.
+// TWEAK ZONE 3 in playground.css controls color + pulse.
 type LeafletLike = {
   divIcon: (opts: {
     className: string;
@@ -13,11 +13,22 @@ type LeafletLike = {
   }) => unknown;
 };
 
+// Pin size per alert level. Higher alert = larger icon.
+const SIZE: Record<AlertLevel, number> = {
+  warning: 34,
+  watch: 30,
+  advisory: 26,
+  normal: 22,
+  unknown: 22,
+};
+
 export function makePinIcon(L: LeafletLike, level: AlertLevel) {
+  const s = SIZE[level];
+  const svg = volcanoSvg(level, s);
   return L.divIcon({
     className: "",
-    html: `<div class="volcano-pin level-${level}"></div>`,
-    iconSize: [0, 0],
-    iconAnchor: [0, 0],
+    html: `<div class="volcano-pin level-${level}">${svg}</div>`,
+    iconSize: [s, s],
+    iconAnchor: [s / 2, s - 3],
   });
 }

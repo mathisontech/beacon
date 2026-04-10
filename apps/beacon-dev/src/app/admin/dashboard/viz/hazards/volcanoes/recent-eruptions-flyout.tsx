@@ -2,6 +2,7 @@
 
 import type { RecentEruption } from "./get-recent-eruptions";
 import type { Volcano } from "./types";
+import { volcanoSvg } from "./volcano-svg";
 
 interface Props {
   open: boolean;
@@ -42,7 +43,10 @@ export function RecentEruptionsFlyout({ open, items, onSelect, onClose }: Props)
             className="vp-flyout-row"
             onClick={() => onSelect(v)}
           >
-            <div className={`vp-flyout-dot level-${v.level}`} />
+            <div
+              className={`vp-flyout-icon level-${v.level}`}
+              dangerouslySetInnerHTML={{ __html: volcanoSvg(v.level, 22) }}
+            />
             <div className="vp-flyout-meta">
               <div className="vp-flyout-name">{v.name}</div>
               <div className="vp-flyout-region">{v.region}</div>

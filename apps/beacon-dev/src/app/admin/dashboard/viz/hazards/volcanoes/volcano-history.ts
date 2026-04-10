@@ -43,6 +43,19 @@ export interface AltStyle {
   description: string;
 }
 
+// How close observed behavior looks like pre-eruption behavior
+// for a specific capability. Drives the color on header chips.
+export type ImminenceLevel = "none" | "low" | "moderate" | "high";
+
+// A named capability of the volcano — what it's physically
+// capable of doing — together with how imminent that looks right
+// now, and a plain-English sign summary.
+export interface Capability {
+  label: string;
+  imminence: ImminenceLevel;
+  signs: string;
+}
+
 export interface VolcanoHistory {
   id: string;
   eruptions: EruptionRecord[]; // most recent first
@@ -53,6 +66,7 @@ export interface VolcanoHistory {
   danger: DangerChar;
   dangerExplanation: string;
   altStyles?: AltStyle[];
+  capabilities?: Capability[];
   quakeBaseline: string;
   deformationBaseline: string;
 }
@@ -87,6 +101,18 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
           "About once a century, magma hits the water table and Kīlauea throws ballistic rocks and ash from the summit. 1924 killed one person at the crater rim. This mode is abrupt and gives very little warning.",
       },
     ],
+    capabilities: [
+      {
+        label: "Lava flows",
+        imminence: "moderate",
+        signs: "Summit is actively inflating. Elevated summit tremor and earthquake rate typical of magma movement. Next effusive episode is likely within months.",
+      },
+      {
+        label: "Phreatic blast",
+        imminence: "low",
+        signs: "Water table near the vent is stable. No ballistic ejecta or sudden summit pressurization. Low risk under current conditions.",
+      },
+    ],
     quakeBaseline:
       "Normal background: 20–50 small M<2 quakes per day across the edifice. Swarms of M2–3 events, or sustained M3+ activity, often precede eruptions by hours to days.",
     deformationBaseline:
@@ -115,6 +141,18 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "high",
     dangerExplanation:
       "1950 flows from the SW Rift Zone reached the ocean in 3 hours, crossing a highway. SW Rift eruptions can threaten Kona and Hwy 11 with almost no warning.",
+    capabilities: [
+      {
+        label: "Fast SW Rift flow",
+        imminence: "low",
+        signs: "Summit has been inflating since the 2022 eruption ended. No deep long-period quakes suggesting magma ascent. Next eruption is uncertain — decades is plausible.",
+      },
+      {
+        label: "NE Rift flow",
+        imminence: "low",
+        signs: "NE Rift fed the 2022 and 1984 eruptions and is the more probable next vent location, but still no short-term precursors.",
+      },
+    ],
     quakeBaseline:
       "Normal background: 10–30 small M<2 quakes per day, mostly <10 km depth. Sustained swarms or deep long-period events signal magma ascent.",
     deformationBaseline:
@@ -214,6 +252,18 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "high",
     dangerExplanation:
       "Ash clouds drift over the North Pacific air corridor (where Asia–North America flights cross). Cold Bay and other nearby villages get ashfall. Lahars from ice melt can reach the coast.",
+    capabilities: [
+      {
+        label: "Fire fountains + ash",
+        imminence: "moderate",
+        signs: "Currently at Advisory. Pavlof erupts every 3–5 years on average and gives very little warning — minutes to hours of tremor before ash reaches the sky. Treat it as primed.",
+      },
+      {
+        label: "Lahar to coast",
+        imminence: "moderate",
+        signs: "Glacier ice on the flanks means any strong eruption will generate lahars reaching the shoreline. Cold Bay is downwind but not in the direct path.",
+      },
+    ],
     quakeBaseline:
       "Normal background: a few small quakes per day. Eruptions often begin with little to no clear seismic warning — minutes to hours of tremor before ash reaches the sky.",
     deformationBaseline:
@@ -253,6 +303,23 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
           "Three VEI 8 supereruptions have occurred (2.1 Mya, 1.3 Mya, 631 kya). These produced continent-wide ashfall and would be civilization-scale events today. Probability in our lifetimes is effectively zero, but the geologic record shows it has happened before.",
       },
     ],
+    capabilities: [
+      {
+        label: "VEI 8 supereruption",
+        imminence: "none",
+        signs: "No signs of imminent supereruption. Caldera floor rises and falls a few cm per year from hydrothermal fluids, not rising magma. No deep long-period earthquakes, no sustained harmonic tremor, no anomalous gas flux. This is background behavior.",
+      },
+      {
+        label: "Hydrothermal blast",
+        imminence: "moderate",
+        signs: "Small steam explosions in geyser basins occur several times per year. The Biscuit Basin blast in July 2024 was at the upper end of normal. Visitors in basin boardwalks are the population at risk; wider area is safe.",
+      },
+      {
+        label: "Local lava flow",
+        imminence: "low",
+        signs: "Small rhyolite flows happen every ~50,000–100,000 years. No current magma-ascent signals. Not expected on human timescales.",
+      },
+    ],
     quakeBaseline:
       "Normal background: 1,000–3,000 quakes PER YEAR across the caldera. Swarms of hundreds of small quakes in a week are normal. Most Yellowstone quake news is NOT unusual.",
     deformationBaseline:
@@ -288,6 +355,23 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
         danger: "moderate",
         description:
           "Magmatic CO₂ vents around Mammoth Mountain kill trees and, in enclosed spaces (ski patrol huts, cabins), can suffocate people. This is the day-to-day hazard, not eruptions.",
+      },
+    ],
+    capabilities: [
+      {
+        label: "VEI 7 caldera",
+        imminence: "none",
+        signs: "No deep earthquake swarms or sustained harmonic tremor. The 1980s unrest (earthquakes + 80 cm of uplift) did NOT lead to eruption. Current baseline is quiet.",
+      },
+      {
+        label: "Explosive rhyolite",
+        imminence: "low",
+        signs: "Magma-ascent signals absent. Long-term inflation of a few cm/year around the resurgent dome is notable but slow.",
+      },
+      {
+        label: "CO₂ gas (Mammoth)",
+        imminence: "high",
+        signs: "Active magmatic CO₂ emission. Dead tree zones around Horseshoe Lake. Enclosed spaces can be lethal. This is a present hazard, not a future one.",
       },
     ],
     quakeBaseline:
@@ -341,6 +425,23 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
         danger: "extreme",
         description:
           "Lahars (volcanic mudflows) can occur WITHOUT an eruption. Rainier has 35+ glaciers perched on weakened, hydrothermally altered rock. Flank collapse or even heavy rainfall could send a lahar down the Puyallup, Nisqually, or White River valleys at 30+ mph, reaching populated areas in under an hour.",
+      },
+    ],
+    capabilities: [
+      {
+        label: "Flank-collapse lahar",
+        imminence: "low",
+        signs: "Lahar detection sensors along the Puyallup and Carbon rivers are quiet. No anomalous summit seismicity. But the hazard is structural — it can happen with little warning regardless of baseline signs.",
+      },
+      {
+        label: "Explosive eruption",
+        imminence: "none",
+        signs: "No magma-ascent signals. No inflation of the edifice. Historically quiet on human timescales.",
+      },
+      {
+        label: "Glacier outburst flood",
+        imminence: "low",
+        signs: "Small glacial outbursts occur from time to time without eruption. Seasonal risk — watch during heavy snowmelt or intense rainfall.",
       },
     ],
     quakeBaseline:
@@ -475,6 +576,23 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
         danger: "extreme",
         description:
           "VEI 5 Plinian eruption like May 18, 1980: lateral blast flattened 600 km² of forest in minutes, followed by a sustained ash column to 24 km. This is the mode to fear. Large eruptions cluster in ~100–200 year cycles.",
+      },
+    ],
+    capabilities: [
+      {
+        label: "VEI 5 Plinian",
+        imminence: "none",
+        signs: "No magma-ascent signals. Dense GPS + seismic network is quiet. Not expected without months of precursory unrest.",
+      },
+      {
+        label: "Dome-building",
+        imminence: "low",
+        signs: "Dome has been quiet since 2008. Small gas emissions at the crater are normal.",
+      },
+      {
+        label: "Lahar in Toutle valley",
+        imminence: "low",
+        signs: "Sediment retention structures downstream mitigate chronic lahar risk. Eruption would overwhelm them.",
       },
     ],
     quakeBaseline:

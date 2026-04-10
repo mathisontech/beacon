@@ -3,7 +3,10 @@
 import type { Volcano } from "./types";
 import { VOLCANO_DETAILS, DEFAULT_VOLCANO_DETAIL } from "./volcano-details";
 import { VOLCANO_HISTORY } from "./volcano-history";
+import { getCams } from "./volcano-cams";
 import { useVolcanoQuakes } from "./use-volcano-quakes";
+import { CapabilityChips } from "./detail-sections/capability-chips";
+import { LocationDropdown } from "./detail-sections/location-dropdown";
 import { OverviewSection } from "./detail-sections/overview-section";
 import { EruptionStyleSection } from "./detail-sections/eruption-style-section";
 import { EruptionHistorySection } from "./detail-sections/eruption-history-section";
@@ -25,6 +28,7 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
     : DEFAULT_VOLCANO_DETAIL;
 
   const history = volcano ? VOLCANO_HISTORY[volcano.id] : undefined;
+  const cams = volcano ? getCams(volcano.id) : [];
 
   const { quakes, loading, error } = useVolcanoQuakes(
     volcano?.lat ?? null,
@@ -44,9 +48,7 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
           <header className="vp-panel-head">
             <div className="vp-panel-title">
               <div className="vp-panel-name">{volcano.name}</div>
-              <div className="vp-panel-sub">
-                {volcano.region} · {volcano.obs}
-              </div>
+              <div className="vp-panel-region">{volcano.region}</div>
             </div>
             <button
               type="button"
@@ -58,10 +60,16 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
             </button>
           </header>
 
+          {history?.capabilities && history.capabilities.length > 0 && (
+            <CapabilityChips capabilities={history.capabilities} />
+          )}
+
+          <LocationDropdown volcano={volcano} />
+
           <div className="vp-panel-body">
-            <OverviewSection volcano={volcano} detail={detail} />
-            {history && <EruptionStyleSection history={history} />}
             {history && <EruptionHistorySection history={history} />}
+            <WebcamSection cams={cams} />
+            {history && <EruptionStyleSection history={history} />}
             <QuakesSection
               quakes={quakes}
               loading={loading}
@@ -74,7 +82,7 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
               detail={detail}
               baseline={history?.deformationBaseline}
             />
-            <WebcamSection detail={detail} />
+            <OverviewSection detail={detail} />
           </div>
         </>
       )}

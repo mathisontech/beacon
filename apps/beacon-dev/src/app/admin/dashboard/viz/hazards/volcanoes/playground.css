@@ -30,44 +30,76 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   TWEAK ZONE 3 — pin icon
-   Pins are Leaflet divIcons (HTML+CSS). Change shape/size here.
+   TWEAK ZONE 3 — pin icon (shaded-volcano SVG)
+   Pins are Leaflet divIcons rendering a triangular mountain with
+   a lit face + shaded face + summit crater + optional plume.
+   Colors come from --alert-* vars via CSS classes below.
    ═══════════════════════════════════════════════════════════════ */
 .volcano-pin {
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  border: 2px solid var(--pin-ring);
-  box-shadow: 0 0 0 1px var(--pin-shadow), 0 2px 6px var(--pin-shadow);
-  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6));
   cursor: pointer;
   transition: transform .12s ease;
+  transform-origin: center bottom;
 }
-.volcano-pin:hover { transform: translate(-50%, -50%) scale(1.25); }
+.volcano-pin:hover { transform: scale(1.18); }
 
-/* Size escalates with alert level. */
-.volcano-pin.level-normal   { width: 12px; height: 12px; background: var(--alert-normal); }
-.volcano-pin.level-advisory { width: 15px; height: 15px; background: var(--alert-advisory); }
-.volcano-pin.level-watch    { width: 18px; height: 18px; background: var(--alert-watch); }
-.volcano-pin.level-warning  { width: 22px; height: 22px; background: var(--alert-warning); }
-.volcano-pin.level-unknown  { width: 11px; height: 11px; background: var(--alert-unknown); }
+.vp-volcano-svg { display: block; overflow: visible; }
 
-/* Pulsing ring for WATCH + WARNING. Delete the @keyframes to disable. */
-.volcano-pin.level-watch::after,
+/* Default lit face + dark face shading. Gets recolored per level. */
+.vp-volcano-svg .vp-volcano-lit    { fill: var(--alert-unknown); }
+.vp-volcano-svg .vp-volcano-dark   { fill: #2a2e36; }
+.vp-volcano-svg .vp-volcano-crater { fill: #101216; }
+.vp-volcano-svg .vp-volcano-ring   {
+  fill: none;
+  stroke: rgba(0,0,0,0.85);
+  stroke-width: 1.1;
+  stroke-linejoin: round;
+}
+
+/* Level color — drives the lit face */
+.vp-volcano-normal    .vp-volcano-lit { fill: var(--alert-normal); }
+.vp-volcano-advisory  .vp-volcano-lit { fill: var(--alert-advisory); }
+.vp-volcano-watch     .vp-volcano-lit { fill: var(--alert-watch); }
+.vp-volcano-warning   .vp-volcano-lit { fill: var(--alert-warning); }
+.vp-volcano-unknown   .vp-volcano-lit { fill: var(--alert-unknown); }
+
+/* Dark face subtly tinted toward the level color */
+.vp-volcano-warning  .vp-volcano-dark { fill: #3a1810; }
+.vp-volcano-watch    .vp-volcano-dark { fill: #3a2210; }
+.vp-volcano-advisory .vp-volcano-dark { fill: #3a3512; }
+.vp-volcano-normal   .vp-volcano-dark { fill: #0f2614; }
+
+/* Plume for active volcanoes */
+.vp-volcano-plume ellipse {
+  fill: rgba(255, 200, 140, 0.9);
+  animation: vp-plume 3.2s ease-in-out infinite;
+}
+.vp-volcano-plume ellipse:nth-child(2) { animation-delay: -1.1s; }
+.vp-volcano-plume ellipse:nth-child(3) { animation-delay: -2.2s; }
+@keyframes vp-plume {
+  0%, 100% { transform: translateY(0); opacity: 0.9; }
+  50%      { transform: translateY(-2px); opacity: 0.4; }
+}
+
+/* Warning pulse — keeps the urgency ping from the old circle pin */
+.volcano-pin.level-warning { position: relative; }
 .volcano-pin.level-warning::after {
   content: "";
   position: absolute;
-  inset: -6px;
+  left: 50%; bottom: 3px;
+  width: 16px; height: 16px;
+  margin-left: -8px;
   border-radius: 50%;
-  border: 2px solid currentColor;
-  color: inherit;
+  border: 2px solid var(--alert-warning);
   animation: vp-pulse 1.8s ease-out infinite;
   pointer-events: none;
 }
-.volcano-pin.level-warning { color: var(--alert-warning); }
-.volcano-pin.level-watch   { color: var(--alert-watch); }
 @keyframes vp-pulse {
-  0%   { transform: scale(0.8); opacity: 0.9; }
-  100% { transform: scale(1.9); opacity: 0;   }
+  0%   { transform: scale(0.7); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0;   }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -103,11 +135,13 @@
   user-select: none;
 }
 .vp-legend-row .sw {
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  border: 2px solid var(--pin-ring);
+  width: 18px; height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
+.vp-legend-row .sw.sw-volcano svg { width: 18px; height: 18px; }
 .vp-legend-row .lbl { flex: 1; color: rgba(255,255,255,0.9); }
 .vp-legend-row .ct  { color: rgba(255,255,255,0.45); font-variant-numeric: tabular-nums; }
 .vp-legend-row.off .sw  { opacity: 0.25; }
@@ -643,12 +677,19 @@
   border-radius: 6px;
 }
 .vp-root .vp-legend-recent .sw-recent {
-  background: repeating-linear-gradient(
-    45deg,
-    var(--alert-warning) 0 4px,
-    var(--alert-watch) 4px 8px
-  );
-  box-shadow: 0 0 6px rgba(255,100,50,0.6);
+  width: 18px; height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  position: relative;
+}
+.vp-root .vp-legend-recent .sw-recent::before {
+  content: "";
+  width: 14px; height: 14px;
+  clip-path: polygon(50% 8%, 92% 92%, 8% 92%);
+  background: linear-gradient(135deg, var(--alert-warning) 0%, var(--alert-watch) 100%);
+  filter: drop-shadow(0 0 4px rgba(255,100,50,0.6));
 }
 
 /* ---------- Fly-out panel (right of legend) ---------- */
@@ -736,18 +777,15 @@
 .vp-root .vp-flyout-row:hover {
   background: rgba(255,255,255,0.05);
 }
-.vp-root .vp-flyout-dot {
-  flex: 0 0 10px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.4);
+.vp-root .vp-flyout-icon {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
-.vp-root .vp-flyout-dot.level-warning   { background: var(--alert-warning); }
-.vp-root .vp-flyout-dot.level-watch     { background: var(--alert-watch); }
-.vp-root .vp-flyout-dot.level-advisory  { background: var(--alert-advisory); }
-.vp-root .vp-flyout-dot.level-normal    { background: var(--alert-normal); }
-.vp-root .vp-flyout-dot.level-unknown   { background: var(--alert-unknown); }
+.vp-root .vp-flyout-icon svg { width: 22px; height: 22px; }
 
 .vp-root .vp-flyout-meta {
   flex: 1;
@@ -773,4 +811,225 @@
   color: rgba(255,255,255,0.7);
   flex: 0 0 auto;
   padding-left: 6px;
+}
+
+/* =========================================================
+ * TWEAK ZONE 11 — new detail panel header (region-only),
+ * capability chips, location dropdown, embedded webcams.
+ * ========================================================= */
+
+/* --- Header: name + region on its own line --- */
+.vp-root .vp-panel-region {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 2px;
+  letter-spacing: 0.2px;
+}
+
+/* --- Capability chips (below the region) --- */
+.vp-root .vp-capabilities {
+  padding: 10px 16px 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02);
+}
+.vp-root .vp-capabilities-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.vp-root .vp-cap-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px 4px 7px;
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 500;
+  line-height: 1.2;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.vp-root .vp-cap-chip:hover {
+  background: rgba(255,255,255,0.09);
+}
+.vp-root .vp-cap-chip.active {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.3);
+}
+.vp-root .vp-cap-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 4px currentColor;
+  flex-shrink: 0;
+}
+.vp-root .vp-cap-label {
+  font-weight: 600;
+}
+.vp-root .vp-cap-immin {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  opacity: 0.75;
+  padding-left: 3px;
+}
+
+/* Imminence color drives .vp-cap-dot via currentColor */
+.vp-root .vp-cap-chip.imminence-none     { color: #6b7280; }
+.vp-root .vp-cap-chip.imminence-low      { color: var(--alert-normal); }
+.vp-root .vp-cap-chip.imminence-moderate { color: var(--alert-advisory); }
+.vp-root .vp-cap-chip.imminence-high     { color: var(--alert-warning); }
+
+.vp-root .vp-capabilities-detail {
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.28);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+}
+.vp-root .vp-cap-detail-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 3px;
+}
+.vp-root .vp-cap-detail-signs {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: rgba(255,255,255,0.82);
+}
+
+/* --- Location dropdown --- */
+.vp-root .vp-loc-drop {
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.vp-root .vp-loc-drop-btn {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  color: rgba(255,255,255,0.55);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.vp-root .vp-loc-drop-btn:hover {
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.8);
+}
+.vp-root .vp-loc-drop-arrow {
+  font-size: 11px;
+  opacity: 0.8;
+}
+.vp-root .vp-loc-drop-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 14px;
+  padding: 2px 16px 12px 16px;
+  margin: 0;
+}
+.vp-root .vp-loc-drop-grid > div { min-width: 0; }
+.vp-root .vp-loc-drop-grid dt {
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 1px;
+}
+.vp-root .vp-loc-drop-grid dd {
+  margin: 0;
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.85);
+}
+
+/* --- Embedded webcam tiles --- */
+.vp-root .vp-cam-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.vp-root .vp-cam-tile {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.vp-root .vp-cam-frame {
+  position: relative;
+  width: 100%;
+  background: #000;
+  aspect-ratio: 16 / 9;
+}
+.vp-root .vp-cam-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.vp-root .vp-cam-live {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(220, 40, 30, 0.92);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(220,40,30,0.6);
+}
+.vp-root .vp-cam-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 12px;
+  background: rgba(255,255,255,0.03);
+}
+.vp-root .vp-cam-placeholder-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.08);
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.65);
+}
+.vp-root .vp-cam-placeholder-text {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+}
+.vp-root .vp-cam-meta {
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.vp-root .vp-cam-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

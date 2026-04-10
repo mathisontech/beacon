@@ -10,6 +10,7 @@ import { useLeafletCdn } from "./use-leaflet-cdn";
 import { VolcanoDetailPanel } from "./volcano-detail-panel";
 import { getRecentlyErupting } from "./get-recent-eruptions";
 import { RecentEruptionsFlyout } from "./recent-eruptions-flyout";
+import { volcanoSvg } from "./volcano-svg";
 
 // Minimal surface of the Leaflet globals we touch. Keeps us from
 // pulling @types/leaflet into the workspace just for the playground.
@@ -160,8 +161,8 @@ export function VolcanoPlayground() {
               onClick={() => toggleLevel(l.id)}
             >
               <div
-                className="sw"
-                style={{ background: `var(--alert-${l.id})` }}
+                className={`sw sw-volcano level-${l.id}`}
+                dangerouslySetInnerHTML={{ __html: volcanoSvg(l.id, 18) }}
               />
               <div className="lbl">{l.label}</div>
               <div className="ct">{counts[l.id]}</div>
