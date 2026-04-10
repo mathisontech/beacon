@@ -13,8 +13,9 @@ import { usgs } from "./sources/usgs";
 import { ingv } from "./sources/ingv";
 import { geonet } from "./sources/geonet";
 import { ipgp } from "./sources/ipgp";
+import { emsc } from "./sources/emsc";
 
-const REGIONAL: QuakeSource[] = [ingv, geonet, ipgp];
+const REGIONAL: QuakeSource[] = [ingv, geonet, ipgp, emsc];
 
 export function pickSource(lat: number, lng: number): QuakeSource {
   for (const s of REGIONAL) {
