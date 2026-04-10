@@ -4,6 +4,7 @@ import type { VolcanoDetail, ThreatRank } from "../volcano-details";
 
 interface Props {
   detail: VolcanoDetail | Omit<VolcanoDetail, "id">;
+  baseline?: string;
 }
 
 const THREAT_LABEL: Record<ThreatRank, string> = {
@@ -13,7 +14,7 @@ const THREAT_LABEL: Record<ThreatRank, string> = {
   low: "Low",
 };
 
-export function DeformationSection({ detail }: Props) {
+export function DeformationSection({ detail, baseline }: Props) {
   return (
     <section className="vp-section">
       <header className="vp-section-head">
@@ -26,6 +27,13 @@ export function DeformationSection({ detail }: Props) {
           {THREAT_LABEL[detail.threatRank]}
         </span>
       </div>
+
+      {baseline && (
+        <div className="vp-baseline">
+          <div className="vp-baseline-label">What's normal</div>
+          <div className="vp-baseline-text">{baseline}</div>
+        </div>
+      )}
 
       <p className="vp-note">{detail.deformationNote}</p>
       <p className="vp-note">{detail.hazardZones}</p>

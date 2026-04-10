@@ -8,6 +8,7 @@ interface Props {
   error: string | null;
   radiusKm: number;
   days: number;
+  baseline?: string;
 }
 
 function formatTimeAgo(ms: number): string {
@@ -27,7 +28,7 @@ function magClass(mag: number | null): string {
   return "mag-low";
 }
 
-export function QuakesSection({ quakes, loading, error, radiusKm, days }: Props) {
+export function QuakesSection({ quakes, loading, error, radiusKm, days, baseline }: Props) {
   return (
     <section className="vp-section">
       <header className="vp-section-head">
@@ -36,6 +37,12 @@ export function QuakesSection({ quakes, loading, error, radiusKm, days }: Props)
           {radiusKm} km · last {days}d
         </span>
       </header>
+      {baseline && (
+        <div className="vp-baseline">
+          <div className="vp-baseline-label">What's normal</div>
+          <div className="vp-baseline-text">{baseline}</div>
+        </div>
+      )}
       {loading && <div className="vp-note">Loading USGS feed…</div>}
       {error && <div className="vp-note vp-error">Error: {error}</div>}
       {!loading && !error && quakes.length === 0 && (

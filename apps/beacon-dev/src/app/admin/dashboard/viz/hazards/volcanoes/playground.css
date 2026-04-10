@@ -436,3 +436,168 @@
 .vp-threat-chip.threat-high      { background: var(--alert-watch);    color: #fff; }
 .vp-threat-chip.threat-moderate  { background: var(--alert-advisory); color: #111; }
 .vp-threat-chip.threat-low       { background: var(--alert-normal);   color: #fff; }
+
+/* ═══════════════════════════════════════════════════════════════
+   TWEAK ZONE 9 — eruption style + eruption history sections
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Eruption style card */
+.vp-style-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 14px;
+}
+.vp-style-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.vp-style-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+.vp-danger-chip {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 10px;
+}
+.vp-danger-chip.danger-low      { background: var(--alert-normal);   color: #fff; }
+.vp-danger-chip.danger-moderate { background: var(--alert-advisory); color: #111; }
+.vp-danger-chip.danger-high     { background: var(--alert-watch);    color: #fff; }
+.vp-danger-chip.danger-extreme  { background: var(--alert-warning);  color: #fff; }
+
+.vp-style-text {
+  margin: 0 0 8px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: rgba(255,255,255,0.88);
+}
+.vp-style-danger {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.65);
+  font-style: italic;
+}
+
+/* Tempo row — "years since" + "average interval" */
+.vp-tempo-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.vp-tempo-cell {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.vp-tempo-num {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.2px;
+  margin-bottom: 3px;
+}
+.vp-tempo-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+
+/* Eruption list */
+.vp-eruption-list {
+  list-style: none;
+  margin: 10px 0 6px;
+  padding: 0;
+}
+.vp-eruption-row {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.vp-eruption-row:first-child { border-top: none; }
+
+.vp-vei {
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  padding: 3px 0;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+.vp-vei.vei-0   { background: rgba(44,160,44,0.2);   color: #8fe48f; }
+.vp-vei.vei-2   { background: rgba(255,204,0,0.2);   color: #ffd95a; }
+.vp-vei.vei-3   { background: rgba(255,127,14,0.22); color: #ffb267; }
+.vp-vei.vei-4   { background: rgba(214,39,40,0.22);  color: #ff8f8f; }
+.vp-vei.vei-5   { background: rgba(148,0,211,0.25);  color: #d895ff; }
+.vp-vei.vei-unk { background: rgba(255,255,255,0.08);color: rgba(255,255,255,0.5); }
+
+.vp-eruption-meta { min-width: 0; }
+.vp-eruption-when {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
+}
+.vp-eruption-notes {
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.55);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+.vp-eruption-desc {
+  font-size: 10px;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  padding-top: 2px;
+}
+
+.vp-vei-legend {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Baseline context blocks inside quakes + deformation sections */
+.vp-baseline {
+  background: rgba(124,185,255,0.06);
+  border-left: 2px solid rgba(124,185,255,0.45);
+  padding: 8px 12px;
+  border-radius: 0 6px 6px 0;
+  margin: 0 0 10px;
+}
+.vp-baseline-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(124,185,255,0.9);
+  margin-bottom: 3px;
+}
+.vp-baseline-text {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.75);
+}

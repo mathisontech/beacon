@@ -30,6 +30,7 @@ Reference for look: current live test account at `apps/beacon-dev/src/app/admin/
 - `C1.2` — (local) — overlay live feeds on beacon-dev LiveWorldMap, revert beacon-client map placeholder.
 - `C1.3` — (local) — volcano layer playground inside beacon-dev at viz/hazards/volcanoes.
 - `C1.4` — (local) — volcano detail side panel: overview, live USGS quakes, webcam link, deformation + threat.
+- `C1.5` — (local) — volcano eruption history (VEI list, avg interval, time since last), plain-English eruption style + danger, "what's normal" baseline context for quakes and deformation.
 
 ### Sandbox gotchas picked up this pass
 
@@ -104,6 +105,18 @@ Reference for look: current live test account at `apps/beacon-dev/src/app/admin/
 - NVTA threat ranks are based on USGS open-file report 2018-1115. I used my best recollection — treat them as "approximately correct"; cross-check against the USGS source before publishing externally.
 - Verify: pin click → panel slides in → quakes fetch from USGS → click a quake to open the USGS event page → close panel and pick another volcano. If you see "Error: HTTP 502" in the quakes section, the USGS API is unreachable from your network.
 - Sandbox typecheck is clean: 0 new errors, same 28 pre-existing baseline errors.
+
+**C1.5 — Eruption history + plain-English context — DONE (local)**
+- Kristin's feedback on C1.4: (1) show past eruptions with VEI levels, (2) show average time between eruptions, (3) show how long it's been since the last eruption, (4) raw quake counts and uplift numbers are meaningless without knowing what's normal, (5) saying "Pavlof is a Strombolian volcano" is jargon — it's unclear whether that means slow Hawaiian lava flows or violent dangerous eruptions.
+- New data file `volcano-history.ts`: 30 entries keyed by volcano id. Each entry has `eruptions: EruptionRecord[]` (year, display string like "2024" or "~1,000 years ago", VEI 0–8 or null, optional notes), `returnIntervalYears` + `returnIntervalNote`, `style` enum (`effusive | mixed | strombolian | explosive | dome | phreatic`), `styleDescription` in plain English, `danger` rank (`low | moderate | high | extreme`), `dangerExplanation`, `quakeBaseline` (what's normal), `deformationBaseline` (what's normal). Eruption data curated from Smithsonian Global Volcanism Program and USGS — cross-check before external publishing.
+- Helpers in the same file: `yearsSinceLast(h, now)`, `formatYearsSince(years)`, `formatReturnInterval(years)` — handles small/large numbers and unknowns gracefully.
+- New section `detail-sections/eruption-style-section.tsx`: style tag + colored danger chip + plain-English `styleDescription` + `dangerExplanation`. For Pavlof this reads: "Violent and unpredictable. Pavlof produces tall ash columns (often 8–15 km), fire fountains, hot rock avalanches, and occasional fast lava flows. This is NOT Hawaiian-style: eruptions start suddenly, often with little warning, and are dangerous to aircraft and nearby communities." Direct answer to Kristin's jargon complaint.
+- New section `detail-sections/eruption-history-section.tsx`: two-cell tempo row (years since last / average interval), short return-interval note, full eruption list with VEI chips colored by level (vei-0 green through vei-5 purple), eruption category label, plus a footer legend explaining VEI.
+- Modified `quakes-section.tsx` + `deformation-section.tsx`: each now accepts an optional `baseline` prop. Renders a "What's normal" callout above the live data. Kilauea reads "20–50 small M<2 quakes per day"; Yellowstone reads "1,000–3,000 quakes PER YEAR; swarms of hundreds in a week are normal" — directly addresses the "raw numbers are meaningless" feedback.
+- `volcano-detail-panel.tsx` reordered: Overview → Eruption style (what to expect) → Eruption history (when, how often) → Recent quakes (with baseline) → Deformation + threat (with baseline) → Webcam. Baselines are passed in from `VOLCANO_HISTORY[volcano.id]` and gracefully fall through to undefined for unknown volcanoes.
+- `playground.css` TWEAK ZONE 9 appended: style card, danger chips (danger-low/moderate/high/extreme reusing the --alert-* variables from Zone 2), tempo row, VEI chips with their own color scale, eruption list rows, VEI legend, and a blue-tinted baseline callout box.
+- Sandbox typecheck: 0 new errors, same 28 pre-existing baseline errors. All new/modified files clean.
+- Verify: click a volcano pin. Panel now opens with "What to expect when it erupts" near the top. Scroll to "Eruption history" for the VEI list + tempo. Scroll to "Recent earthquakes" — the "What's normal" line sets context before the live feed.
 
 **C2 — User creation + contact management**
 - Signup, login, profile.

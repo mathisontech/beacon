@@ -2,8 +2,11 @@
 
 import type { Volcano } from "./types";
 import { VOLCANO_DETAILS, DEFAULT_VOLCANO_DETAIL } from "./volcano-details";
+import { VOLCANO_HISTORY } from "./volcano-history";
 import { useVolcanoQuakes } from "./use-volcano-quakes";
 import { OverviewSection } from "./detail-sections/overview-section";
+import { EruptionStyleSection } from "./detail-sections/eruption-style-section";
+import { EruptionHistorySection } from "./detail-sections/eruption-history-section";
 import { QuakesSection } from "./detail-sections/quakes-section";
 import { WebcamSection } from "./detail-sections/webcam-section";
 import { DeformationSection } from "./detail-sections/deformation-section";
@@ -20,6 +23,8 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
   const detail = volcano
     ? VOLCANO_DETAILS[volcano.id] || DEFAULT_VOLCANO_DETAIL
     : DEFAULT_VOLCANO_DETAIL;
+
+  const history = volcano ? VOLCANO_HISTORY[volcano.id] : undefined;
 
   const { quakes, loading, error } = useVolcanoQuakes(
     volcano?.lat ?? null,
@@ -55,15 +60,21 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
 
           <div className="vp-panel-body">
             <OverviewSection volcano={volcano} detail={detail} />
+            {history && <EruptionStyleSection history={history} />}
+            {history && <EruptionHistorySection history={history} />}
             <QuakesSection
               quakes={quakes}
               loading={loading}
               error={error}
               radiusKm={QUAKE_RADIUS_KM}
               days={QUAKE_DAYS}
+              baseline={history?.quakeBaseline}
+            />
+            <DeformationSection
+              detail={detail}
+              baseline={history?.deformationBaseline}
             />
             <WebcamSection detail={detail} />
-            <DeformationSection detail={detail} />
           </div>
         </>
       )}
