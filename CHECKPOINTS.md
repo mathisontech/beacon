@@ -29,6 +29,7 @@ Reference for look: current live test account at `apps/beacon-dev/src/app/admin/
 - `C1` — `6c76edf` — public feed ingestions on thin map (local only — push manually).
 - `C1.2` — (local) — overlay live feeds on beacon-dev LiveWorldMap, revert beacon-client map placeholder.
 - `C1.3` — (local) — volcano layer playground inside beacon-dev at viz/hazards/volcanoes.
+- `C1.4` — (local) — volcano detail side panel: overview, live USGS quakes, webcam link, deformation + threat.
 
 ### Sandbox gotchas picked up this pass
 
@@ -85,6 +86,24 @@ Reference for look: current live test account at `apps/beacon-dev/src/app/admin/
 - Verify on your machine: `npm run dev:dev`, open http://localhost:3000, log in, expand Visualization Manager → Hazards → Volcanoes in the left nav. Satellite basemap + dimming overlay + 30 pins. Click a level in the legend to toggle. Click a pin for a popup card. Alert colors: red=warning, orange=watch, yellow=advisory, green=normal. Watch/warning pins pulse.
 - Sandbox typecheck (`apps/beacon-dev/tsconfig.check.json`) is clean for every file I created — 0 new errors, same 28 pre-existing errors in prisma-typed / cesium-init / maplibre CSS files that were there before I started.
 - Next layer ideas (same pattern per hazard): earthquakes, fires, severe weather, NWS alerts, flights/cameras.
+
+**C1.4 — Volcano detail side panel — DONE (local)**
+- Kristin asked: are the volcano icons wired to cameras? She wants to click a volcano and see recent quakes, ground uplift, and an overview.
+- Answer re cameras: USGS observatories publish public webcams for most of these volcanoes (HVO/AVO/CVO/CalVO/YVO). We don't embed them directly — we link out to each observatory's webcam landing page. Live embeds would require per-cam URLs and probably iframe workarounds.
+- Chosen layout: right-side slide-out panel over the map (380px wide, translateX animation). Map stays visible on the left. Close button in the header.
+- Chosen data mode: live USGS earthquake API via a new server proxy at `apps/beacon-dev/src/app/api/volcano-quakes/route.ts`. Accepts `?lat&lng&radiusKm&days&minMag`, calls `https://earthquake.usgs.gov/fdsnws/event/1/query` with GeoJSON, normalises to `{id, mag, place, time, depthKm, lat, lng, url}`. Default: 20 km radius, 30 days.
+- Panel sections (one file each under `detail-sections/`):
+  - `overview-section.tsx` — paragraph blurb + 2-column stat grid (alert level chip, region, observatory, elevation, last eruption, lat/lng)
+  - `quakes-section.tsx` — list of up to 20 recent quakes with a colored magnitude chip (green <2, yellow 2–4, red >4), place, depth, relative time ("3h ago"). Loading + error states.
+  - `webcam-section.tsx` — card with a placeholder CAM icon + observatory name + "Open live cameras →" link to the USGS page.
+  - `deformation-section.tsx` — USGS NVTA threat chip (Very High / High / Moderate / Low) + a short deformation note + hazard zone note + link to observatory deformation page.
+- Per-volcano reference data in `volcano-details.ts`: 30 entries keyed by volcano id, each with overview blurb, threat rank (from USGS 2018 NVTA open-file report), webcam URL, webcam label, deformation URL, deformation note, hazard zone note. Plus a `DEFAULT_VOLCANO_DETAIL` fallback.
+- Data fetching hook in `use-volcano-quakes.ts`: takes `(lat, lng, {radiusKm, days})`, fetches `/api/volcano-quakes`, returns `{quakes, loading, error, fetchedAt}`. AbortController for cleanup.
+- `volcano-playground.tsx` changes: added `selected: Volcano | null` state, replaced `bindPopup` with `m.on("click", () => setSelected(v))`, mounted `<VolcanoDetailPanel>` at the bottom of `.vp-root`. `make-popup-html.ts` is now dead code — sandbox can't delete, will clean up later.
+- CSS: new TWEAK ZONE 8 appended to `playground.css` with panel chrome, section headers, stat grid, quake list + magnitude chips, webcam placeholder, threat chip colors. Threat chips reuse the existing `--alert-*` CSS variables from Zone 2, so recoloring the alert scale also restyles the threat ranks.
+- NVTA threat ranks are based on USGS open-file report 2018-1115. I used my best recollection — treat them as "approximately correct"; cross-check against the USGS source before publishing externally.
+- Verify: pin click → panel slides in → quakes fetch from USGS → click a quake to open the USGS event page → close panel and pick another volcano. If you see "Error: HTTP 502" in the quakes section, the USGS API is unreachable from your network.
+- Sandbox typecheck is clean: 0 new errors, same 28 pre-existing baseline errors.
 
 **C2 — User creation + contact management**
 - Signup, login, profile.

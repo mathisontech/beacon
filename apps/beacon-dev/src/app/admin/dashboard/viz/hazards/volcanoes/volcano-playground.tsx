@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./playground.css";
-import type { AlertLevel } from "./types";
+import type { AlertLevel, Volcano } from "./types";
 import { VOLCANOES } from "./volcano-data";
 import { LEVELS } from "./volcano-levels";
 import { makePinIcon } from "./make-pin-icon";
-import { makePopupHtml } from "./make-popup-html";
 import { useLeafletCdn } from "./use-leaflet-cdn";
+import { VolcanoDetailPanel } from "./volcano-detail-panel";
 
 // Minimal surface of the Leaflet globals we touch. Keeps us from
 // pulling @types/leaflet into the workspace just for the playground.
@@ -36,7 +36,7 @@ type LLayerGroup = {
   addLayer: (x: unknown) => void;
 };
 type LMarker = {
-  bindPopup: (html: string, opts: { closeButton: boolean }) => LMarker;
+  on: (event: string, handler: () => void) => LMarker;
 };
 
 export function VolcanoPlayground() {
@@ -45,6 +45,7 @@ export function VolcanoPlayground() {
   const groupsRef = useRef<Record<AlertLevel, LLayerGroup> | null>(null);
   const L = useLeafletCdn() as LGlobal | null;
   const [offLevels, setOffLevels] = useState<Set<AlertLevel>>(() => new Set());
+  const [selected, setSelected] = useState<Volcano | null>(null);
 
   const counts = useMemo(() => {
     const out: Record<string, number> = {};
@@ -85,7 +86,7 @@ export function VolcanoPlayground() {
     VOLCANOES.forEach((v) => {
       const icon = makePinIcon(L, v.level);
       const m = L.marker([v.lat, v.lng], { icon });
-      m.bindPopup(makePopupHtml(v), { closeButton: false });
+      m.on("click", () => setSelected(v));
       (groups[v.level] || groups.unknown).addLayer(m);
     });
 
@@ -120,6 +121,8 @@ export function VolcanoPlayground() {
       return next;
     });
   };
+
+  const closePanel = useCallback(() => setSelected(null), []);
 
   return (
     <div className="vp-root">
@@ -159,6 +162,8 @@ export function VolcanoPlayground() {
           Click a pin for details.
         </div>
       </div>
+
+      <VolcanoDetailPanel volcano={selected} onClose={closePanel} />
     </div>
   );
 }
