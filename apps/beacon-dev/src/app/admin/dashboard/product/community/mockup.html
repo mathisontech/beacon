@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beacon Community - Interactive Mockup</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #e5e7eb; }
+
+    .app-frame { display: flex; flex-direction: column; width: 100vw; height: 100vh; }
+    .app-body { flex: 1; display: flex; overflow: hidden; }
+
+    /* Left Sidebar */
+    .left-sidebar {
+      height: 100%; flex-shrink: 0;
+      background: linear-gradient(180deg, #162636 0%, #1f3348 50%, #2a4560 100%);
+      color: white; display: flex; flex-direction: column; overflow: hidden;
+      transition: width 0.2s ease;
+    }
+    .left-header {
+      padding: 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    .left-logo {
+      width: 28px; height: 16px; background: rgba(255,255,255,0.3); border-radius: 2px;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 7px; font-weight: 700; color: rgba(255,255,255,0.8);
+    }
+    .left-title { font-size: 16px; font-weight: 700; letter-spacing: 3px; white-space: nowrap; }
+    .collapse-btn {
+      width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 4px; flex-shrink: 0; margin-left: auto;
+    }
+    .collapse-btn:hover { background: rgba(255,255,255,0.1); }
+    .collapse-btn.light:hover { background: #f3f4f6; }
+    .left-sections { flex: 1; overflow-y: auto; padding: 4px 0; }
+    .left-section { padding: 8px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .left-section-label { font-size: 9px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 5px; }
+    .left-row { display: flex; align-items: center; justify-content: space-between; padding: 3px 0; font-size: 10px; color: rgba(255,255,255,0.65); cursor: pointer; }
+    .left-bright { color: rgba(255,255,255,0.85); font-weight: 600; font-size: 10px; }
+    .left-dim { color: rgba(255,255,255,0.35); font-size: 9px; }
+    .left-tag { font-size: 8px; font-weight: 500; padding: 1px 4px; border-radius: 2px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.35); }
+    .left-location { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .left-loc-name { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: rgba(255,255,255,0.85); }
+    .left-loc-summary { font-size: 9px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+    /* Center */
+    .center { flex: 1; background: #f8f9fa; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* Right Sidebar */
+    .right-sidebar {
+      height: 100%; flex-shrink: 0;
+      background: #ffffff; border-left: 1px solid #e5e7eb;
+      display: flex; flex-direction: column; overflow: hidden;
+      transition: width 0.2s ease;
+    }
+    .right-header {
+      padding: 12px 14px; border-bottom: 1px solid #e5e7eb;
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    .avatar {
+      width: 28px; height: 28px; border-radius: 50%; background: #1f3348;
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; flex-shrink: 0; position: relative;
+    }
+    .verified-dot {
+      position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px;
+      border-radius: 50%; background: #10b981; border: 1.5px solid #fff;
+    }
+    .avatar-name { font-size: 12px; font-weight: 700; color: #1f3348; white-space: nowrap; flex: 1; }
+    .right-sections { flex: 1; overflow-y: auto; }
+    .right-section-label { font-size: 9px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #9ca3af; padding: 12px 14px 4px; }
+    .right-item {
+      display: flex; align-items: center; gap: 8px; padding: 8px 14px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+      color: #6b7280; cursor: pointer; border-left: 2px solid transparent;
+    }
+    .right-item:hover { background: #f9fafb; }
+    .right-item.active { color: #1f3348; font-weight: 700; background: #f3f4f6; border-left-color: #1f3348; }
+    .right-sub-item {
+      padding: 6px 14px 6px 28px; font-size: 10px; font-weight: 500;
+      letter-spacing: 0.4px; text-transform: uppercase; color: #9ca3af; cursor: pointer;
+    }
+    .right-sub-item:hover { color: #6b7280; }
+    .right-sub-item.active { color: #1f3348; font-weight: 600; }
+    .chevron { flex-shrink: 0; }
+
+    /* Tab Bar */
+    .tab-bar { display: flex; height: 48px; background: #f5f6f8; border-top: 1px solid #e0e2e6; flex-shrink: 0; }
+    .tab {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 2px; cursor: pointer;
+      border-top: 2px solid transparent; color: #9ca3af;
+    }
+    .tab.active { color: #1f3348; background: #fff; border-top-color: #1f3348; }
+    .tab-icon { width: 18px; height: 18px; border-radius: 3px; background: currentColor; opacity: 0.25; }
+    .tab.active .tab-icon { opacity: 0.6; }
+    .tab-label { font-size: 7px; font-weight: 500; letter-spacing: 0.8px; text-transform: uppercase; }
+    .tab.active .tab-label { font-weight: 700; }
+
+    /* Messages */
+    .msg-tabs { display: flex; border-bottom: 1px solid #e5e7eb; flex-shrink: 0; background: #fff; }
+    .msg-tab {
+      flex: 1; padding: 10px 0; text-align: center; font-size: 10px; font-weight: 600;
+      letter-spacing: 0.5px; text-transform: uppercase; color: #9ca3af;
+      border-bottom: 2px solid transparent; cursor: pointer; position: relative;
+    }
+    .msg-tab.active { color: #1f3348; font-weight: 700; border-bottom-color: #1f3348; }
+    .msg-badge {
+      display: inline-flex; width: 14px; height: 14px; border-radius: 50%;
+      background: #ef4444; color: #fff; font-size: 8px; font-weight: 700;
+      align-items: center; justify-content: center;
+      position: absolute; top: 4px; right: calc(50% - 24px);
+    }
+
+    .thread-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+      cursor: pointer; border-bottom: 1px solid #f3f4f6;
+    }
+    .thread-item:hover { background: #f9fafb; }
+    .thread-item.active { background: #f3f4f6; border-left: 2px solid #1f3348; }
+    .thread-avatar {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; flex-shrink: 0;
+    }
+    .thread-avatar.group { border-radius: 6px; background: #1f3348; color: #fff; }
+    .thread-avatar.contact { border-radius: 50%; background: #1f3348; color: #fff; }
+    .thread-avatar.request { border-radius: 50%; background: #f3f4f6; color: #6b7280; border: 1px dashed #d1d5db; }
+    .thread-info { flex: 1; overflow: hidden; }
+    .thread-name { font-size: 12px; font-weight: 500; color: #1f3348; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .thread-name.unread { font-weight: 700; }
+    .thread-preview { font-size: 10px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .thread-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+    .thread-time { font-size: 9px; color: #9ca3af; }
+    .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #1f3348; }
+
+    /* Chat bubbles */
+    .chat-header {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+      border-bottom: 1px solid #e5e7eb; background: #fff; flex-shrink: 0;
+    }
+    .back-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .chat-name { font-size: 13px; font-weight: 700; color: #1f3348; }
+    .chat-type { font-size: 9px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
+    .request-banner { padding: 8px 14px; background: #fef3c7; font-size: 10px; font-weight: 600; color: #92400e; text-align: center; border-bottom: 1px solid #fde68a; }
+    .msg-list { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+    .msg-row { display: flex; align-items: flex-end; gap: 6px; max-width: 85%; }
+    .msg-row.me { flex-direction: row-reverse; align-self: flex-end; }
+    .msg-row.them { align-self: flex-start; }
+    .msg-avatar-sm {
+      width: 24px; height: 24px; border-radius: 50%; background: #1f3348; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; font-weight: 700; flex-shrink: 0;
+    }
+    .msg-bubble {
+      padding: 8px 12px; border-radius: 16px; font-size: 12px; line-height: 1.4;
+    }
+    .msg-bubble.me { background: #1f3348; color: #fff; border-bottom-right-radius: 4px; }
+    .msg-bubble.them { background: #f3f4f6; color: #1f3348; border-bottom-left-radius: 4px; }
+    .msg-author { font-size: 9px; font-weight: 600; color: #6b7280; margin-bottom: 2px; }
+    .msg-time { font-size: 8px; color: #9ca3af; margin-top: 2px; }
+    .msg-time.me { text-align: right; color: rgba(255,255,255,0.5); }
+    .reply-ref {
+      font-size: 10px; padding: 4px 8px; margin-bottom: 4px; border-radius: 8px;
+      border-left: 2px solid #d1d5db; background: rgba(0,0,0,0.04); color: #6b7280;
+    }
+    .reply-ref.me { border-left-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
+    .reactions { display: flex; gap: 4px; margin-top: 4px; }
+    .reaction-chip {
+      display: flex; align-items: center; gap: 3px; padding: 2px 6px;
+      border-radius: 10px; font-size: 9px; font-weight: 600; cursor: pointer;
+      background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb;
+    }
+    .reaction-chip.reacted { background: #e8e3f3; color: #5b21b6; border-color: #c4b5fd; }
+    .action-bar {
+      display: flex; gap: 2px; padding: 3px 6px; background: #fff;
+      border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.12); font-size: 10px;
+      position: absolute; top: -4px; z-index: 10;
+    }
+    .action-btn { padding: 3px 5px; border-radius: 3px; cursor: pointer; color: #6b7280; font-weight: 600; }
+    .action-btn:hover { background: #f3f4f6; }
+
+    .compose {
+      display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+      border-top: 1px solid #e5e7eb; background: #fff; flex-shrink: 0;
+    }
+    .compose-input {
+      flex: 1; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 20px;
+      font-size: 12px; outline: none; font-family: inherit;
+    }
+    .send-btn {
+      width: 28px; height: 28px; border-radius: 50%; background: #1f3348;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+    }
+    .compose-reply {
+      display: flex; align-items: center; gap: 6px; padding: 6px 14px;
+      background: #f9fafb; border-top: 1px solid #e5e7eb; font-size: 10px; color: #6b7280;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="app-frame">
+  <div class="app-body">
+
+    <!-- LEFT SIDEBAR -->
+    <div class="left-sidebar" id="leftSidebar" style="width: 220px;">
+      <div class="left-header">
+        <div class="left-logo">B</div>
+        <span class="left-title" id="leftTitle">BEACON</span>
+        <div class="collapse-btn" id="leftArrow" onclick="toggleLeft()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </div>
+      </div>
+      <div id="leftBody">
+        <div class="left-location">
+          <div class="left-loc-name">Asheville, NC</div>
+          <div class="left-loc-summary">Sunny, mid 70s</div>
+        </div>
+        <div class="left-sections">
+          <div class="left-section">
+            <div class="left-section-label">THREATS</div>
+            <div class="left-row"><span class="left-bright">Flood Watch</span><span class="left-dim">Now</span></div>
+            <div class="left-row"><span class="left-bright">Hurricane Milton</span><span class="left-dim">~4 days</span></div>
+            <div class="left-row"><span class="left-bright">High Fire Risk</span><span class="left-dim">Tomorrow</span></div>
+          </div>
+          <div class="left-section">
+            <div class="left-section-label">YOUR STATUS</div>
+            <div class="left-row"><span class="left-bright">SHELTERING</span><span class="left-tag">EMS</span><span class="left-tag">Contacts</span></div>
+          </div>
+          <div class="left-section">
+            <div class="left-section-label">REQUESTS</div>
+            <div style="padding:6px 8px;margin:4px 0;border-radius:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.12);font-size:10px;color:rgba(255,255,255,0.9);font-weight:600;">Are you safe?</div>
+            <div style="padding:6px 8px;margin:4px 0;border-radius:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.12);font-size:10px;color:rgba(255,255,255,0.9);font-weight:600;">Help needed 0.3mi away</div>
+          </div>
+          <div class="left-section">
+            <div class="left-section-label">LOVED ONES</div>
+            <div class="left-row"><span class="left-bright">Mom</span><span class="left-dim">in hazard zone</span></div>
+            <div class="left-row"><span>Jake</span><span class="left-dim">good</span></div>
+            <div class="left-row"><span>Sarah</span></div>
+          </div>
+          <div class="left-section">
+            <div class="left-section-label">SAVED LOCATIONS</div>
+            <div class="left-row"><span>Home</span><span class="left-dim" style="font-weight:600">risk changed</span></div>
+            <div class="left-row"><span>Office</span></div>
+          </div>
+          <div class="left-section">
+            <div class="left-section-label">GROUPS</div>
+            <div class="left-row"><span>Neighborhood</span><span class="left-dim">1</span></div>
+            <div class="left-row"><span>Family</span></div>
+          </div>
+          <div class="left-section">
+            <div class="left-section-label">PEOPLE HELPING PEOPLE</div>
+            <div class="left-row"><span>2 active nearby</span><span class="left-dim">1 request near you</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER CONTENT -->
+    <div class="center" id="centerArea">
+      <!-- Filled by JS -->
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="right-sidebar" id="rightSidebar" style="width: 220px;">
+      <div class="right-header">
+        <div class="avatar">KM<div class="verified-dot"></div></div>
+        <span class="avatar-name" id="rightName">Kristin M.</span>
+        <div class="collapse-btn light" id="rightArrow" onclick="toggleRight()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div id="rightBody">
+        <div class="right-sections" id="rightMenu">
+          <!-- Built by JS -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <div class="tab"><div class="tab-icon"></div><span class="tab-label">Map</span></div>
+    <div class="tab"><div class="tab-icon"></div><span class="tab-label">Reports</span></div>
+    <div class="tab"><div class="tab-icon"></div><span class="tab-label">Alerts</span></div>
+    <div class="tab"><div class="tab-icon"></div><span class="tab-label">Helping</span></div>
+    <div class="tab active"><div class="tab-icon"></div><span class="tab-label">Community</span></div>
+  </div>
+</div>
+
+<script>
+let leftOpen = true, rightOpen = true;
+let currentPage = 'messages';
+let currentMailbox = 'all';
+let currentThread = null;
+let settingsOpen = false, historyOpen = false;
+
+// ── Sidebar toggles ──
+function toggleLeft() {
+  leftOpen = !leftOpen;
+  const sb = document.getElementById('leftSidebar');
+  const arrow = document.getElementById('leftArrow');
+  sb.style.width = leftOpen ? '220px' : '44px';
+  document.getElementById('leftTitle').classList.toggle('hidden', !leftOpen);
+  document.getElementById('leftBody').classList.toggle('hidden', !leftOpen);
+  arrow.innerHTML = leftOpen
+    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'
+    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+  sb.querySelector('.left-header').style.justifyContent = leftOpen ? 'flex-start' : 'center';
+  sb.querySelector('.left-header').style.padding = leftOpen ? '16px 14px' : '14px 10px';
+}
+
+function toggleRight() {
+  rightOpen = !rightOpen;
+  const sb = document.getElementById('rightSidebar');
+  const arrow = document.getElementById('rightArrow');
+  sb.style.width = rightOpen ? '220px' : '44px';
+  document.getElementById('rightName').classList.toggle('hidden', !rightOpen);
+  document.getElementById('rightBody').classList.toggle('hidden', !rightOpen);
+  arrow.innerHTML = rightOpen
+    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
+    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
+  sb.querySelector('.right-header').style.justifyContent = rightOpen ? 'flex-start' : 'center';
+  sb.querySelector('.right-header').style.padding = rightOpen ? '12px 14px' : '10px 10px';
+}
+
+// ── Right Menu ──
+const settingsChildren = [
+  'Account Management', 'Household', 'Equipment & Skills', 'Vehicles',
+  'Emergency Contacts', 'Trusted Neighbors', 'Privacy & Location Sharing',
+  'Sensor Data', 'Mesh Network', 'Notifications', 'ID Verification', 'Legal Releases'
+];
+const historyChildren = ['Event History', 'Helping History', 'Usage & Battery', 'Location Audit'];
+
+function buildMenu() {
+  const m = document.getElementById('rightMenu');
+  const chevR = '<svg class="chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+  const chevD = '<svg class="chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
+  let html = '<div class="right-section-label">COMMUNITY</div>';
+  ['messages', 'contacts', 'groups'].forEach(id => {
+    const label = id.charAt(0).toUpperCase() + id.slice(1);
+    const cls = currentPage === id ? ' active' : '';
+    html += `<div class="right-item${cls}" onclick="setPage('${id}')">${label}</div>`;
+  });
+
+  html += '<div class="right-section-label">ACCOUNT</div>';
+  html += `<div class="right-item${currentPage.startsWith('settings') ? ' active' : ''}" onclick="toggleSettings()" style="justify-content:space-between;">Settings ${settingsOpen ? chevD : chevR}</div>`;
+  if (settingsOpen) {
+    settingsChildren.forEach(c => {
+      html += `<div class="right-sub-item" onclick="setPage('settings-sub')">${c}</div>`;
+    });
+  }
+  html += `<div class="right-item${currentPage.startsWith('history') ? ' active' : ''}" onclick="toggleHistory()" style="justify-content:space-between;">Account History ${historyOpen ? chevD : chevR}</div>`;
+  if (historyOpen) {
+    historyChildren.forEach(c => {
+      html += `<div class="right-sub-item" onclick="setPage('history-sub')">${c}</div>`;
+    });
+  }
+
+  m.innerHTML = html;
+}
+
+function toggleSettings() { settingsOpen = !settingsOpen; buildMenu(); }
+function toggleHistory() { historyOpen = !historyOpen; buildMenu(); }
+
+function setPage(page) {
+  currentPage = page;
+  currentThread = null;
+  buildMenu();
+  renderCenter();
+}
+
+// ── Thread/message data ──
+const threads = [
+  { id:'t1', name:'Montford Block 7', type:'group', last:'Power just flickered on Montford Ave', time:'2m', unread:3, av:'M7',
+    msgs: [
+      { author:'Jake R.', init:'JR', text:'Power just flickered on Montford Ave. Anyone else?', time:'2:41 PM', me:false, reactions:[{e:'!',n:4}], reply:null },
+      { author:'Lisa K.', init:'LK', text:'Same here. Lights dimmed twice.', time:'2:42 PM', me:false, reactions:[], reply:{a:'Jake R.',t:'Power just flickered on Montford Ave'} },
+      { author:'You', init:'KM', text:'We still have power but it\'s been unstable since noon', time:'2:43 PM', me:true, reactions:[{e:'OK',n:2}], reply:null },
+      { author:'Marcus T.', init:'MT', text:'Duke Energy says they\'re aware. ETA 45 min for a crew.', time:'2:45 PM', me:false, reactions:[{e:'OK',n:5,r:true}], reply:null },
+    ]},
+  { id:'t2', name:'Family', type:'group', last:'Heading to shelter now', time:'15m', unread:1, av:'FA',
+    msgs: [
+      { author:'Mom', init:'MO', text:'Heading to shelter now. Roads clear on I-26.', time:'2:28 PM', me:false, reactions:[{e:'OK',n:3,r:true}], reply:null },
+      { author:'You', init:'KM', text:'Stay safe. Text when you arrive.', time:'2:30 PM', me:true, reactions:[], reply:null },
+      { author:'Jake', init:'JK', text:'I can pick up Dad on the way if needed', time:'2:31 PM', me:false, reactions:[], reply:null },
+    ]},
+  { id:'t3', name:'Mom', type:'contact', last:'Made it to the shelter. All good here.', time:'8m', unread:1, av:'MO',
+    msgs: [
+      { author:'Mom', init:'MO', text:'Made it to the shelter. All good here.', time:'2:35 PM', me:false, reactions:[], reply:null },
+      { author:'You', init:'KM', text:'So glad. I\'ll check in tonight.', time:'2:36 PM', me:true, reactions:[{e:'OK',n:1}], reply:null },
+    ]},
+  { id:'t4', name:'Jake', type:'contact', last:'Picked up extra water and batteries', time:'2h', unread:0, av:'JK',
+    msgs: [
+      { author:'Jake', init:'JK', text:'Picked up extra water and batteries from Ingles. Need anything?', time:'12:15 PM', me:false, reactions:[], reply:null },
+      { author:'You', init:'KM', text:'Can you grab a flashlight? Ours died.', time:'12:18 PM', me:true, reactions:[], reply:null },
+      { author:'Jake', init:'JK', text:'Got it', time:'12:20 PM', me:false, reactions:[{e:'OK',n:1,r:true}], reply:null },
+    ]},
+  { id:'t5', name:'Sarah M.', type:'request', last:'Hi, I live on Montford too. Can I join your block group?', time:'1h', unread:1, av:'SM',
+    msgs: [
+      { author:'Sarah M.', init:'SM', text:'Hi, I live on Montford too. Can I join your block group?', time:'1:30 PM', me:false, reactions:[], reply:null },
+    ]},
+  { id:'t6', name:'Tom R.', type:'request', last:'Saw you have a generator listed. Could I borrow it?', time:'3h', unread:1, av:'TR',
+    msgs: [
+      { author:'Tom R.', init:'TR', text:'Saw you have a generator listed. Could I borrow it during the outage?', time:'11:45 AM', me:false, reactions:[], reply:null },
+    ]},
+];
+
+function getFiltered() {
+  if (currentMailbox === 'all') return threads;
+  if (currentMailbox === 'contacts') return threads.filter(t => t.type === 'contact');
+  if (currentMailbox === 'groups') return threads.filter(t => t.type === 'group');
+  if (currentMailbox === 'requests') return threads.filter(t => t.type === 'request');
+  return threads;
+}
+
+function countUnread(box) {
+  const list = box === 'all' ? threads : threads.filter(t => {
+    if (box === 'contacts') return t.type === 'contact';
+    if (box === 'groups') return t.type === 'group';
+    if (box === 'requests') return t.type === 'request';
+  });
+  return list.reduce((s,t) => s + t.unread, 0);
+}
+
+// ── Render center ──
+function renderCenter() {
+  const c = document.getElementById('centerArea');
+  if (currentPage === 'messages') {
+    if (currentThread) { c.innerHTML = chatHTML(); }
+    else { c.innerHTML = threadListHTML(); }
+  } else if (currentPage === 'contacts') { c.innerHTML = contactsHTML(); }
+  else if (currentPage === 'groups') { c.innerHTML = groupsHTML(); }
+  else { c.innerHTML = placeholderHTML(currentPage); }
+}
+
+function threadListHTML() {
+  const boxes = ['all','contacts','groups','requests'];
+  const labels = {all:'All',contacts:'People',groups:'Groups',requests:'Requests'};
+  let html = '<div style="display:flex;flex-direction:column;height:100%;">';
+  html += '<div class="msg-tabs">';
+  boxes.forEach(b => {
+    const u = countUnread(b);
+    html += `<div class="msg-tab${currentMailbox===b?' active':''}" onclick="currentMailbox='${b}';renderCenter();">${labels[b]}${u>0?`<span class="msg-badge">${u}</span>`:''}</div>`;
+  });
+  html += '</div><div style="flex:1;overflow-y:auto;">';
+  const list = getFiltered();
+  if (!list.length) html += '<div style="padding:20px;text-align:center;color:#9ca3af;font-size:11px;">No messages</div>';
+  list.forEach(t => {
+    const avCls = t.type === 'group' ? 'group' : t.type === 'request' ? 'request' : 'contact';
+    html += `<div class="thread-item" onclick="currentThread='${t.id}';renderCenter();">
+      <div class="thread-avatar ${avCls}">${t.av}</div>
+      <div class="thread-info">
+        <div class="thread-name${t.unread?' unread':''}">${t.name}</div>
+        <div class="thread-preview">${t.last}</div>
+      </div>
+      <div class="thread-meta">
+        <span class="thread-time">${t.time}</span>
+        ${t.unread?'<div class="unread-dot"></div>':''}
+      </div>
+    </div>`;
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function chatHTML() {
+  const t = threads.find(x => x.id === currentThread);
+  if (!t) return '';
+  const avCls = t.type === 'group' ? 'group' : t.type === 'request' ? 'request' : 'contact';
+  let html = '<div style="display:flex;flex-direction:column;height:100%;">';
+  html += `<div class="chat-header">
+    <div class="back-btn" onclick="currentThread=null;renderCenter();">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1f3348" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="thread-avatar ${avCls}" style="width:28px;height:28px;font-size:9px;">${t.av}</div>
+    <div><div class="chat-name">${t.name}</div><div class="chat-type">${t.type==='group'?'group':t.type==='request'?'message request':'contact'}</div></div>
+  </div>`;
+  if (t.type === 'request') html += '<div class="request-banner">Message request - not in your contacts</div>';
+  html += '<div class="msg-list">';
+  t.msgs.forEach(m => {
+    const side = m.me ? 'me' : 'them';
+    html += `<div style="position:relative;align-self:${m.me?'flex-end':'flex-start'};max-width:85%;">`;
+    html += `<div class="msg-row ${side}">`;
+    if (!m.me) html += `<div class="msg-avatar-sm">${m.init}</div>`;
+    html += '<div>';
+    if (!m.me) html += `<div class="msg-author">${m.author}</div>`;
+    if (m.reply) html += `<div class="reply-ref ${side}">${m.reply.a}: ${m.reply.t.slice(0,40)}${m.reply.t.length>40?'...':''}</div>`;
+    html += `<div class="msg-bubble ${side}">${m.text}</div>`;
+    html += `<div class="msg-time ${side}">${m.time}</div>`;
+    if (m.reactions && m.reactions.length) {
+      html += '<div class="reactions">';
+      m.reactions.forEach(r => {
+        html += `<div class="reaction-chip${r.r?' reacted':''}">${r.e} ${r.n}</div>`;
+      });
+      html += '</div>';
+    }
+    html += '</div></div></div>';
+  });
+  html += '</div>';
+  html += `<div class="compose">
+    <input class="compose-input" placeholder="Message...">
+    <div class="send-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+  </div>`;
+  html += '</div>';
+  return html;
+}
+
+function contactsHTML() {
+  return `<div style="padding:16px;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;margin-bottom:12px;">EMERGENCY CONTACTS (3)</div>
+    ${['Mom|Asheville, NC|#10b981','Dad|Portland, OR|#3b82f6','Jake|Asheville, NC|#10b981'].map((c,i) => {
+      const [n,l,col] = c.split('|');
+      return `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:#1f3348;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;">#${i+1}</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#1f3348;">${n}</div><div style="font-size:11px;color:#6b7280;">${l}</div></div>
+        <div style="width:10px;height:10px;border-radius:50%;background:${col};"></div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function groupsHTML() {
+  return `<div style="padding:16px;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;margin-bottom:12px;">SUGGESTED FOR YOU</div>
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div><div style="font-size:13px;font-weight:600;color:#1f3348;">Montford Neighborhood</div><div style="font-size:11px;color:#6b7280;margin-top:2px;">0.2 mi &middot; 187 members</div></div>
+        <div style="background:#8b5cf6;color:white;padding:4px 10px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;cursor:pointer;">JOIN</div>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;margin:16px 0 12px;">YOUR GROUPS</div>
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-size:13px;font-weight:600;color:#1f3348;">Family</div><div style="font-size:11px;color:#6b7280;margin-top:2px;">4 members &middot; <span style="font-size:9px;background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:3px;font-weight:600;">ADMIN</span></div></div>
+        <div style="width:20px;height:20px;border-radius:50%;background:#ef4444;color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">1</div>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:8px;">
+      <div><div style="font-size:13px;font-weight:600;color:#1f3348;">Montford Block 7</div><div style="font-size:11px;color:#6b7280;margin-top:2px;">23 members &middot; Member</div></div>
+    </div>
+  </div>`;
+}
+
+function placeholderHTML(page) {
+  return `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#9ca3af;font-size:13px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;">${page.replace(/-/g,' ')}</div>`;
+}
+
+// ── Init ──
+buildMenu();
+renderCenter();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,231 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id                String             @id @default(cuid())
+  employeeId        String             @unique
+  email             String             @unique
+  username          String             @unique
+  passwordHash      String
+  name              String
+  role              EmployeeRole
+  twoFactorSecret   String?
+  twoFactorEnabled  Boolean            @default(false)
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  activityLog       ActivityLog[]
+  clientAssignments ClientAssignment[]
+  loginHistory      LoginHistory[]
+
+  @@index([employeeId])
+  @@index([email])
+  @@index([role])
+}
+
+model LoginHistory {
+  id              String    @id @default(cuid())
+  employeeId      String
+  loginTime       DateTime  @default(now())
+  logoutTime      DateTime?
+  sessionDuration Int?
+  ipAddress       String?
+  userAgent       String?
+  active          Boolean   @default(true)
+  employee        Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+  @@index([loginTime])
+  @@index([employeeId, loginTime])
+}
+
+model Client {
+  id               String             @id @default(cuid())
+  clientId         String             @unique
+  name             String
+  organizationType String
+  primaryContact   String?
+  email            String?
+  phone            String?
+  jurisdiction     String?
+  state            String?
+  boundingBox      Json?
+  plan             String?
+  status           ClientStatus       @default(TRIAL)
+  activatedAt      DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  accountManagers  ClientAssignment[]
+  incidents        Incident[]
+  usageMetrics     UsageMetric[]
+
+  @@index([clientId])
+  @@index([status])
+  @@index([state])
+}
+
+model ClientAssignment {
+  id         String   @id @default(cuid())
+  clientId   String
+  employeeId String
+  role       String
+  assignedAt DateTime @default(now())
+  client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, employeeId])
+  @@index([clientId])
+  @@index([employeeId])
+}
+
+model PublicUser {
+  id             String        @id @default(cuid())
+  userId         String        @unique
+  email          String?
+  userType       UserType      @default(public)
+  region         String?
+  accountCreated DateTime      @default(now())
+  lastActive     DateTime?
+  totalSessions  Int           @default(0)
+  usageMetrics   UsageMetric[]
+
+  @@index([userId])
+  @@index([userType])
+  @@index([region])
+}
+
+model UsageMetric {
+  id         String      @id @default(cuid())
+  clientId   String?
+  userId     String?
+  metricType String
+  endpoint   String?
+  timestamp  DateTime    @default(now())
+  value      Float       @default(1)
+  metadata   Json?
+  client     Client?     @relation(fields: [clientId], references: [id])
+  user       PublicUser? @relation(fields: [userId], references: [id])
+
+  @@index([clientId, timestamp])
+  @@index([userId, timestamp])
+  @@index([metricType, timestamp])
+  @@index([timestamp])
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  employeeId String
+  action     String
+  target     String?
+  targetId   String?
+  details    Json?
+  timestamp  DateTime @default(now())
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId, timestamp])
+  @@index([action])
+  @@index([timestamp])
+}
+
+model MapDataset {
+  id          String           @id @default(cuid())
+  datasetId   String           @unique
+  name        String
+  type        String
+  source      String?
+  version     String?
+  uploadedAt  DateTime         @default(now())
+  uploadedBy  String?
+  boundingBox Json?
+  status      MapDatasetStatus @default(UPLOADING)
+  processedAt DateTime?
+  s3Bucket    String?
+  s3Key       String?
+  fileSize    BigInt?
+  metadata    Json?
+
+  @@index([datasetId])
+  @@index([type])
+  @@index([status])
+  @@index([type, status])
+}
+
+model Incident {
+  id                  String    @id @default(cuid())
+  incidentId          String    @unique
+  clientId            String
+  type                String
+  severity            String?
+  startTime           DateTime
+  endTime             DateTime?
+  location            Json?
+  affectedUsers       Int       @default(0)
+  alertsSent          Int       @default(0)
+  helpRequestsCreated Int       @default(0)
+  metadata            Json?
+  client              Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([type])
+  @@index([startTime])
+  @@index([clientId, startTime])
+  @@index([type, startTime])
+}
+
+enum EmployeeRole {
+  SUPERADMIN
+  ADMIN
+  ACCOUNT_MANAGER
+  ANALYST
+  SUPPORT
+}
+
+enum ClientStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  CANCELLED
+}
+
+enum UserType {
+  public
+  em
+  supporting_group
+}
+
+enum MapDatasetStatus {
+  UPLOADING
+  PROCESSING
+  ACTIVE
+  ARCHIVED
+  ERROR
+}
+
+model SystemComponent {
+  id          String   @id @default(cuid())
+  module      String   // atlas, jupiter, exodus, beaconmesh, id-verification, core
+  order       Int      @default(0)
+  name        String
+  description String?
+  status      String   @default("planned") // planned, in-progress, testing, complete
+  priority    String   @default("medium")  // critical, high, medium, low
+  inputs      Json     @default("[]")
+  triggers    Json     @default("[]")
+  outputs     Json     @default("[]")
+  databaseEffects Json @default("[]")
+  subcomponents   Json @default("[]")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([module])
+  @@index([module, order])
+}

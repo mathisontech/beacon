@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Map Tile Styles</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1a1a2e; color: #e0e0e0; font-family: -apple-system, sans-serif; padding: 24px; }
+  h1 { font-size: 18px; margin-bottom: 16px; color: #fff; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+  .card { border-radius: 8px; overflow: hidden; background: #16213e; border: 1px solid #1a1a3e; }
+  .card img { width: 100%; height: 200px; object-fit: cover; display: block; background: #111; }
+  .card .label { padding: 10px 12px; font-size: 13px; font-weight: 600; }
+  .card .sub { padding: 0 12px 10px; font-size: 11px; color: #888; }
+  .err { color: #e55; font-style: italic; padding: 80px 20px; text-align: center; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1>Available 2D Map Tile Styles — San Francisco (no API key required)</h1>
+<div class="grid" id="grid"></div>
+<script>
+const z = 13, x = 1309, y = 3166;
+
+const styles = [
+  {
+    name: "OpenStreetMap",
+    sub: "Standard road map. Free, no key.",
+    url: `https://tile.openstreetmap.org/${z}/${x}/${y}.png`
+  },
+  {
+    name: "OpenTopoMap",
+    sub: "Topographic contour lines + roads. Free.",
+    url: `https://tile.opentopomap.org/${z}/${x}/${y}.png`
+  },
+  {
+    name: "ESRI World Imagery (Satellite)",
+    sub: "High-res satellite. Free tiles.",
+    url: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`
+  },
+  {
+    name: "ESRI World Topo Map",
+    sub: "Topographic with labels. Free tiles.",
+    url: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/${z}/${y}/${x}`
+  },
+  {
+    name: "ESRI World Street Map",
+    sub: "Detailed street map. Free tiles.",
+    url: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${z}/${y}/${x}`
+  },
+  {
+    name: "ESRI Light Gray Canvas",
+    sub: "Minimal light base. Free tiles.",
+    url: `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/${z}/${y}/${x}`
+  },
+  {
+    name: "ESRI Dark Gray Canvas",
+    sub: "Minimal dark base. Free tiles.",
+    url: `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/${z}/${y}/${x}`
+  },
+  {
+    name: "ESRI National Geographic",
+    sub: "NatGeo style. Free tiles.",
+    url: `https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/${z}/${y}/${x}`
+  },
+  {
+    name: "ESRI World Terrain Base",
+    sub: "Shaded relief terrain. Free tiles.",
+    url: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/${z}/${y}/${x}`
+  },
+  {
+    name: "ESRI Ocean Basemap",
+    sub: "Ocean floor + bathymetry. Free tiles.",
+    url: `https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/${z}/${y}/${x}`
+  },
+  {
+    name: "CartoDB Positron (Light)",
+    sub: "Clean minimal light. Free.",
+    url: `https://basemaps.cartocdn.com/light_all/${z}/${x}/${y}.png`
+  },
+  {
+    name: "CartoDB Dark Matter",
+    sub: "Clean minimal dark. Free.",
+    url: `https://basemaps.cartocdn.com/dark_all/${z}/${x}/${y}.png`
+  },
+  {
+    name: "CartoDB Voyager",
+    sub: "Colorful, readable. Free.",
+    url: `https://basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}.png`
+  },
+  {
+    name: "CartoDB Positron (No Labels)",
+    sub: "Light base, no text. Free.",
+    url: `https://basemaps.cartocdn.com/light_nolabels/${z}/${x}/${y}.png`
+  },
+  {
+    name: "CartoDB Dark Matter (No Labels)",
+    sub: "Dark base, no text. Free.",
+    url: `https://basemaps.cartocdn.com/dark_nolabels/${z}/${x}/${y}.png`
+  },
+  {
+    name: "OSM Humanitarian (HOT)",
+    sub: "Emphasizes humanitarian features. Free.",
+    url: `https://tile-a.openstreetmap.fr/hot/${z}/${x}/${y}.png`
+  },
+];
+
+const grid = document.getElementById('grid');
+styles.forEach(s => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  const img = document.createElement('img');
+  img.src = s.url;
+  img.alt = s.name;
+  img.crossOrigin = 'anonymous';
+  img.onerror = () => {
+    img.remove();
+    const err = document.createElement('div');
+    err.className = 'err';
+    err.textContent = 'Failed to load — may be blocked';
+    card.insertBefore(err, card.firstChild);
+  };
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = s.name;
+  const sub = document.createElement('div');
+  sub.className = 'sub';
+  sub.textContent = s.sub;
+  card.appendChild(img);
+  card.appendChild(label);
+  card.appendChild(sub);
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>

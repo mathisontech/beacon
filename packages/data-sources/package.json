@@ -1,0 +1,22 @@
+{
+  "name": "@beacon/data-sources",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Registry of all external data feeds (natural hazards, human threats, deformation, cameras, advisories)",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./natural": "./src/natural/index.ts",
+    "./human": "./src/human/index.ts",
+    "./volcano": "./src/volcano/index.ts",
+    "./cameras": "./src/cameras/index.ts",
+    "./travel": "./src/travel/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
