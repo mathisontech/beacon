@@ -101,13 +101,21 @@ const LAYER_CATEGORIES = [
 
 type LayerState = Record<string, boolean>;
 
+export interface ExtraCategory {
+  id: string;
+  label: string;
+  layers: { id: string; label: string; enabled: boolean }[];
+  onToggle: (id: string) => void;
+}
+
 interface Props {
   open: boolean;
   onToggle: () => void;
   onFlyTo?: (lat: number, lng: number, zoom: number) => void;
+  extraCategory?: ExtraCategory;
 }
 
-export default function MapLayersPanel({ open, onToggle, onFlyTo }: Props) {
+export default function MapLayersPanel({ open, onToggle, onFlyTo, extraCategory }: Props) {
   const [layerState, setLayerState] = useState<LayerState>(() => {
     const init: LayerState = {};
     LAYER_CATEGORIES.forEach((cat) =>
@@ -258,6 +266,101 @@ export default function MapLayersPanel({ open, onToggle, onFlyTo }: Props) {
 
       {/* Layer list */}
       <div style={{ flex: 1, overflowY: "auto", padding: "0 0 8px" }}>
+        {extraCategory && (() => {
+          const cat = extraCategory;
+          const isExpanded = expandedCats[cat.id] ?? true;
+          const catActiveCount = cat.layers.filter((l) => l.enabled).length;
+          return (
+            <div key={cat.id}>
+              <button
+                onClick={() => toggleCat(cat.id)}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "7px 12px",
+                  background: "none",
+                  border: "none",
+                  borderBottom: "1px solid rgba(255,255,255,0.04)",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    {isExpanded
+                      ? <polyline points="6 9 12 15 18 9" />
+                      : <polyline points="9 6 15 12 9 18" />}
+                  </svg>
+                  <span style={{
+                    fontSize: 9, fontWeight: 700, letterSpacing: "1px",
+                    color: "rgba(255,255,255,0.7)", textTransform: "uppercase",
+                  }}>
+                    {cat.label}
+                  </span>
+                </div>
+                {catActiveCount > 0 && (
+                  <span style={{
+                    fontSize: 8, fontWeight: 600,
+                    color: "rgba(255,255,255,0.5)",
+                    background: "rgba(59,130,246,0.15)",
+                    padding: "1px 4px", borderRadius: 3,
+                  }}>
+                    {catActiveCount}
+                  </span>
+                )}
+              </button>
+              {isExpanded && (
+                <div style={{ padding: "2px 0" }}>
+                  {cat.layers.map((layer) => (
+                    <button
+                      key={layer.id}
+                      onClick={() => cat.onToggle(layer.id)}
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "5px 12px 5px 28px",
+                        background: layer.enabled ? "rgba(59,130,246,0.1)" : "none",
+                        border: "none",
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      <div style={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: 3,
+                        border: layer.enabled ? "2px solid #3b82f6" : "2px solid rgba(255,255,255,0.2)",
+                        background: layer.enabled ? "#3b82f6" : "transparent",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}>
+                        {layer.enabled && (
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </div>
+                      <span style={{
+                        fontSize: 10,
+                        color: layer.enabled ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.5)",
+                        fontWeight: layer.enabled ? 600 : 400,
+                        textAlign: "left",
+                      }}>
+                        {layer.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
         {filtered.map((cat) => {
           const isExpanded = expandedCats[cat.id] ?? false;
           const catActiveCount = cat.layers.filter((l) => layerState[l.id]).length;

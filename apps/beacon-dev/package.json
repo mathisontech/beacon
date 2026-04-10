@@ -15,7 +15,9 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@beacon/data-sources": "*",
     "@beacon/design-system": "file:../design_system",
+    "@beacon/event-engine": "*",
     "@headlessui/react": "^2.2.9",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^6.19.2",

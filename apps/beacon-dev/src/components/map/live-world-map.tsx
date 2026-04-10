@@ -6,6 +6,7 @@ import type { ActiveFire } from "@/types/fire";
 import ViewSwitcher from "./view-switcher";
 import NWSAlertLayer from "./nws-alert-layer";
 import FireLayer from "./fire-layer";
+import FeedEventsLayer from "./feed-events-layer";
 import FireSelector from "./fire-selector";
 import FireTimeline from "./fire-timeline";
 import type { FireProjection } from "./fire-timeline";
@@ -22,7 +23,9 @@ import MapZoomControls from "./map-zoom-controls";
 import DevicePreview, { getDeviceDimensions } from "../ui/device-preview";
 import { useNWSAlerts } from "@/hooks/use-nws-alerts";
 import { useActiveFires } from "@/hooks/use-active-fires";
+import { useFeedEvents } from "@/hooks/use-feed-events";
 import { DEFAULT_LAYERS } from "@/lib/layers";
+import { ALL_FEEDS } from "@beacon/data-sources";
 
 export default function LiveWorldMap() {
   const [activeView, setActiveView] = useState<MapView>("photo");
@@ -36,6 +39,19 @@ export default function LiveWorldMap() {
   const [timelineGeom, setTimelineGeom] = useState<GeoJSON.Geometry | null>(null);
   const [projection, setProjection] = useState<FireProjection | null>(null);
   const [projLoading, setProjLoading] = useState(false);
+  const [liveFeedsEnabled, setLiveFeedsEnabled] = useState(true);
+  const [feedsEnabled, setFeedsEnabled] = useState<Record<string, boolean>>(
+    () => Object.fromEntries(ALL_FEEDS.map((f) => [f.id, true]))
+  );
+
+  const { events: feedEvents } = useFeedEvents(60000);
+  const toggleFeed = useCallback((id: string) => {
+    if (id === "live-feeds") {
+      setLiveFeedsEnabled((v) => !v);
+      return;
+    }
+    setFeedsEnabled((prev) => ({ ...prev, [id]: !prev[id] }));
+  }, []);
 
   const { alerts, loading, lastFetched } = useNWSAlerts(60000);
   const {
@@ -117,6 +133,14 @@ export default function LiveWorldMap() {
           timelineGeometry={timelineGeom}
         />
       )}
+      {activeView !== "lowdata" && (
+        <FeedEventsLayer
+          viewer={viewer}
+          events={feedEvents}
+          feedsEnabled={feedsEnabled}
+          enabled={liveFeedsEnabled}
+        />
+      )}
     </>
   );
 
@@ -151,7 +175,24 @@ export default function LiveWorldMap() {
           />
         </>
       )}
-      <MapLayersPanel open={layersPanelOpen} onToggle={() => setLayersPanelOpen((p) => !p)} onFlyTo={handleFlyTo} />
+      <MapLayersPanel
+        open={layersPanelOpen}
+        onToggle={() => setLayersPanelOpen((p) => !p)}
+        onFlyTo={handleFlyTo}
+        extraCategory={{
+          id: "live-feeds",
+          label: "LIVE FEEDS",
+          layers: [
+            { id: "live-feeds", label: "Master: Live Feeds", enabled: liveFeedsEnabled },
+            ...ALL_FEEDS.map((f) => ({
+              id: f.id,
+              label: f.name,
+              enabled: feedsEnabled[f.id] ?? true,
+            })),
+          ],
+          onToggle: toggleFeed,
+        }}
+      />
       <MapSightingReport />
       <MapTimelinePlayback />
       <MapViewToggle active={activeView} onChange={setActiveView} />

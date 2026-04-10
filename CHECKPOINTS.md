@@ -27,6 +27,7 @@ Reference for look: current live test account at `apps/beacon-dev/src/app/admin/
 
 - `C0` — `023cc0e` — monorepo scaffold baseline (pushed to origin).
 - `C1` — `6c76edf` — public feed ingestions on thin map (local only — push manually).
+- `C1.2` — (local) — overlay live feeds on beacon-dev LiveWorldMap, revert beacon-client map placeholder.
 
 ### Sandbox gotchas picked up this pass
 
@@ -50,6 +51,20 @@ Reference for look: current live test account at `apps/beacon-dev/src/app/admin/
 - `beacon-client` map tab now renders `ThinMap` — no base tiles, plain equirectangular SVG grid with pins sized and colored by severity/category. A footer legend strip shows every registered feed id, its live pin count, and an `err` chip if its last fetch failed. Client refreshes on a 30s interval.
 - Checkpoint verify (must run on your machine, sandbox has no network): `npm install && npm run dev:client`, open http://localhost:3100, Map tab. Expect pins for every green feed chip. Any red `err` chip means the upstream rejected or timed out — the feed file and the error are printed in the `/api/events` response for debugging.
 - Known gaps to revisit: (a) NWS alerts currently skip zone-only alerts that have no geometry — the previous beacon-dev map resolved zone geometry on demand; that work lives in `apps/beacon-dev/src/lib/nws-alerts.ts` if we want to port it. (b) GDELT's tone-based severity is a rough proxy; revisit once we have a real event taxonomy. (c) The "cameras" slot only has Caltrans D4 as a starter — volcano/fire cams are a backlog item.
+
+**C1.2 — Overlay live feeds on the real LiveWorldMap (beacon-dev) — DONE (local)**
+- Kristin flagged that the C1 ThinMap in `beacon-client` was not the map she wanted. The "original Beacon app" is `apps/beacon-dev`, which already has the full `LiveWorldMap` (Cesium photo + clay + MapLibre lowdata), fire layer, NWS alert layer, view switcher, layers panel. The `beacon-client` map tab has been reverted to its pre-C1 placeholder — scaffold still exists, just out of the way.
+- Plumbing reused from C1: `@beacon/data-sources`, `@beacon/event-engine`, the polling + cache + `pollStale` flow. No package changes.
+- beacon-dev changes:
+  - `package.json`: added `@beacon/data-sources: "*"` and `@beacon/event-engine: "*"` as workspace deps. `next.config.ts`: added both to `transpilePackages`.
+  - `src/app/api/events/route.ts`: new, mirrors the beacon-client route — `pollStale()` then `{ at, poll, feeds, events }`.
+  - `src/hooks/use-feed-events.ts`: polls `/api/events` on an interval, mirrors the `useActiveFires` pattern.
+  - `src/components/map/feed-events-layer.tsx`: Cesium `CustomDataSource` with one `.entities.add({ point })` per event, colored by category+severity via `pin-color-for.ts`, sized by severity via `pin-size-for.ts`. Mirrors the fire-layer point-rendering pattern (camera snapshot + restore, `HeightReference.CLAMP_TO_GROUND`, per-feed gating). Only renders on Cesium views (`photo` + `clay`) — matches fire-layer / nws-alert-layer which both skip `lowdata`.
+  - `src/components/map/live-world-map.tsx`: imports the new hook + layer + `ALL_FEEDS`, owns `liveFeedsEnabled` (master) and `feedsEnabled: Record<string, boolean>` (per-feed, all ON by default), renders `<FeedEventsLayer>` alongside the existing layers, and passes an `extraCategory` prop to `MapLayersPanel`.
+  - `src/components/map/map-layers-panel.tsx`: new optional `extraCategory` prop. When provided, the panel renders that category at the top, expanded by default, using the same checkbox styling as the existing static categories but sourced from props instead of the internal local state. No static categories were removed or renamed — all existing toggles still work the same way they did before.
+- Sidebar toggle UX: inside the existing layers panel (top-right gear), there's a new "LIVE FEEDS" section at the top with a master toggle ("Master: Live Feeds") plus one checkbox per feed id (usgs-earthquakes, nws-alerts, nifc-fires, gdelt-events, usgs-volcanoes, caltrans-d4-cams, opensky-flights). Toggling master flips the whole layer on/off; toggling a feed id removes just that feed's pins.
+- Caveats: (1) Feed pins render on Cesium views only. The `lowdata` (MapLibre 2D) view does not get them because the existing fire-layer and nws-alert-layer also skip it and the directive was to mirror those patterns. Adding MapLibre markers would require refactoring `maplibre-2d.tsx` to expose its map instance and is a future lift. (2) Sandbox typecheck for `beacon-dev` still shows 12 pre-existing errors in files I did not touch (`base-views/*.tsx`, `maplibre-2d.tsx`, `cesium-init.ts`, `pmtiles-setup.ts`) — all CSS-import / pmtiles-module / Cesium window-cast issues from before C1.2. My new/modified files are clean.
+- Verify on your machine: `rm apps/beacon-client/node_modules` (removes the stale worldview_oss symlink the sandbox couldn't delete), then `rm -rf node_modules apps/*/node_modules packages/*/node_modules && npm install && npm run dev:dev`. Open http://localhost:3000 (or whatever beacon-dev binds to), land on the Map tab, click the layers button (top right), expand LIVE FEEDS, and you should see pins colored by category (red natural, orange human, dark-red volcano, purple cameras, blue travel) sized by severity. Toggle feeds on/off to confirm the cache-backed polling works.
 
 **C2 — User creation + contact management**
 - Signup, login, profile.
