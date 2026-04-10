@@ -4,9 +4,11 @@ import type { Volcano } from "./types";
 import { VOLCANO_DETAILS, DEFAULT_VOLCANO_DETAIL } from "./volcano-details";
 import { VOLCANO_HISTORY } from "./volcano-history";
 import { getCams } from "./volcano-cams";
+import { getMonitoring } from "./volcano-monitoring";
 import { useVolcanoQuakes } from "./use-volcano-quakes";
 import { CapabilityChips } from "./detail-sections/capability-chips";
 import { LocationDropdown } from "./detail-sections/location-dropdown";
+import { MonitoringSection } from "./detail-sections/monitoring-section";
 import { OverviewSection } from "./detail-sections/overview-section";
 import { EruptionStyleSection } from "./detail-sections/eruption-style-section";
 import { EruptionHistorySection } from "./detail-sections/eruption-history-section";
@@ -29,6 +31,7 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
 
   const history = volcano ? VOLCANO_HISTORY[volcano.id] : undefined;
   const cams = volcano ? getCams(volcano.id) : [];
+  const monitoring = volcano ? getMonitoring(volcano.id) : undefined;
 
   const { quakes, loading, error } = useVolcanoQuakes(
     volcano?.lat ?? null,
@@ -67,6 +70,7 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
           <LocationDropdown volcano={volcano} />
 
           <div className="vp-panel-body">
+            {monitoring && <MonitoringSection monitoring={monitoring} />}
             {history && <EruptionHistorySection history={history} />}
             <WebcamSection cams={cams} />
             {history && <EruptionStyleSection history={history} />}
