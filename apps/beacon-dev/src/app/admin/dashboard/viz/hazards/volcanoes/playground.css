@@ -1,0 +1,192 @@
+/* ═══════════════════════════════════════════════════════════════
+   TWEAK ZONE 1 — global chrome
+   Background, font, panel positions.
+   ═══════════════════════════════════════════════════════════════ */
+.vp-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #0b0f1a;
+  color: #f5f5f5;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif;
+  overflow: hidden;
+}
+.vp-map { position: absolute; inset: 0; }
+
+/* ═══════════════════════════════════════════════════════════════
+   TWEAK ZONE 2 — alert level colors (USGS HANS codes)
+   These CSS variables drive EVERY volcano pin + legend swatch.
+   Change one value and the whole layer restyles.
+   ═══════════════════════════════════════════════════════════════ */
+.vp-root {
+  --alert-warning:  #d62728;   /* RED    — hazardous eruption imminent / underway */
+  --alert-watch:    #ff7f0e;   /* ORANGE — heightened / escalating unrest         */
+  --alert-advisory: #ffcc00;   /* YELLOW — elevated unrest above background       */
+  --alert-normal:   #2ca02c;   /* GREEN  — typical background activity            */
+  --alert-unknown:  #6b7280;   /* GRAY   — not monitored / unassigned             */
+
+  --pin-ring: rgba(255,255,255,0.92);
+  --pin-shadow: rgba(0,0,0,0.55);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TWEAK ZONE 3 — pin icon
+   Pins are Leaflet divIcons (HTML+CSS). Change shape/size here.
+   ═══════════════════════════════════════════════════════════════ */
+.volcano-pin {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--pin-ring);
+  box-shadow: 0 0 0 1px var(--pin-shadow), 0 2px 6px var(--pin-shadow);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: transform .12s ease;
+}
+.volcano-pin:hover { transform: translate(-50%, -50%) scale(1.25); }
+
+/* Size escalates with alert level. */
+.volcano-pin.level-normal   { width: 12px; height: 12px; background: var(--alert-normal); }
+.volcano-pin.level-advisory { width: 15px; height: 15px; background: var(--alert-advisory); }
+.volcano-pin.level-watch    { width: 18px; height: 18px; background: var(--alert-watch); }
+.volcano-pin.level-warning  { width: 22px; height: 22px; background: var(--alert-warning); }
+.volcano-pin.level-unknown  { width: 11px; height: 11px; background: var(--alert-unknown); }
+
+/* Pulsing ring for WATCH + WARNING. Delete the @keyframes to disable. */
+.volcano-pin.level-watch::after,
+.volcano-pin.level-warning::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  color: inherit;
+  animation: vp-pulse 1.8s ease-out infinite;
+  pointer-events: none;
+}
+.volcano-pin.level-warning { color: var(--alert-warning); }
+.volcano-pin.level-watch   { color: var(--alert-watch); }
+@keyframes vp-pulse {
+  0%   { transform: scale(0.8); opacity: 0.9; }
+  100% { transform: scale(1.9); opacity: 0;   }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TWEAK ZONE 4 — legend panel
+   ═══════════════════════════════════════════════════════════════ */
+.vp-legend {
+  position: absolute;
+  left: 16px; bottom: 16px;
+  z-index: 400;
+  background: rgba(11, 15, 26, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 14px 16px 12px;
+  min-width: 220px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.vp-legend h3 {
+  margin: 0 0 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
+.vp-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+.vp-legend-row .sw {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--pin-ring);
+  flex-shrink: 0;
+}
+.vp-legend-row .lbl { flex: 1; color: rgba(255,255,255,0.9); }
+.vp-legend-row .ct  { color: rgba(255,255,255,0.45); font-variant-numeric: tabular-nums; }
+.vp-legend-row.off .sw  { opacity: 0.25; }
+.vp-legend-row.off .lbl { color: rgba(255,255,255,0.35); text-decoration: line-through; }
+.vp-legend hr { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 10px 0 8px; }
+.vp-legend .footnote { font-size: 10px; color: rgba(255,255,255,0.4); }
+
+/* ═══════════════════════════════════════════════════════════════
+   TWEAK ZONE 5 — popup card (click a pin)
+   ═══════════════════════════════════════════════════════════════ */
+.vp-root .leaflet-popup-content-wrapper {
+  background: rgba(11, 15, 26, 0.92);
+  backdrop-filter: blur(10px);
+  color: #f5f5f5;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.vp-root .leaflet-popup-tip { background: rgba(11, 15, 26, 0.92); }
+.vp-root .leaflet-popup-content { margin: 12px 14px; min-width: 200px; }
+.vcard-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.vcard-sub  { font-size: 11px; color: rgba(255,255,255,0.55); margin-bottom: 10px; }
+.vcard-row  { display: flex; justify-content: space-between; font-size: 11px; padding: 3px 0; }
+.vcard-row span:first-child {
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-size: 9px;
+}
+.vcard-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+.vcard-chip.level-warning  { background: var(--alert-warning);  color: #fff; }
+.vcard-chip.level-watch    { background: var(--alert-watch);    color: #fff; }
+.vcard-chip.level-advisory { background: var(--alert-advisory); color: #111; }
+.vcard-chip.level-normal   { background: var(--alert-normal);   color: #fff; }
+.vcard-chip.level-unknown  { background: var(--alert-unknown);  color: #fff; }
+
+/* ═══════════════════════════════════════════════════════════════
+   TWEAK ZONE 6 — header strip
+   ═══════════════════════════════════════════════════════════════ */
+.vp-header {
+  position: absolute;
+  top: 14px; left: 14px; right: 14px;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.vp-header .title {
+  background: rgba(11, 15, 26, 0.82);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  pointer-events: auto;
+}
+.vp-header .stat {
+  background: rgba(11, 15, 26, 0.82);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.85);
+  pointer-events: auto;
+  font-variant-numeric: tabular-nums;
+}
+.vp-header .stat b { color: #fff; }

@@ -70,6 +70,7 @@ const vizGroups = [
     label: 'Hazards',
     docsHref: '/admin/dashboard/modules/hazards/docs',
     items: [
+      { label: 'Volcanoes', href: '/admin/dashboard/viz/hazards/volcanoes', icon: Flame },
       { label: 'Risk Layers', href: '/admin/dashboard/viz/hazards/risk-layers', icon: AlertTriangle },
       { label: 'Hazard Perimeters', href: '/admin/dashboard/viz/hazards/perimeters', icon: TriangleAlert },
       { label: 'Building Status Overlays', href: '/admin/dashboard/viz/hazards/building-status', icon: Layers },
@@ -708,7 +709,7 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      <main className={`beacon-main-content${pathname === '/admin/dashboard/live-map' || pathname?.startsWith('/admin/dashboard/modules/base-map/views') ? ' no-padding' : ''}`}>
+      <main className={`beacon-main-content${pathname === '/admin/dashboard/live-map' || pathname?.startsWith('/admin/dashboard/modules/base-map/views') || pathname?.startsWith('/admin/dashboard/viz/hazards/volcanoes') ? ' no-padding' : ''}`}>
         {children}
       </main>
     </div>

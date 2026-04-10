@@ -28,6 +28,7 @@ Reference for look: current live test account at `apps/beacon-dev/src/app/admin/
 - `C0` — `023cc0e` — monorepo scaffold baseline (pushed to origin).
 - `C1` — `6c76edf` — public feed ingestions on thin map (local only — push manually).
 - `C1.2` — (local) — overlay live feeds on beacon-dev LiveWorldMap, revert beacon-client map placeholder.
+- `C1.3` — (local) — volcano layer playground inside beacon-dev at viz/hazards/volcanoes.
 
 ### Sandbox gotchas picked up this pass
 
@@ -65,6 +66,25 @@ Reference for look: current live test account at `apps/beacon-dev/src/app/admin/
 - Sidebar toggle UX: inside the existing layers panel (top-right gear), there's a new "LIVE FEEDS" section at the top with a master toggle ("Master: Live Feeds") plus one checkbox per feed id (usgs-earthquakes, nws-alerts, nifc-fires, gdelt-events, usgs-volcanoes, caltrans-d4-cams, opensky-flights). Toggling master flips the whole layer on/off; toggling a feed id removes just that feed's pins.
 - Caveats: (1) Feed pins render on Cesium views only. The `lowdata` (MapLibre 2D) view does not get them because the existing fire-layer and nws-alert-layer also skip it and the directive was to mirror those patterns. Adding MapLibre markers would require refactoring `maplibre-2d.tsx` to expose its map instance and is a future lift. (2) Sandbox typecheck for `beacon-dev` still shows 12 pre-existing errors in files I did not touch (`base-views/*.tsx`, `maplibre-2d.tsx`, `cesium-init.ts`, `pmtiles-setup.ts`) — all CSS-import / pmtiles-module / Cesium window-cast issues from before C1.2. My new/modified files are clean.
 - Verify on your machine: `rm apps/beacon-client/node_modules` (removes the stale worldview_oss symlink the sandbox couldn't delete), then `rm -rf node_modules apps/*/node_modules packages/*/node_modules && npm install && npm run dev:dev`. Open http://localhost:3000 (or whatever beacon-dev binds to), land on the Map tab, click the layers button (top right), expand LIVE FEEDS, and you should see pins colored by category (red natural, orange human, dark-red volcano, purple cameras, blue travel) sized by severity. Toggle feeds on/off to confirm the cache-backed polling works.
+
+**C1.3 — Volcano layer playground inside beacon-dev — DONE (local)**
+- Kristin wanted a design playground for each hazard layer (mess with legends, icons, display components) living inside the beacon-dev admin interface. First layer: volcanoes.
+- New sidebar entry: Visualization Manager → Hazards → Volcanoes (first item in the Hazards vizGroup, before Risk Layers). Uses the existing `Flame` lucide icon already imported in `apps/beacon-dev/src/app/admin/dashboard/layout.tsx`, so no new imports needed. Path: `/admin/dashboard/viz/hazards/volcanoes`.
+- Added the volcanoes path to the layout's no-padding list (same list that already covers live-map and base-map/views) so the playground can fill the full content area.
+- New directory: `apps/beacon-dev/src/app/admin/dashboard/viz/hazards/volcanoes/`, one short descriptive file per function (per Kristin's "short files, descriptive names" preference):
+  - `types.ts` — `AlertLevel`, `Volcano`, `LevelMeta` types.
+  - `volcano-data.ts` — 30 real US volcanoes matching USGS HANS shape (2 warning Hawaiian, 4 watch Aleutian, 7 advisory Cascades/Yellowstone/Long Valley, 17 normal).
+  - `volcano-levels.ts` — `LEVELS` metadata (label + blurb) driving legend rows.
+  - `make-pin-icon.ts` — Leaflet `divIcon` factory, typed against a minimal Leaflet surface so we don't pull `@types/leaflet` into the workspace.
+  - `make-popup-html.ts` — popup card HTML string template.
+  - `use-leaflet-cdn.ts` — client hook that injects the Leaflet 1.9.4 `<script>` + `<link>` from unpkg on first mount, resolves to the global `L` once loaded. Avoids bundling Leaflet as an npm dep.
+  - `volcano-playground.tsx` — main `'use client'` component. Uses the CDN hook, initializes the Leaflet map in a ref, renders Esri World Imagery + CartoCDN dark_nolabels overlay, builds per-level `layerGroup`s, adds pins, tears down on unmount. Legend rows are React state-driven (`offLevels: Set<AlertLevel>`), toggling updates map visibility via a second effect.
+  - `playground.css` — every one of the 7 TWEAK ZONES from the original standalone HTML, scoped under `.vp-root` so it can't leak into the rest of beacon-dev. Alert colors live in CSS variables (`--alert-warning`, `--alert-watch`, `--alert-advisory`, `--alert-normal`, `--alert-unknown`) so recoloring the whole layer is a one-line edit.
+  - `page.tsx` — thin server wrapper that renders `<VolcanoPlayground />`.
+- Also kept around: the standalone single-file HTML at `layer-playgrounds/volcano.html` from the earlier iteration. Useful as a reference for quick color/size tweaks without having to boot the Next dev server.
+- Verify on your machine: `npm run dev:dev`, open http://localhost:3000, log in, expand Visualization Manager → Hazards → Volcanoes in the left nav. Satellite basemap + dimming overlay + 30 pins. Click a level in the legend to toggle. Click a pin for a popup card. Alert colors: red=warning, orange=watch, yellow=advisory, green=normal. Watch/warning pins pulse.
+- Sandbox typecheck (`apps/beacon-dev/tsconfig.check.json`) is clean for every file I created — 0 new errors, same 28 pre-existing errors in prisma-typed / cesium-init / maplibre CSS files that were there before I started.
+- Next layer ideas (same pattern per hazard): earthquakes, fires, severe weather, NWS alerts, flights/cameras.
 
 **C2 — User creation + contact management**
 - Signup, login, profile.
