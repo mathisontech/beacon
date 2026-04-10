@@ -8,6 +8,8 @@ import { LEVELS } from "./volcano-levels";
 import { makePinIcon } from "./make-pin-icon";
 import { useLeafletCdn } from "./use-leaflet-cdn";
 import { VolcanoDetailPanel } from "./volcano-detail-panel";
+import { getRecentlyErupting } from "./get-recent-eruptions";
+import { RecentEruptionsFlyout } from "./recent-eruptions-flyout";
 
 // Minimal surface of the Leaflet globals we touch. Keeps us from
 // pulling @types/leaflet into the workspace just for the playground.
@@ -26,6 +28,7 @@ type LGlobal = {
 };
 type LMap = {
   setView: (ll: [number, number], z: number) => LMap;
+  flyTo: (ll: [number, number], z: number, opts?: { duration?: number }) => LMap;
   removeLayer: (g: unknown) => void;
   addLayer: (g: unknown) => void;
   remove: () => void;
@@ -46,6 +49,7 @@ export function VolcanoPlayground() {
   const L = useLeafletCdn() as LGlobal | null;
   const [offLevels, setOffLevels] = useState<Set<AlertLevel>>(() => new Set());
   const [selected, setSelected] = useState<Volcano | null>(null);
+  const [recentOpen, setRecentOpen] = useState(false);
 
   const counts = useMemo(() => {
     const out: Record<string, number> = {};
@@ -58,6 +62,8 @@ export function VolcanoPlayground() {
     () => VOLCANOES.filter((v) => !offLevels.has(v.level)).length,
     [offLevels]
   );
+
+  const recent = useMemo(() => getRecentlyErupting(), []);
 
   // Init map once Leaflet is loaded.
   useEffect(() => {
@@ -123,6 +129,13 @@ export function VolcanoPlayground() {
   };
 
   const closePanel = useCallback(() => setSelected(null), []);
+  const closeFlyout = useCallback(() => setRecentOpen(false), []);
+
+  const flyToVolcano = useCallback((v: Volcano) => {
+    const map = mapRef.current;
+    if (map) map.flyTo([v.lat, v.lng], 8, { duration: 1.2 });
+    setSelected(v);
+  }, []);
 
   return (
     <div className="vp-root">
@@ -155,13 +168,33 @@ export function VolcanoPlayground() {
             </div>
           );
         })}
+
+        <div className="vp-legend-divider" />
+
+        <div
+          className={`vp-legend-row vp-legend-recent${recentOpen ? " active" : ""}`}
+          title="Click to see volcanoes with eruptions in the last 12 months"
+          onClick={() => setRecentOpen((v) => !v)}
+        >
+          <div className="sw sw-recent" />
+          <div className="lbl">Recent eruptions</div>
+          <div className="ct">{recent.length}</div>
+        </div>
+
         <hr />
         <div className="footnote">
-          Click any level to toggle.
+          Click a level to toggle.
           <br />
-          Click a pin for details.
+          Click a pin or a recent row for details.
         </div>
       </div>
+
+      <RecentEruptionsFlyout
+        open={recentOpen}
+        items={recent}
+        onSelect={flyToVolcano}
+        onClose={closeFlyout}
+      />
 
       <VolcanoDetailPanel volcano={selected} onClose={closePanel} />
     </div>

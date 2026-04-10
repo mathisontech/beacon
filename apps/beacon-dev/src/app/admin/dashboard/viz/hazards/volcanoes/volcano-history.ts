@@ -24,9 +24,24 @@ export type EruptionStyle =
   | "strombolian"
   | "explosive"
   | "dome"
-  | "phreatic";
+  | "phreatic"
+  | "hydrothermal"
+  | "caldera"
+  | "lahar";
 
 export type DangerChar = "low" | "moderate" | "high" | "extreme";
+
+// How often this eruption mode shows up, in human terms.
+export type StyleFrequency = "usually" | "sometimes" | "rarely" | "historical";
+
+// Some volcanoes do more than one thing. Primary mode stays in
+// `style` + `styleDescription`; alternative modes go here.
+export interface AltStyle {
+  kind: EruptionStyle;
+  frequency: StyleFrequency;
+  danger: DangerChar;
+  description: string;
+}
 
 export interface VolcanoHistory {
   id: string;
@@ -37,6 +52,7 @@ export interface VolcanoHistory {
   styleDescription: string;
   danger: DangerChar;
   dangerExplanation: string;
+  altStyles?: AltStyle[];
   quakeBaseline: string;
   deformationBaseline: string;
 }
@@ -62,6 +78,15 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "Low risk to visitors at a distance, but devastating to anything downslope of an active flow. 2018 destroyed 700+ homes in Leilani Estates.",
+    altStyles: [
+      {
+        kind: "phreatic",
+        frequency: "rarely",
+        danger: "high",
+        description:
+          "About once a century, magma hits the water table and Kīlauea throws ballistic rocks and ash from the summit. 1924 killed one person at the crater rim. This mode is abrupt and gives very little warning.",
+      },
+    ],
     quakeBaseline:
       "Normal background: 20–50 small M<2 quakes per day across the edifice. Swarms of M2–3 events, or sustained M3+ activity, often precede eruptions by hours to days.",
     deformationBaseline:
@@ -212,6 +237,22 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "low",
     dangerExplanation:
       "Day-to-day risk is hydrothermal: small steam explosions and scalding ground. Geologic supereruption risk exists but is essentially zero on human timescales.",
+    altStyles: [
+      {
+        kind: "hydrothermal",
+        frequency: "usually",
+        danger: "moderate",
+        description:
+          "Small steam (hydrothermal) explosions are common — several per year, ranging from puddle-sized to basketball-court sized. Biscuit Basin threw rocks 2 stories high in 2024. Local risk to visitors near geyser basins; no wider danger.",
+      },
+      {
+        kind: "caldera",
+        frequency: "historical",
+        danger: "extreme",
+        description:
+          "Three VEI 8 supereruptions have occurred (2.1 Mya, 1.3 Mya, 631 kya). These produced continent-wide ashfall and would be civilization-scale events today. Probability in our lifetimes is effectively zero, but the geologic record shows it has happened before.",
+      },
+    ],
     quakeBaseline:
       "Normal background: 1,000–3,000 quakes PER YEAR across the caldera. Swarms of hundreds of small quakes in a week are normal. Most Yellowstone quake news is NOT unusual.",
     deformationBaseline:
@@ -233,6 +274,22 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "Geologic hazard is real but timing is unpredictable. Day-to-day, the main issue is CO₂ gas emissions from Mammoth Mountain that have killed trees and occasionally people.",
+    altStyles: [
+      {
+        kind: "caldera",
+        frequency: "historical",
+        danger: "extreme",
+        description:
+          "The Bishop Tuff eruption ~760,000 years ago was a VEI 7 caldera collapse that deposited ash across most of the western US. That mode is extremely rare but the caldera itself is evidence it has happened here.",
+      },
+      {
+        kind: "hydrothermal",
+        frequency: "usually",
+        danger: "moderate",
+        description:
+          "Magmatic CO₂ vents around Mammoth Mountain kill trees and, in enclosed spaces (ski patrol huts, cabins), can suffocate people. This is the day-to-day hazard, not eruptions.",
+      },
+    ],
     quakeBaseline:
       "Normal background: tens of small quakes per day. Swarms of hundreds to thousands of quakes have occurred multiple times since 1980 without eruption.",
     deformationBaseline:
@@ -277,6 +334,15 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "extreme",
     dangerExplanation:
       "150,000+ people live in lahar inundation zones. The Osceola Mudflow ~5,500 years ago reached what is now Auburn, Kent, and parts of Tacoma. A similar event today would be catastrophic.",
+    altStyles: [
+      {
+        kind: "lahar",
+        frequency: "sometimes",
+        danger: "extreme",
+        description:
+          "Lahars (volcanic mudflows) can occur WITHOUT an eruption. Rainier has 35+ glaciers perched on weakened, hydrothermally altered rock. Flank collapse or even heavy rainfall could send a lahar down the Puyallup, Nisqually, or White River valleys at 30+ mph, reaching populated areas in under an hour.",
+      },
+    ],
     quakeBaseline:
       "Normal background: ~20 quakes per month, mostly <M2, mostly in a shallow swarm zone beneath the summit. Unusual swarms or deep long-period events warrant attention.",
     deformationBaseline:
@@ -402,6 +468,15 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "high",
     dangerExplanation:
       "Lahars down the Toutle River could threaten communities as far as the Columbia River. Ashfall can affect eastern Washington and beyond.",
+    altStyles: [
+      {
+        kind: "explosive",
+        frequency: "rarely",
+        danger: "extreme",
+        description:
+          "VEI 5 Plinian eruption like May 18, 1980: lateral blast flattened 600 km² of forest in minutes, followed by a sustained ash column to 24 km. This is the mode to fear. Large eruptions cluster in ~100–200 year cycles.",
+      },
+    ],
     quakeBaseline:
       "Normal background: a few quakes per month. Dense monitoring network. Any sustained swarm is taken seriously.",
     deformationBaseline:

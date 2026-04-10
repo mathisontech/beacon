@@ -31,6 +31,7 @@ Reference for look: current live test account at `apps/beacon-dev/src/app/admin/
 - `C1.3` — (local) — volcano layer playground inside beacon-dev at viz/hazards/volcanoes.
 - `C1.4` — (local) — volcano detail side panel: overview, live USGS quakes, webcam link, deformation + threat.
 - `C1.5` — (local) — volcano eruption history (VEI list, avg interval, time since last), plain-English eruption style + danger, "what's normal" baseline context for quakes and deformation.
+- `C1.6` — (local) — multi-mode eruption styles (e.g. Yellowstone supervolcano vs. hydrothermal), "Recent eruptions" legend row + fly-out panel (last 12 months or ongoing), click a row → map flies to volcano + opens detail panel.
 
 ### Sandbox gotchas picked up this pass
 
@@ -117,6 +118,31 @@ Reference for look: current live test account at `apps/beacon-dev/src/app/admin/
 - `playground.css` TWEAK ZONE 9 appended: style card, danger chips (danger-low/moderate/high/extreme reusing the --alert-* variables from Zone 2), tempo row, VEI chips with their own color scale, eruption list rows, VEI legend, and a blue-tinted baseline callout box.
 - Sandbox typecheck: 0 new errors, same 28 pre-existing baseline errors. All new/modified files clean.
 - Verify: click a volcano pin. Panel now opens with "What to expect when it erupts" near the top. Scroll to "Eruption history" for the VEI list + tempo. Scroll to "Recent earthquakes" — the "What's normal" line sets context before the live feed.
+
+**C1.6 — Multi-mode eruptions + recent-eruptions fly-out — DONE (local)**
+- Kristin flagged two things: (1) volcanoes that do more than one kind of eruption (supervolcano with tiny hydrothermal blasts AND rare civilization-scale collapse) should make that clear, and (2) the legend should have a "recent / ongoing eruptions" entry that opens a side list you can scroll and click to zoom to each volcano.
+- C1.6 delivers the multi-style display + the recent-eruptions fly-out. C1.7 (next) will layer on clickable affected-regions with population, tourist counts, and hazard zone polygons for all 30 volcanoes.
+- `volcano-history.ts` type additions (non-breaking): new `StyleFrequency = "usually" | "sometimes" | "rarely" | "historical"`, new `AltStyle = { kind, frequency, danger, description }`, optional `altStyles?: AltStyle[]` on `VolcanoHistory`. Also added three new `EruptionStyle` values: `"hydrothermal"`, `"caldera"`, `"lahar"` — lets us name modes that aren't eruptions in the usual sense.
+- Six volcanoes now carry altStyles (hand-picked for where the multi-mode framing is the clearest):
+  - **Kilauea** primary effusive + rare phreatic (1924 killed one at the crater rim).
+  - **Yellowstone** primary explosive + usually hydrothermal (frequent small steam blasts) + historical VEI 8 caldera collapse.
+  - **Long Valley** primary explosive + historical VEI 7 Bishop Tuff + usually Mammoth Mountain CO₂ gas.
+  - **Mount Rainier** primary dome + sometimes lahar-without-eruption (35+ glaciers on weakened rock).
+  - **Mount St. Helens** primary dome + rarely VEI 5 Plinian (1980 mode).
+- `detail-sections/eruption-style-section.tsx` now stacks a primary style card plus one card per altStyle, each with a frequency heading chip ("Usually", "Sometimes", "Rarely", "Historical only"). Section header shows the mode count when there are alts.
+- New file `get-recent-eruptions.ts`: `getRecentlyErupting(now?, windowYears = 1)` joins `VOLCANOES` with `VOLCANO_HISTORY` and returns entries where the most recent EruptionRecord is within 12 months, or the display label contains "present" (our convention for ongoing — e.g. `"2021–present"` on Great Sitkin), or the volcano's alert level is `"warning"`. Sorted ongoing-first, then by most recent year.
+- New file `recent-eruptions-flyout.tsx`: scrollable list anchored just right of the legend (280px wide, slides in from the left edge, close X in the header). Each row shows a color-coded alert-level dot, volcano name, region, and an "Ongoing" badge or the eruption display string.
+- `volcano-playground.tsx` changes:
+  - New legend row below the four alert levels, separated by a divider. Styled with a diagonal gradient swatch (warning + watch) and a pulse halo. Shows the current count of recent volcanoes. Click to toggle the fly-out.
+  - Extended the local `LMap` type with `flyTo(ll, z, opts?)`.
+  - New `flyToVolcano(v)` handler: `map.flyTo([v.lat, v.lng], 8, { duration: 1.2 })` + `setSelected(v)`. Wired to the fly-out `onSelect`.
+- `playground.css` TWEAK ZONE 10 appended: style-card frequency chip, stack spacing, legend divider + recent row with diagonal swatch, fly-out panel chrome (slide + fade transition), fly-out rows with alert-level dots.
+- Sandbox typecheck: 0 new errors, 28 pre-existing baseline errors unchanged. All new/modified files clean.
+- Verify: click a volcano pin for Yellowstone → detail panel shows 3 mode cards (explosive / usually hydrothermal / historical caldera). Click the "Recent eruptions" legend row → fly-out slides in from the left edge. Click a row → map flies to the volcano and the right-side detail panel opens for it.
+
+**C1.7 — Clickable affected regions with hazard zones + population — TODO**
+- Kristin also asked for: "any data on the affected regions of the last eruptions clickable/explorable in the eruption history. of the eruption hot spots, how many people will be affected by the potential different components of that volcanic eruption. please point out the local population, any mappings of hazard zones, tourist counts".
+- Scope (per user decision): full GeoJSON hazard zones for all 30 volcanoes. Populations from USGS hazard assessments, tourist counts from NPS annual visitation. This will be split out as its own checkpoint since the data sourcing alone is substantial.
 
 **C2 — User creation + contact management**
 - Signup, login, profile.
