@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import "./playground.css";
 import type { AlertLevel, Volcano } from "./types";
 import { ALL_VOLCANOES } from "./all-volcanoes";
@@ -145,12 +144,6 @@ export function VolcanoPlayground() {
 
       <div className="vp-header">
         <div className="title">Beacon · Volcano Layer</div>
-        <Link
-          href="/admin/dashboard/viz/hazards/volcanoes/data-manager"
-          className="vp-dm-link"
-        >
-          Data Manager →
-        </Link>
         <div className="stat">
           <b>{visibleCount}</b> of {ALL_VOLCANOES.length} volcanoes
         </div>

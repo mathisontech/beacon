@@ -1,16 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import "./data-manager.css";
 import { SourceManagerPanel } from "./source-manager/source-manager-panel";
-import { ProcessorsPanel } from "./processors/processors-panel";
+import { NationsPanel } from "./nations/nations-panel";
 
-type Tab = "source-manager" | "processors";
+type Tab = "source-manager" | "nations";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "source-manager", label: "Data Source Manager" },
-  { id: "processors", label: "Data Source Processors" },
+  { id: "nations", label: "Nations" },
 ];
 
 export function DataManagerShell() {
@@ -19,15 +18,9 @@ export function DataManagerShell() {
   return (
     <div className="vdm-root">
       <header className="vdm-header">
-        <div className="vdm-crumbs">
-          <Link href="/admin/dashboard/viz/hazards/volcanoes" className="vdm-back">
-            Back to map
-          </Link>
-          <span className="vdm-sep">/</span>
-          <span className="vdm-title">Volcano Data Manager</span>
-        </div>
+        <div className="vdm-title">Volcano Data Manager</div>
         <div className="vdm-subtitle">
-          Internal view. Raw feeds, ingestion health, and per-volcano aggregation.
+          Internal view. Raw feeds, coverage geometry, and per-volcano processing pipelines.
         </div>
       </header>
 
@@ -47,7 +40,7 @@ export function DataManagerShell() {
 
       <main className="vdm-body">
         {tab === "source-manager" && <SourceManagerPanel />}
-        {tab === "processors" && <ProcessorsPanel />}
+        {tab === "nations" && <NationsPanel />}
       </main>
     </div>
   );

@@ -1,13 +1,9 @@
-import { VolcanoPlayground } from "./volcano-playground";
+import { VolcanoesShell } from "./volcanoes-shell";
 
 export const metadata = {
   title: "Volcanoes — Beacon Dev",
 };
 
 export default function VolcanoesPage() {
-  return (
-    <div style={{ position: "absolute", inset: 0 }}>
-      <VolcanoPlayground />
-    </div>
-  );
+  return <VolcanoesShell />;
 }

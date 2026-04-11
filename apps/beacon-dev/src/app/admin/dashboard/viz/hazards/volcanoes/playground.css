@@ -224,25 +224,6 @@
   font-variant-numeric: tabular-nums;
 }
 .vp-header .stat b { color: #fff; }
-.vp-header .vp-dm-link {
-  background: rgba(11, 15, 26, 0.82);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 158, 79, 0.35);
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  color: #ff9e4f;
-  text-decoration: none;
-  pointer-events: auto;
-  transition: background 0.15s, border-color 0.15s;
-}
-.vp-header .vp-dm-link:hover {
-  background: rgba(255, 158, 79, 0.12);
-  border-color: rgba(255, 158, 79, 0.6);
-}
 
 /* ═══════════════════════════════════════════════════════════════
    TWEAK ZONE 8 — detail panel (slide-out right side)

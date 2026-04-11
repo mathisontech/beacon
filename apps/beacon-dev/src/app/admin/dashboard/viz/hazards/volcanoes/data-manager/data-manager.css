@@ -107,3 +107,166 @@
   border: 1px solid rgba(255, 158, 79, 0.4);
   border-radius: 4px;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Nations panel — left rail of nations, right body of volcanoes
+   ═══════════════════════════════════════════════════════════════ */
+.vdm-nations {
+  display: flex;
+  gap: 18px;
+  height: 100%;
+  min-height: 0;
+}
+.vdm-nation-list {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 4px;
+  overflow-y: auto;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+.vdm-nation-chip {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.65);
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  transition: background 0.12s, color 0.12s;
+}
+.vdm-nation-chip:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+}
+.vdm-nation-chip.active {
+  background: rgba(255, 158, 79, 0.12);
+  color: #fff;
+}
+.vdm-nation-chip .name { flex: 1 1 auto; }
+.vdm-nation-chip .count {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  font-variant-numeric: tabular-nums;
+}
+.vdm-nation-chip.active .count { color: #ff9e4f; }
+
+.vdm-nation-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* Nation header + volcano chip row */
+.vdm-nation-view { display: flex; flex-direction: column; gap: 14px; }
+.vdm-nation-header {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.vdm-nation-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+.vdm-nation-meta {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.vdm-volcano-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.vdm-volcano-chip {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.75);
+  font: inherit;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.vdm-volcano-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.vdm-volcano-chip.active {
+  background: rgba(255, 158, 79, 0.14);
+  border-color: rgba(255, 158, 79, 0.55);
+  color: #fff;
+}
+.vdm-volcano-chip.level-warning.active { border-color: #d62728; }
+.vdm-volcano-chip.level-watch.active { border-color: #ff7f0e; }
+.vdm-volcano-chip.level-advisory.active { border-color: #ffcc00; }
+.vdm-volcano-chip.level-normal.active { border-color: #2ca02c; }
+
+/* Volcano detail card */
+.vdm-volcano-view {
+  margin-top: 10px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+}
+.vdm-volcano-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.vdm-volcano-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+.vdm-volcano-sub {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.vdm-subtabs {
+  display: flex;
+  gap: 2px;
+  margin: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.vdm-subtab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font: inherit;
+  font-size: 12px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+.vdm-subtab:hover { color: rgba(255, 255, 255, 0.9); }
+.vdm-subtab.active {
+  color: #fff;
+  border-bottom-color: #ff9e4f;
+}
+.vdm-volcano-body { padding-top: 4px; }
