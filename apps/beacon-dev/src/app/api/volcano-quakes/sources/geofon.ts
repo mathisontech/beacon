@@ -1,41 +1,26 @@
-// GEOFON — GFZ Potsdam global seismic network.
+// DEPRECATED — GEOFON was pulled in C1.8c.9.
 //
-// GEOFON runs a long-standing FDSN event service and is one of the
-// reference European-operated global catalogs. It is strongest for
-// M4.5+ events globally, and for European / Mediterranean / North
-// Atlantic regions where the GEOFON station density is high.
+// Endpoint is live (https://geofon.gfz-potsdam.de/fdsnws/event/1/query
+// returns 200 for Aegean M4+ queries; sandbox-verified a real M4.17
+// at Dodecanese Islands). But GEOFON's catalog is a global M~4.5+
+// reference catalog by design — it contains zero small quakes at
+// Icelandic volcanoes, so Katla / Hekla / Grímsvötn M0+ queries
+// return 204 No Content.
 //
-// In the Beacon router we use GEOFON to fill the Iceland gap: Katla,
-// Hekla, Grímsvötn, Eyjafjallajökull, Bárðarbunga, Askja. The
-// Icelandic Met Office does not expose a public FDSN event service,
-// and USGS misses most small Icelandic quakes. GEOFON is the best
-// realistic fallback here because GFZ participates in the Nordic
-// monitoring networks.
+// For bradyseismic monitoring (the whole point of this router)
+// GEOFON cannot do better than USGS, because the events we care
+// about (M0-M3 swarms) simply are not in the catalog. Extending the
+// bbox to the African Rift would hit the same problem.
 //
-// Bounding box is Iceland-only in this pass; if the endpoint verifies
-// we can extend to the African Rift (Nyiragongo, Erta Ale, Ol Doinyo
-// Lengai) in a follow-up pass.
+// Iceland now falls through to USGS. Follow-up paths if we want
+// better Iceland coverage:
+//   - IMO (api.vedur.is/skjalftalisa/v1/quake/array) — Icelandic
+//     Met Office. Returns JSON array, shape not yet mapped.
+//   - ISK network via IRIS federator.
+//   - GEOFON with a much lower magnitude floor once we verify they
+//     even expose sub-M4 events (they probably don't).
 //
-// Docs: https://geofon.gfz-potsdam.de/waveform/archive/
-// FDSN:  https://geofon.gfz-potsdam.de/fdsnws/event/1/
+// Source file is kept as this stub so router edits stay visible
+// in the git history.
 
-import type { QuakeSource } from "../types";
-import { fetchFdsnText } from "../fdsn-text";
-
-export const geofon: QuakeSource = {
-  id: "geofon",
-  name: "GEOFON",
-  operatorUrl: "https://geofon.gfz-potsdam.de/",
-  covers(lat, lng) {
-    // Iceland bounding box.
-    return lat >= 63 && lat <= 67 && lng >= -25 && lng <= -13;
-  },
-  async fetch(params, signal) {
-    return fetchFdsnText(
-      "https://geofon.gfz-potsdam.de/fdsnws/event/1/query",
-      "GEOFON",
-      params,
-      signal,
-    );
-  },
-};
+export {};

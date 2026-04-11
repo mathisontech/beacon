@@ -23,14 +23,14 @@ Status legend:
 | IPGP      | Réunion, Martinique, Guadeloupe                  | live       | FDSN text, three disjoint boxes. Verified at Piton de la Fournaise. |
 | EMSC      | Aegean + Azores + Canaries + Madeira             | live       | FDSN text (spec `maxradius` degrees). Verified at Santorini. |
 | BMKG      | Indonesia (Merapi, Semeru, Krakatau, Agung, …)   | live       | FDSN text. Verified: real quakes at Merapi. |
-| GEOFON    | Iceland (Katla, Hekla, Grímsvötn, Eyjafjallajökull, Bárðarbunga, Askja) | fdsn?      | FDSN text. GFZ Potsdam. Iceland-only bbox in this pass; shipped unverified — needs curl test at Katla. |
 
 ## Tried and pulled
 
 | Source    | Region                                         | Status   | Why pulled |
 |-----------|-------------------------------------------------|----------|------------|
 | OVSICORI  | Costa Rica (Arenal, Poás, Turrialba, Rincón…)  | no-api   | `sdb.ovsicori.una.ac.cr` does not resolve. OVSICORI publishes weekly bulletins and alert levels but no machine-readable FDSN event service. Costa Rica currently falls through to USGS. Future: scrape weekly bulletins or use INETER cross-border catalog. |
-| CSN Chile | Chile (Villarrica, Nevados de Chillán, Calbuco…) | no-api   | `http://evtdb.csn.uchile.cl/fdsnws/event/1/` redirects HTTP→HTTPS and the HTTPS target serves the CSN website HTML, not an FDSN event service. Endpoint guess was wrong; CSN may not expose FDSN publicly. Chile currently falls through to USGS. Future: IRIS/EarthScope federator proxy (CSN's C1 network is federated), GEOFON, or sismologia.cl HTML scraping. |
+| CSN Chile | Chile (Villarrica, Nevados de Chillán, Calbuco…) | no-api   | `http://evtdb.csn.uchile.cl/fdsnws/event/1/` redirects HTTP→HTTPS and the HTTPS target serves the CSN website HTML, not an FDSN event service. Endpoint guess was wrong; CSN may not expose FDSN publicly. Chile currently falls through to USGS. Future: IRIS/EarthScope federator proxy (CSN's C1 network is federated), or sismologia.cl HTML scraping. |
+| GEOFON    | Iceland (tried), African Rift (skipped)          | too-high | Endpoint is live (verified M4.17 in Dodecanese) but GEOFON is a global M~4.5+ reference catalog by design. Katla M0+ query returned 204 No Content — no small quakes in the catalog. Cannot beat USGS for bradyseismic monitoring. African Rift extension skipped for the same reason. Future: IMO JSON API for Iceland, IRIS federator for ISK network. |
 
 ## High priority — should be next
 
@@ -39,7 +39,6 @@ Status legend:
 | NIED Hi-net | Japan (Sakurajima, Aso, Unzen, Fuji, Kusatsu-Shirane, Zao, Tokachi…) | fdsn?  | `https://www.hinet.bosai.go.jp/` — waveform focused; event catalog may require NIED login |
 | SGC         | Colombia (Nevado del Ruiz, Galeras, Nevado del Huila, Purace…) | fdsn?  | `https://bdrsnc.sgc.gov.co/` — may require account; also publishes weekly PDF bulletins |
 | IG-EPN      | Ecuador (Cotopaxi, Sangay, Tungurahua, Reventador, Chimborazo…) | json?  | `https://www.igepn.edu.ec/solicitud-de-datos/` — data requests only, no clean API |
-| GEOFON/GFZ  | African Rift + wider secondary fallback         | fdsn?  | Shipped for Iceland in C1.8c.8; next pass extend bbox to Nyiragongo / Erta Ale / Ol Doinyo Lengai if Iceland verifies |
 
 ## Medium priority
 
