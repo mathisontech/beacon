@@ -15,12 +15,13 @@ import { geonet } from "./sources/geonet";
 import { ipgp } from "./sources/ipgp";
 import { emsc } from "./sources/emsc";
 import { bmkg } from "./sources/bmkg";
+import { geofon } from "./sources/geofon";
 
 // OVSICORI pulled in C1.8c.6 and CSN pulled in C1.8c.7 — neither
 // exposes a reachable FDSN event service under the URL I guessed.
 // See OBSERVATORIES.md for current status and fallback paths.
 
-const REGIONAL: QuakeSource[] = [ingv, geonet, ipgp, bmkg, emsc];
+const REGIONAL: QuakeSource[] = [ingv, geonet, ipgp, bmkg, emsc, geofon];
 
 export function pickSource(lat: number, lng: number): QuakeSource {
   for (const s of REGIONAL) {

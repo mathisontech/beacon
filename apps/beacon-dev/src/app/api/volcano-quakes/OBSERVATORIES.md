@@ -23,6 +23,7 @@ Status legend:
 | IPGP      | Réunion, Martinique, Guadeloupe                  | live       | FDSN text, three disjoint boxes. Verified at Piton de la Fournaise. |
 | EMSC      | Aegean + Azores + Canaries + Madeira             | live       | FDSN text (spec `maxradius` degrees). Verified at Santorini. |
 | BMKG      | Indonesia (Merapi, Semeru, Krakatau, Agung, …)   | live       | FDSN text. Verified: real quakes at Merapi. |
+| GEOFON    | Iceland (Katla, Hekla, Grímsvötn, Eyjafjallajökull, Bárðarbunga, Askja) | fdsn?      | FDSN text. GFZ Potsdam. Iceland-only bbox in this pass; shipped unverified — needs curl test at Katla. |
 
 ## Tried and pulled
 
@@ -38,7 +39,7 @@ Status legend:
 | NIED Hi-net | Japan (Sakurajima, Aso, Unzen, Fuji, Kusatsu-Shirane, Zao, Tokachi…) | fdsn?  | `https://www.hinet.bosai.go.jp/` — waveform focused; event catalog may require NIED login |
 | SGC         | Colombia (Nevado del Ruiz, Galeras, Nevado del Huila, Purace…) | fdsn?  | `https://bdrsnc.sgc.gov.co/` — may require account; also publishes weekly PDF bulletins |
 | IG-EPN      | Ecuador (Cotopaxi, Sangay, Tungurahua, Reventador, Chimborazo…) | json?  | `https://www.igepn.edu.ec/solicitud-de-datos/` — data requests only, no clean API |
-| GEOFON/GFZ  | secondary global fallback, esp. Europe          | fdsn?  | `http://geofon.gfz-potsdam.de/fdsnws/event/1/query` — well-known FDSN data centre, could sit between regional sources and USGS |
+| GEOFON/GFZ  | African Rift + wider secondary fallback         | fdsn?  | Shipped for Iceland in C1.8c.8; next pass extend bbox to Nyiragongo / Erta Ale / Ol Doinyo Lengai if Iceland verifies |
 
 ## Medium priority
 
