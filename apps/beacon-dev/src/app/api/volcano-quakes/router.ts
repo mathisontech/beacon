@@ -14,14 +14,13 @@ import { ingv } from "./sources/ingv";
 import { geonet } from "./sources/geonet";
 import { ipgp } from "./sources/ipgp";
 import { emsc } from "./sources/emsc";
-import { csn } from "./sources/csn";
 import { bmkg } from "./sources/bmkg";
 
-// OVSICORI pulled in C1.8c.6 — their public endpoint is not a
-// reachable FDSN event service. See OBSERVATORIES.md for the
-// status and the alternate weekly-bulletin scraping path.
+// OVSICORI pulled in C1.8c.6 and CSN pulled in C1.8c.7 — neither
+// exposes a reachable FDSN event service under the URL I guessed.
+// See OBSERVATORIES.md for current status and fallback paths.
 
-const REGIONAL: QuakeSource[] = [ingv, geonet, ipgp, csn, bmkg, emsc];
+const REGIONAL: QuakeSource[] = [ingv, geonet, ipgp, bmkg, emsc];
 
 export function pickSource(lat: number, lng: number): QuakeSource {
   for (const s of REGIONAL) {

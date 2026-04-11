@@ -13,7 +13,7 @@ Status legend:
 - `html` — only HTML/PDF bulletins are public; needs a scraper
 - `blocked` — no public machine-readable feed
 
-## Implemented (pass 1 + 2 + 3)
+## Implemented
 
 | Source    | Region                                          | Status     | Notes |
 |-----------|--------------------------------------------------|------------|-------|
@@ -22,7 +22,6 @@ Status legend:
 | GeoNet    | NZ + Kermadec Arc                                | live       | FDSN text. Verified working at Whakaari. |
 | IPGP      | Réunion, Martinique, Guadeloupe                  | live       | FDSN text, three disjoint boxes. Verified at Piton de la Fournaise. |
 | EMSC      | Aegean + Azores + Canaries + Madeira             | live       | FDSN text (spec `maxradius` degrees). Verified at Santorini. |
-| CSN Chile | Chile (Villarrica, Nevados de Chillán, Calbuco…) | live       | FDSN text. Endpoint responds; count 0 at Villarrica is plausible for current quiet period. |
 | BMKG      | Indonesia (Merapi, Semeru, Krakatau, Agung, …)   | live       | FDSN text. Verified: real quakes at Merapi. |
 
 ## Tried and pulled
@@ -30,6 +29,7 @@ Status legend:
 | Source    | Region                                         | Status   | Why pulled |
 |-----------|-------------------------------------------------|----------|------------|
 | OVSICORI  | Costa Rica (Arenal, Poás, Turrialba, Rincón…)  | no-api   | `sdb.ovsicori.una.ac.cr` does not resolve. OVSICORI publishes weekly bulletins and alert levels but no machine-readable FDSN event service. Costa Rica currently falls through to USGS. Future: scrape weekly bulletins or use INETER cross-border catalog. |
+| CSN Chile | Chile (Villarrica, Nevados de Chillán, Calbuco…) | no-api   | `http://evtdb.csn.uchile.cl/fdsnws/event/1/` redirects HTTP→HTTPS and the HTTPS target serves the CSN website HTML, not an FDSN event service. Endpoint guess was wrong; CSN may not expose FDSN publicly. Chile currently falls through to USGS. Future: IRIS/EarthScope federator proxy (CSN's C1 network is federated), GEOFON, or sismologia.cl HTML scraping. |
 
 ## High priority — should be next
 

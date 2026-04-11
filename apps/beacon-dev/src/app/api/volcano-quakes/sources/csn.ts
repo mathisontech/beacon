@@ -1,32 +1,19 @@
-// CSN — Centro Sismológico Nacional, Universidad de Chile.
+// DEPRECATED — CSN Chile is not currently wired into the router.
 //
-// Authoritative seismic catalog for Chile. Covers Villarrica,
-// Nevados de Chillán, Copahue, Llaima, Puyehue-Cordón Caulle,
-// Calbuco, Chaitén, Lascar, Lonquimay, Osorno, Cerro Hudson,
-// Planchón-Peteroa, Nevado Tres Cruces, Ojos del Salado, San José,
-// Tupungatito, Michinmahuida, and the rest of the Southern Andes
-// volcanic arc.
+// The guessed endpoint `http://evtdb.csn.uchile.cl/fdsnws/event/1/`
+// redirects HTTP -> HTTPS, and the HTTPS target serves the CSN
+// website HTML rather than an FDSN event service. CSN may have
+// retired the subdomain or never exposed FDSN publicly.
 //
-// Docs: http://evtdb.csn.uchile.cl/fdsnws/event/1/
+// Alternatives to investigate:
+//  1. IRIS/EarthScope federator — includes CSN's C1 network.
+//     `https://service.iris.edu/fdsnws/event/1/query` with a
+//     catalog filter. Could be wired in as a CSN proxy.
+//  2. GEOFON/GFZ secondary feed — picks up larger Chilean events.
+//  3. sismologia.cl / www.csn.uchile.cl — HTML daily bulletin,
+//     would need scraping.
+//
+// Until one of the above is implemented, Chilean volcanoes fall
+// through to the USGS global catalog.
 
-import type { QuakeSource } from "../types";
-import { fetchFdsnText } from "../fdsn-text";
-
-export const csn: QuakeSource = {
-  id: "csn",
-  name: "CSN Chile",
-  operatorUrl: "https://www.csn.uchile.cl/",
-  covers(lat, lng) {
-    // Mainland Chile + near-offshore trench. Excludes Easter Island
-    // (far off the coast) which would fall through to USGS.
-    return lat >= -56 && lat <= -17 && lng >= -76 && lng <= -66;
-  },
-  async fetch(params, signal) {
-    return fetchFdsnText(
-      "http://evtdb.csn.uchile.cl/fdsnws/event/1/query",
-      "CSN Chile",
-      params,
-      signal,
-    );
-  },
-};
+export {};
