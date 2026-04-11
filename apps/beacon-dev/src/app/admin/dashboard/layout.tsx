@@ -71,6 +71,7 @@ const vizGroups = [
     docsHref: '/admin/dashboard/modules/hazards/docs',
     items: [
       { label: 'Volcanoes', href: '/admin/dashboard/viz/hazards/volcanoes', icon: Flame },
+      { label: 'Volcano Data Manager', href: '/admin/dashboard/viz/hazards/volcanoes/data-manager', icon: Network },
       { label: 'Risk Layers', href: '/admin/dashboard/viz/hazards/risk-layers', icon: AlertTriangle },
       { label: 'Hazard Perimeters', href: '/admin/dashboard/viz/hazards/perimeters', icon: TriangleAlert },
       { label: 'Building Status Overlays', href: '/admin/dashboard/viz/hazards/building-status', icon: Layers },

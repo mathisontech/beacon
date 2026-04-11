@@ -3,18 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import "./data-manager.css";
-import { SourcesPanel } from "./sources/sources-panel";
-import { PipelinesPanel } from "./pipelines/pipelines-panel";
+import { SourceManagerPanel } from "./source-manager/source-manager-panel";
+import { ProcessorsPanel } from "./processors/processors-panel";
 
-type Tab = "sources" | "pipelines";
+type Tab = "source-manager" | "processors";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "sources", label: "Data Sources" },
-  { id: "pipelines", label: "Per-Volcano Pipelines" },
+  { id: "source-manager", label: "Data Source Manager" },
+  { id: "processors", label: "Data Source Processors" },
 ];
 
 export function DataManagerShell() {
-  const [tab, setTab] = useState<Tab>("sources");
+  const [tab, setTab] = useState<Tab>("source-manager");
 
   return (
     <div className="vdm-root">
@@ -46,8 +46,8 @@ export function DataManagerShell() {
       </nav>
 
       <main className="vdm-body">
-        {tab === "sources" && <SourcesPanel />}
-        {tab === "pipelines" && <PipelinesPanel />}
+        {tab === "source-manager" && <SourceManagerPanel />}
+        {tab === "processors" && <ProcessorsPanel />}
       </main>
     </div>
   );
