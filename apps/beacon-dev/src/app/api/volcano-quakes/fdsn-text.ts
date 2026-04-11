@@ -16,11 +16,14 @@ export async function fetchFdsnText(
   signal?: AbortSignal,
 ): Promise<Quake[]> {
   const start = new Date(Date.now() - params.days * 86_400_000);
+  // `maxradius` is in degrees and is the FDSN spec standard.
+  // `maxradiuskm` is a USGS extension some servers (EMSC) reject.
+  const maxRadiusDeg = params.radiusKm / 111.195;
   const qs = new URLSearchParams({
     format: "text",
     latitude: String(params.lat),
     longitude: String(params.lng),
-    maxradiuskm: String(params.radiusKm),
+    maxradius: maxRadiusDeg.toFixed(4),
     starttime: start.toISOString().slice(0, 19),
     minmagnitude: String(params.minMag),
     orderby: "time",
