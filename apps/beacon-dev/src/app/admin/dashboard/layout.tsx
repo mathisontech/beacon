@@ -216,6 +216,14 @@ const communityDevTabs = [
   { label: 'Dev Monitor', href: '/admin/dashboard/product/community/dev-monitor', icon: Activity },
 ];
 
+// Volcanoes > subtabs in the sidebar
+const VOLCANOES_HREF = '/admin/dashboard/viz/hazards/volcanoes';
+const VOLCANO_DM_HREF = `${VOLCANOES_HREF}/data-manager`;
+const volcanoDmTabs = [
+  { label: 'Data Source Manager', href: `${VOLCANO_DM_HREF}/sources`, icon: Globe },
+  { label: 'Nations', href: `${VOLCANO_DM_HREF}/nations`, icon: Flame },
+];
+
 export default function DashboardLayout({
   children,
 }: {
@@ -236,6 +244,8 @@ export default function DashboardLayout({
   const [productOpenTabs, setProductOpenTabs] = useState<Record<string, boolean>>({});
   const [communityProjectOpen, setCommunityProjectOpen] = useState(false);
   const [communityDevOpen, setCommunityDevOpen] = useState(false);
+  const [volcanoesNavOpen, setVolcanoesNavOpen] = useState(false);
+  const [volcanoDmNavOpen, setVolcanoDmNavOpen] = useState(false);
 
   const employee = session?.user;
 
@@ -280,6 +290,13 @@ export default function DashboardLayout({
         if (pathname.startsWith(catPrefix)) {
           setOpenCategories(prev => ({ ...prev, [cat.slug]: true }));
         }
+      }
+    }
+    // Auto-open Volcanoes subtree when on any volcano route
+    if (pathname?.startsWith(VOLCANOES_HREF)) {
+      setVolcanoesNavOpen(true);
+      if (pathname.startsWith(VOLCANO_DM_HREF)) {
+        setVolcanoDmNavOpen(true);
       }
     }
     // Auto-open submodule tabs
@@ -407,6 +424,64 @@ export default function DashboardLayout({
                             {group.items.map((item) => {
                               const ItemIcon = item.icon;
                               const itemActive = pathname?.startsWith(item.href);
+
+                              // Volcanoes item gets nested subtabs in the sidebar.
+                              if (item.href === VOLCANOES_HREF) {
+                                const mapActive = pathname === VOLCANOES_HREF;
+                                const dmActive = pathname?.startsWith(VOLCANO_DM_HREF);
+                                return (
+                                  <div key={item.href} className="nav-group">
+                                    <button
+                                      className={`nav-item nav-item-nested nav-submodule-toggle ${itemActive ? 'active' : ''}`}
+                                      onClick={() => setVolcanoesNavOpen(p => !p)}
+                                    >
+                                      {volcanoesNavOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+                                      <ItemIcon className="nav-icon" size={15} />
+                                      <span className="nav-text">{item.label}</span>
+                                    </button>
+                                    {volcanoesNavOpen && (
+                                      <div className="nav-group-items">
+                                        <Link
+                                          href={VOLCANOES_HREF}
+                                          className={`nav-item nav-item-nested ${mapActive ? 'active' : ''}`}
+                                          style={{ paddingLeft: 44 }}
+                                        >
+                                          <Map className="nav-icon" size={13} />
+                                          <span className="nav-text">Map</span>
+                                        </Link>
+                                        <button
+                                          className={`nav-group-toggle ${dmActive ? 'has-active' : ''}`}
+                                          onClick={() => setVolcanoDmNavOpen(p => !p)}
+                                          style={{ paddingLeft: 44 }}
+                                        >
+                                          {volcanoDmNavOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                                          <span>Volcano Data Manager</span>
+                                        </button>
+                                        {volcanoDmNavOpen && (
+                                          <div className="nav-group-items">
+                                            {volcanoDmTabs.map((tab) => {
+                                              const TabIcon = tab.icon;
+                                              const tabActive = pathname?.startsWith(tab.href);
+                                              return (
+                                                <Link
+                                                  key={tab.href}
+                                                  href={tab.href}
+                                                  className={`nav-item nav-item-nested ${tabActive ? 'active' : ''}`}
+                                                  style={{ paddingLeft: 60 }}
+                                                >
+                                                  <TabIcon className="nav-icon" size={12} />
+                                                  <span className="nav-text">{tab.label}</span>
+                                                </Link>
+                                              );
+                                            })}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              }
+
                               return (
                                 <Link
                                   key={item.href}
