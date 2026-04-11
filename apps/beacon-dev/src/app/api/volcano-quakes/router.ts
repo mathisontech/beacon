@@ -15,10 +15,13 @@ import { geonet } from "./sources/geonet";
 import { ipgp } from "./sources/ipgp";
 import { emsc } from "./sources/emsc";
 import { csn } from "./sources/csn";
-import { ovsicori } from "./sources/ovsicori";
 import { bmkg } from "./sources/bmkg";
 
-const REGIONAL: QuakeSource[] = [ingv, geonet, ipgp, csn, ovsicori, bmkg, emsc];
+// OVSICORI pulled in C1.8c.6 — their public endpoint is not a
+// reachable FDSN event service. See OBSERVATORIES.md for the
+// status and the alternate weekly-bulletin scraping path.
+
+const REGIONAL: QuakeSource[] = [ingv, geonet, ipgp, csn, bmkg, emsc];
 
 export function pickSource(lat: number, lng: number): QuakeSource {
   for (const s of REGIONAL) {

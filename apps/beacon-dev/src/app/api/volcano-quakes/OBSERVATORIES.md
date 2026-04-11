@@ -13,26 +13,32 @@ Status legend:
 - `html` — only HTML/PDF bulletins are public; needs a scraper
 - `blocked` — no public machine-readable feed
 
-## Implemented (pass 1 + 2)
+## Implemented (pass 1 + 2 + 3)
 
-| Source  | Region                                      | Status | Notes |
-|---------|---------------------------------------------|--------|-------|
-| USGS    | global fallback                             | live   | FDSN geojson, existing code path |
-| INGV    | Italy + surrounding seas                    | live   | FDSN text, priority over EMSC inside the Italian box |
-| GeoNet  | NZ + Kermadec Arc                           | live   | FDSN text |
-| IPGP    | Réunion, Martinique, Guadeloupe             | live   | FDSN text, three disjoint boxes |
-| EMSC    | Aegean + Azores + Canaries + Madeira        | live   | FDSN text, covers Santorini/Nisyros/Cumbre Vieja/Teide |
+| Source    | Region                                          | Status     | Notes |
+|-----------|--------------------------------------------------|------------|-------|
+| USGS      | global fallback                                  | live       | FDSN geojson, existing code path |
+| INGV      | Italy + surrounding seas                         | live       | FDSN text, priority over EMSC inside the Italian box. Verified: 26 quakes/30d at Campi Flegrei incl. M3.4, M3.3. |
+| GeoNet    | NZ + Kermadec Arc                                | live       | FDSN text. Verified working at Whakaari. |
+| IPGP      | Réunion, Martinique, Guadeloupe                  | live       | FDSN text, three disjoint boxes. Verified at Piton de la Fournaise. |
+| EMSC      | Aegean + Azores + Canaries + Madeira             | live       | FDSN text (spec `maxradius` degrees). Verified at Santorini. |
+| CSN Chile | Chile (Villarrica, Nevados de Chillán, Calbuco…) | live       | FDSN text. Endpoint responds; count 0 at Villarrica is plausible for current quiet period. |
+| BMKG      | Indonesia (Merapi, Semeru, Krakatau, Agung, …)   | live       | FDSN text. Verified: real quakes at Merapi. |
+
+## Tried and pulled
+
+| Source    | Region                                         | Status   | Why pulled |
+|-----------|-------------------------------------------------|----------|------------|
+| OVSICORI  | Costa Rica (Arenal, Poás, Turrialba, Rincón…)  | no-api   | `sdb.ovsicori.una.ac.cr` does not resolve. OVSICORI publishes weekly bulletins and alert levels but no machine-readable FDSN event service. Costa Rica currently falls through to USGS. Future: scrape weekly bulletins or use INETER cross-border catalog. |
 
 ## High priority — should be next
 
 | Source      | Region                         | Status | Known/suspected endpoint |
 |-------------|--------------------------------|--------|--------------------------|
-| BMKG        | Indonesia (Merapi, Semeru, Krakatau, Agung, Sinabung, Anak Krakatau…) | fdsn?  | `http://geof.bmkg.go.id/fdsnws/event/1/query` — needs verification |
 | NIED Hi-net | Japan (Sakurajima, Aso, Unzen, Fuji, Kusatsu-Shirane, Zao, Tokachi…) | fdsn?  | `https://www.hinet.bosai.go.jp/` — waveform focused; event catalog may require NIED login |
-| CSN Chile   | Chile (Villarrica, Nevados de Chillán, Copahue, Llaima, Puyehue, Calbuco, Lascar…) | fdsn?  | `http://evtdb.csn.uchile.cl/fdsnws/event/1/query` — needs verification |
 | SGC         | Colombia (Nevado del Ruiz, Galeras, Nevado del Huila, Purace…) | fdsn?  | `https://bdrsnc.sgc.gov.co/` — may require account; also publishes weekly PDF bulletins |
 | IG-EPN      | Ecuador (Cotopaxi, Sangay, Tungurahua, Reventador, Chimborazo…) | json?  | `https://www.igepn.edu.ec/solicitud-de-datos/` — data requests only, no clean API |
-| OVSICORI    | Costa Rica (Arenal, Poás, Turrialba, Rincón de la Vieja, Irazú) | fdsn?  | `http://sdb.ovsicori.una.ac.cr/fdsnws/event/1/query` — needs verification |
+| GEOFON/GFZ  | secondary global fallback, esp. Europe          | fdsn?  | `http://geofon.gfz-potsdam.de/fdsnws/event/1/query` — well-known FDSN data centre, could sit between regional sources and USGS |
 
 ## Medium priority
 

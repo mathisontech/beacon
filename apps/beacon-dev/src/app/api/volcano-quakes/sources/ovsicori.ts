@@ -1,28 +1,19 @@
-// OVSICORI — Observatorio Vulcanológico y Sismológico de Costa Rica
-// at Universidad Nacional.
+// DEPRECATED — OVSICORI is not currently wired into the router.
 //
-// Covers the five most-active Costa Rican volcanoes: Arenal, Poás,
-// Turrialba, Rincón de la Vieja, Irazú. Also catches the
-// surrounding volcanic arc including Miravalles and Tenorio.
+// The guessed FDSN endpoint (sdb.ovsicori.una.ac.cr) does not
+// resolve. OVSICORI publishes weekly bulletins and alert levels
+// at https://www.ovsicori.una.ac.cr/ but does not expose a
+// machine-readable FDSN event service.
 //
-// Docs: http://sdb.ovsicori.una.ac.cr/fdsnws/event/1/
+// Options for future implementation:
+//  1. Scrape the weekly bulletin PDFs and extract quake counts
+//     per volcano (coarse, not per-event).
+//  2. Use INETER Nicaragua's cross-border catalog for the far-north
+//     Costa Rican volcanoes if it extends south.
+//  3. Fall back to USGS for Costa Rican volcanoes (current state
+//     after pulling this source from the router).
+//
+// Until one of the above is implemented, Costa Rica falls through
+// to the USGS global catalog like any other uncovered region.
 
-import type { QuakeSource } from "../types";
-import { fetchFdsnText } from "../fdsn-text";
-
-export const ovsicori: QuakeSource = {
-  id: "ovsicori",
-  name: "OVSICORI",
-  operatorUrl: "https://www.ovsicori.una.ac.cr/",
-  covers(lat, lng) {
-    return lat >= 8 && lat <= 11.5 && lng >= -86 && lng <= -82.5;
-  },
-  async fetch(params, signal) {
-    return fetchFdsnText(
-      "http://sdb.ovsicori.una.ac.cr/fdsnws/event/1/query",
-      "OVSICORI",
-      params,
-      signal,
-    );
-  },
-};
+export {};
