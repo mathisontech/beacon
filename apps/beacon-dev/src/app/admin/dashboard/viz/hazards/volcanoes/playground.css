@@ -1224,3 +1224,57 @@
   text-decoration: none;
 }
 .vp-root .vp-quake-source a:hover { text-decoration: underline; }
+
+/* ───────── TWEAK ZONE 15 — hazard risks section ───────── */
+
+.vp-root .vp-hazard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.vp-root .vp-hazard-row {
+  all: unset;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.vp-root .vp-hazard-row:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.14);
+}
+.vp-root .vp-hazard-row.open {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.18);
+}
+.vp-root .vp-hazard-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.vp-root .vp-hazard-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.92);
+}
+.vp-root .vp-hazard-note {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.72);
+}
+.vp-root .vp-hazard-def {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: rgba(255,255,255,0.65);
+  font-style: italic;
+}

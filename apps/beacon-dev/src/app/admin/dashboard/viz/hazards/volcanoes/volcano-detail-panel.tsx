@@ -12,6 +12,7 @@ import { MonitoringSection } from "./detail-sections/monitoring-section";
 import { OverviewSection } from "./detail-sections/overview-section";
 import { EruptionStyleSection } from "./detail-sections/eruption-style-section";
 import { EruptionHistorySection } from "./detail-sections/eruption-history-section";
+import { HazardRisksSection } from "./detail-sections/hazard-risks-section";
 import { QuakesSection } from "./detail-sections/quakes-section";
 import { WebcamSection } from "./detail-sections/webcam-section";
 import { DeformationSection } from "./detail-sections/deformation-section";
@@ -107,6 +108,9 @@ export function VolcanoDetailPanel({ volcano, onClose }: Props) {
             {history && <EruptionHistorySection history={history} />}
             <WebcamSection cams={cams} />
             {history && <EruptionStyleSection history={history} />}
+            {history?.hazardRisks && (
+              <HazardRisksSection risks={history.hazardRisks} />
+            )}
             <QuakesSection
               quakes={quakes}
               loading={loading}

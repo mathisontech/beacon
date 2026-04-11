@@ -56,6 +56,29 @@ export interface Capability {
   signs: string;
 }
 
+// Nine per-volcano hazard categories shown in the detail panel.
+// Each category's plain-English definition lives in
+// detail-sections/hazard-definitions.ts; per-volcano risk level
+// and a one-line "why this volcano" note live in `hazardRisks`
+// below. Rows with no entry for a volcano are hidden.
+export type HazardCategory =
+  | "pyroclastic"
+  | "ashfall"
+  | "lahar"
+  | "gas"
+  | "tsunami"
+  | "collapse"
+  | "lava"
+  | "ballistic"
+  | "flood";
+
+export interface HazardRisk {
+  level: DangerChar;
+  note: string;
+}
+
+export type HazardRisks = Partial<Record<HazardCategory, HazardRisk>>;
+
 export interface VolcanoHistory {
   id: string;
   eruptions: EruptionRecord[]; // most recent first
@@ -67,6 +90,7 @@ export interface VolcanoHistory {
   dangerExplanation: string;
   altStyles?: AltStyle[];
   capabilities?: Capability[];
+  hazardRisks?: HazardRisks;
   quakeBaseline: string;
   deformationBaseline: string;
 }
@@ -113,6 +137,36 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
         signs: "Water table near the vent is stable. No ballistic ejecta or sudden summit pressurization. Low risk under current conditions.",
       },
     ],
+    hazardRisks: {
+      lava: {
+        level: "extreme",
+        note: "Rift-zone flows destroyed 700+ homes in Leilani Estates in 2018 and have repeatedly buried subdivisions since the 1950s.",
+      },
+      gas: {
+        level: "high",
+        note: "Persistent SO₂ and vog plumes cause documented respiratory illness across leeward Hawaiʻi Island.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Summit phreatic explosions (most recently 1924) throw car-sized blocks around the crater rim.",
+      },
+      collapse: {
+        level: "moderate",
+        note: "The south flank (Hilina slump) creeps seaward and produced an M7.2 on the 2018 collapse sequence.",
+      },
+      tsunami: {
+        level: "low",
+        note: "A catastrophic south-flank failure could generate a Pacific-wide tsunami, but such events are thousands of years apart.",
+      },
+      ashfall: {
+        level: "low",
+        note: "Ash is rare and usually local — Kīlauea does not sustain tall eruption columns.",
+      },
+      pyroclastic: {
+        level: "low",
+        note: "Hawaiian-style eruptions almost never produce pyroclastic density currents.",
+      },
+    },
     quakeBaseline:
       "Normal background: 20–50 small M<2 quakes per day across the edifice. Swarms of M2–3 events, or sustained M3+ activity, often precede eruptions by hours to days.",
     deformationBaseline:
@@ -320,6 +374,32 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
         signs: "Small rhyolite flows happen every ~50,000–100,000 years. No current magma-ascent signals. Not expected on human timescales.",
       },
     ],
+    hazardRisks: {
+      ballistic: {
+        level: "high",
+        note: "Hydrothermal explosions routinely throw rocks across geyser basins — Biscuit Basin in 2024 tossed boulders 2 stories high within meters of visitors.",
+      },
+      gas: {
+        level: "moderate",
+        note: "CO₂ from the caldera kills wildlife in known 'death zones' near Mammoth and Norris; thermal areas release H₂S that can sicken unaware visitors.",
+      },
+      flood: {
+        level: "moderate",
+        note: "Hydrothermal blasts in Hot Springs basins cause sudden scalding flash floods; larger explosions historically formed Mary Bay and Indian Pond.",
+      },
+      pyroclastic: {
+        level: "low",
+        note: "Possible only in a VEI 7–8 caldera event. No precursors present; probability on human timescales is effectively zero.",
+      },
+      ashfall: {
+        level: "low",
+        note: "Small rhyolite flows would dust the Park; a VEI 8 would blanket much of the continent. Neither is expected this century.",
+      },
+      lava: {
+        level: "low",
+        note: "Small rhyolite flows occur every 50,000–100,000 years. No current ascent signals.",
+      },
+    },
     quakeBaseline:
       "Normal background: 1,000–3,000 quakes PER YEAR across the caldera. Swarms of hundreds of small quakes in a week are normal. Most Yellowstone quake news is NOT unusual.",
     deformationBaseline:
