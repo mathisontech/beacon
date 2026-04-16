@@ -1,0 +1,179 @@
+{
+  "module_id": "community.household.members",
+  "module_name": "Household Members",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting definition of medical info granularity (minimal vs detailed). Dependency status determination logic needed.",
+    "priority": 2
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Household > Members",
+    "M4_parent": "community.household",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "household_member_entry",
+        "source": "User adds household member (name, age, disabilities, medical needs, pets)",
+        "format": "JSON",
+        "schema_ref": "{ name, age_or_age_range, disabilities: ['mobility'|'visual'|'hearing'|'cognitive'], medical_needs?: string, pets?: [{type, size, needs}], self_evacuate: bool }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "pet_entry",
+        "source": "User adds pet to household",
+        "format": "JSON",
+        "schema_ref": "{ type, breed?, size, carrier_needed?, special_needs? }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "household_roster",
+        "consumers": ["profile UI", "evacuation planning", "group suggestions"],
+        "format": "JSON",
+        "schema_ref": "[{ member_id, name, age_range, disabilities, medical_summary, pets, self_evacuate }]",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "evacuation_constraints",
+        "consumers": ["evacuation system", "help matching"],
+        "format": "JSON",
+        "schema_ref": "{ mobility_assist_needed, vehicle_space_needed_sq_ft, pet_capacity, accessibility_required, estimated_evacuation_time_hours }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Aggregate household capabilities",
+        "algorithm": "If anyone has mobility disability and cannot self-evacuate: household needs help. Count pets and calculate carrier space. Count children and elderly.",
+        "latency_sla": "<100ms",
+        "accuracy_target": "100% correct aggregation"
+      },
+      {
+        "operation": "Calculate evacuation profile",
+        "algorithm": "Household size + pets → vehicle space needed. Disabilities + elderly → accessibility needs. Children/pets → evacuation time estimate.",
+        "latency_sla": "<200ms",
+        "accuracy_target": "Reasonable evacuation estimates (±30%)"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity.account-creation",
+        "description": "User account created",
+        "data_format": "user_id",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "profile_completion",
+        "description": "User adds household members",
+        "data_format": "household member entries",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 3,
+        "module_id": "validation",
+        "description": "Household data validated (age ranges, disability codes, pet sizes)",
+        "data_format": "validated data",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "persistence",
+        "description": "Household members stored in user_profiles + household_members tables",
+        "data_format": "database records",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "aggregation",
+        "description": "Evacuation profile computed (space needed, accessibility, time estimate)",
+        "data_format": "evacuation_profile",
+        "dependencies": ["community.household.evacuation-profile"]
+      },
+      {
+        "step": 6,
+        "module_id": "downstream_features",
+        "description": "Household data used by: group suggestions (school groups for children), help matching (accessibility needs), evacuation planning (convoy sizing)",
+        "data_format": "household data flowing to multiple systems",
+        "dependencies": ["community.groups.types", "community.equipment.resource-matching"]
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Household size validation (must not exceed reasonable limit). Disability combination edge cases (multiple disabilities). Pet size to carrier space calculation (manual mapping). Age range estimation (rough ranges vs exact ages).",
+    "P2_defensibility": "Minimal medical info collection (only what's relevant to evacuation). Age ranges not exact ages (privacy friendly). Self-evacuate flag is user-assessed (avoids medical judgment). Pet info is practical (carrier size, not breed detail).",
+    "P3_confidence_level": "Very high confidence. Simple data entry and aggregation. No complex algorithms.",
+    "P4_failure_modes": [
+      "Household size validation too loose → user enters 100 members (mitigate: reasonable max like 20)",
+      "Age range not granular enough → user can't specify 5yo vs 15yo differently (mitigate: use age buckets: <5, 5-12, 13-17, 18+, 65+)",
+      "Disability combination unclear → wrong evacuation profile (mitigate: clear checkboxes, preview profile)",
+      "Pet space calculation wrong → convoy too small (mitigate: user can manually override estimated space needed)"
+    ],
+    "P5_backup_plan": "If household validation fails: reject entry, show error with constraints. If profile aggregation fails: use defaults (assume worst-case). If evacuation profile fails: user can manually override.",
+    "P6_backup_plan_test": "Test boundary cases: 0 members, 20 members, 100 members. Test age range edge cases. Test disability combinations. Test pet space calculation with various sizes.",
+    "P7_testing_strategy": "Unit tests for aggregation logic (test combinations of disabilities, ages, pets). Integration tests for evacuation profile calculation. End-to-end tests for full household entry workflow. Manual testing of UI (member list, pet list, disability checkboxes).",
+    "P8_benchmarks": "Household entry: <1s validation. Profile aggregation: <100ms. Evacuation profile calc: <200ms. Household roster fetch: <200ms. Age range accuracy: match user intent 95% of time."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for household members module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Disability and medical information is protected health information (PHI). Must be handled carefully. Medical info collection limited to evacuation-relevant details only (not full medical records). User's self-assessment of ability to self-evacuate is legal determination (not Beacon's liability).",
+    "L2_regulatory_frameworks": ["HIPAA (if medical info processed)", "ADA (accessibility)", "COPPA (children under 13)"],
+    "L3_consent_requirements": "Implicit consent to collect household data by entering profile. If medical data collected, separate consent needed (HIPAA).",
+    "L4_liability_notes": "User self-assesses ability to self-evacuate (not medical determination). Beacon not liable for incorrect self-assessment. Pet information is user-provided (not vet-verified). Disability data must be treated as sensitive (encryption, access control)."
+  },
+  "F": {
+    "F1_cost_considerations": "Household data storage: ~500B per member per household. Minimal API costs. No external services needed.",
+    "F2_accounting_considerations": "Operational cost, no special accounting.",
+    "F3_revenue_impact": "Household data enables better group matching and evacuation planning (retention). Positive impact."
+  },
+  "S": {
+    "S1_cybersecurity": "Disability and medical data encrypted at rest (AES-256). Age ranges not exact birthdates (limits PII exposure). Pet info not sensitive.",
+    "S2_data_privacy": "Household roster visible only to account holder and emergency contacts (if applicable). Disability data never shared with groups (only aggregated constraints). Medical data never shared.",
+    "S3_encryption_requirements": "Disability and medical data encrypted at rest. Transiting TLS.",
+    "S4_access_control": "User sees own household. Emergency contacts and EMS may see accessibility needs during event (if authorized). Groups never see member disabilities.",
+    "S5_audit_requirements": "Log access to household data (especially medical info). Audit trail retention: 7 years (medical data compliance)."
+  },
+  "X": {
+    "X1_notes": "Household data is foundation for evacuation planning and inclusive community features. Minimal medical info collection protects privacy while enabling safety. Pet info crucial for evacuation (many people won't evacuate without pets). Age ranges enable group suggestions (school groups, age-appropriate activities) without collecting exact birthdates.",
+    "X2_open_questions": [
+      "Should household members have profiles or just summarized? (profiles would enable per-member communication, adds complexity)",
+      "Can caregivers manage household member profiles? (if user is disabled, caregiver needs access - privacy & access control tradeoff)",
+      "How to verify disability self-report? (probably not - trust user, use for planning not access control)"
+    ],
+    "X3_related_research": "HIPAA compliance for health data. Disability accessibility standards. COPPA requirements for children. Family emergency preparedness systems. Evacuation planning for households with disabilities."
+  }
+}

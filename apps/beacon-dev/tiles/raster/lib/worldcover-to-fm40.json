@@ -1,0 +1,14 @@
+{
+  "_doc": "ESA WorldCover 2021 class → Scott & Burgan FM40 fuel model. Conservative global fallback — LANDFIRE overrides within US.",
+  "10":  { "fm40": 101, "label": "tree cover → GR1 short sparse dry grass" },
+  "20":  { "fm40": 102, "label": "shrubland → GR2 low load dry grass" },
+  "30":  { "fm40": 104, "label": "grassland → GR4 moderate load dry grass" },
+  "40":  { "fm40": 91,  "label": "cropland → NB1 urban/developed" },
+  "50":  { "fm40": 91,  "label": "built-up → NB1 urban/developed" },
+  "60":  { "fm40": 99,  "label": "bare/sparse → NB9 bare ground" },
+  "70":  { "fm40": 99,  "label": "snow/ice → NB9 bare ground" },
+  "80":  { "fm40": 98,  "label": "permanent water → NB8 open water" },
+  "90":  { "fm40": 99,  "label": "herbaceous wetland → NB9 (saturated, low fire)" },
+  "95":  { "fm40": 145, "label": "mangroves → TU5 high load humid timber" },
+  "100": { "fm40": 99,  "label": "moss/lichen → NB9 bare ground" }
+}

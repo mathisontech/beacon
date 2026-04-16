@@ -1,0 +1,231 @@
+{
+  "module_id": "community.groups.types",
+  "module_name": "Group Types (Neighborhood, Parent-Community, Burn-Together, Evacuation Convoy)",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting geo-boundary definitions (census tract, fire district). Burn-together algorithm needs fuel/wind/insurance tier spec. Evacuation convoy auto-generation workflow needed.",
+    "priority": 1
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Groups > Types",
+    "M4_parent": "community.groups",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "user_location",
+        "source": "User's home or saved location",
+        "format": "JSON",
+        "schema_ref": "{ lat, lng, address }",
+        "frequency": "on-demand",
+        "dependencies": ["community.contacts.location-sharing"]
+      },
+      {
+        "name": "user_household_data",
+        "source": "Household info (children, pets, disabilities)",
+        "format": "JSON",
+        "schema_ref": "{ children_count, children_ages[], pets_count, pet_types[], disabilities[] }",
+        "frequency": "on-demand",
+        "dependencies": ["community.household.members"]
+      },
+      {
+        "name": "emergency_event",
+        "source": "EMS/system declares emergency event",
+        "format": "JSON",
+        "schema_ref": "{ event_type, location_polygon, severity, evacuation_order_issued }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "suggested_groups",
+        "consumers": ["group discovery UI"],
+        "format": "JSON",
+        "schema_ref": "[{ group_id, type, name, description, member_count, why_suggested }]",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "created_group",
+        "consumers": ["groups table", "group suggestion engine"],
+        "format": "JSON",
+        "schema_ref": "{ group_id, type, name, geometry, privacy_tier, created_by, created_at }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "evacuation_convoy",
+        "consumers": ["evacuation system", "routing engine"],
+        "format": "JSON",
+        "schema_ref": "{ group_id, type: 'evacuation-convoy', members: [{user_id, vehicle_id?, role}], routes, meeting_points }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Suggest neighborhood groups",
+        "algorithm": "Find groups whose geometry contains user's location. Verify 10+ members. Rank by: (1/distance) * (relevance)",
+        "latency_sla": "<500ms",
+        "accuracy_target": "All nearby groups returned, ranked by relevance"
+      },
+      {
+        "operation": "Suggest parent-community groups",
+        "algorithm": "Match user's children's school enrollment to parent-community groups. Create groups if needed.",
+        "latency_sla": "<1s",
+        "accuracy_target": "100% correct school match, groups created with principal as admin"
+      },
+      {
+        "operation": "Suggest burn-together groups",
+        "algorithm": "Score = proximity * fuel_type_match * wind_corridor_overlap * insurance_tier. Find groups scoring >threshold.",
+        "latency_sla": "<2s",
+        "accuracy_target": "Rank groups by shared wildfire risk"
+      },
+      {
+        "operation": "Auto-create evacuation convoys",
+        "algorithm": "Match users in evacuation zone. Group by vehicle availability. Assign driver/passenger roles. Calculate route.",
+        "latency_sla": "<10s",
+        "accuracy_target": "All evacuation-zone users in convoy. No single-person convoys. Roles assigned by vehicle capacity."
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity.account-creation",
+        "description": "User registered and verified",
+        "data_format": "user_id",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "community.household.members",
+        "description": "Household data available (children, pets, etc.)",
+        "data_format": "children_count, pet_types, disabilities",
+        "dependencies": []
+      },
+      {
+        "step": 3,
+        "module_id": "community.contacts.location-sharing",
+        "description": "User location available",
+        "data_format": "lat, lng",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "external_data_sources",
+        "description": "Census tracts, fire districts, school enrollments, hazard zones available",
+        "data_format": "geo boundaries, school IDs, hazard polygons",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 5,
+        "module_id": "group_matching",
+        "description": "User matched to candidate group types (neighborhood, parent-community, burn-together)",
+        "data_format": "matched_group_ids, match_reason",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "suggestion_ranking",
+        "description": "Candidate groups ranked by relevance. Neighborhood > burn-together > parent-community (in terms of discovery relevance).",
+        "data_format": "ranked suggestion list",
+        "dependencies": []
+      },
+      {
+        "step": 7,
+        "module_id": "group_creation_if_needed",
+        "description": "If no matching group exists and threshold met: create neighborhood or parent-community group",
+        "data_format": "new_group_id, creator: 'system'",
+        "dependencies": []
+      },
+      {
+        "step": 8,
+        "module_id": "display_suggestions",
+        "description": "Suggestions shown in group discovery UI",
+        "data_format": "group cards with join buttons",
+        "dependencies": ["group-discovery-UI"]
+      },
+      {
+        "step": 9,
+        "module_id": "emergency_response",
+        "description": "On emergency event: create evacuation convoys for affected users",
+        "data_format": "evacuation_convoy_groups",
+        "dependencies": ["alerts-page"]
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Group suggestion algorithm latency (spatial queries + ranking). Burn-together scoring (complex algorithm with external data). Evacuation convoy creation (fan-out to all affected users). Auto-group creation (parent-community groups at scale).",
+    "P2_defensibility": "Neighborhood groups driven by real geo boundaries (census, fire district). Parent-community groups auto-create via school enrollment (removes manual overhead). Burn-together algorithm uses real hazard data (fuel, wind). Evacuation convoys auto-generated (no manual coordination needed).",
+    "P3_confidence_level": "Very high confidence in neighborhood group matching (deterministic). High confidence in parent-community matching (school enrollment is definitive). Medium confidence in burn-together algorithm (tuning needed with fire department). Medium confidence in evacuation convoy generation (new workflow, field testing needed).",
+    "P4_failure_modes": [
+      "No matching group found → user sees empty suggestions (mitigate: show 'no groups nearby, start one' with create button)",
+      "Too many suggestions → user overwhelmed (mitigate: limit to top 5, show why suggested)",
+      "Geo boundary incorrect or missing (e.g., fire district not in system) → users not matched (mitigate: fallback to 10-mile radius search)",
+      "School enrollment data not available → parent-community groups not suggested (mitigate: user can create manually)",
+      "Evacuation convoy creation fails → users in evacuation zone not grouped (mitigate: retry, alert admins, users can manually create)"
+    ],
+    "P5_backup_plan": "If suggestion algorithm unavailable: show 'try again' message. If school enrollment fails: skip parent-community suggestions. If evacuation convoy fails: create manual routing UI for admins. If geo boundary missing: use radius-based fallback.",
+    "P6_backup_plan_test": "Simulate suggestion failure (mock group query). Test with missing geo boundaries. Test evacuation convoy creation failure. Test with incomplete school enrollment data. Test edge cases: user at boundary of multiple groups, competing group types.",
+    "P7_testing_strategy": "Unit tests for group type classification logic. Integration tests for suggestion ranking (verify order). Load tests for evacuation convoy generation (1000+ users). Geo boundary accuracy tests (verify users in correct groups). Burn-together algorithm tests (verify scoring). End-to-end tests for full discovery and join flow.",
+    "P8_benchmarks": "Group suggestions: <500ms for 50 nearby groups. Burn-together scoring: <2s for 100 candidates. Evacuation convoy creation: <10s for 1000 users. Suggestion relevance: top-3 suggestions ranked within user's primary needs 95% of time. False positive (wrong group suggested): <5%."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for group types module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Geo-boundary-based grouping may reveal user location (inferred from group membership). Mitigation: group membership is semi-public (members see each other). Evacuation convoys require legal authority (emergency declaration). Parent-community groups use school enrollment (FERPA concerns if school data mishandled).",
+    "L2_regulatory_frameworks": ["FERPA (school enrollment data)", "GDPR (location inferred from group)", "Emergency Declaration authority (FEMA/state/county)"],
+    "L3_consent_requirements": "User implicitly consents to location-based grouping by sharing location. Evacuation convoy participation is opt-in (during active event). Parent-community groups are opt-in (no forced joining).",
+    "L4_liability_notes": "Evacuation convoy accuracy is critical (incorrect routing could lead to harm). Mitigation: convoy creation verified by fire/EMS, users can override routing. Parent-community group accuracy relies on school enrollment (if enrollment is wrong, wrong groups created). Mitigation: user can report incorrect enrollment."
+  },
+  "F": {
+    "F1_cost_considerations": "Geo-boundary data: ~10MB for US (census tracts, fire districts). Suggestion queries: low compute cost (indexed). Burn-together algorithm: variable cost (complexity grows with candidate pool). Evacuation convoy generation: high compute during events (only during crises, acceptable spike).",
+    "F2_accounting_considerations": "Geo-boundary data is one-time cost + periodic updates. Suggestion queries are operational cost (low). Evacuation convoy is event-triggered cost (unpredictable spike).",
+    "F3_revenue_impact": "Auto-group creation drives adoption (reduces friction). Parent-community groups enable school-based engagement (retention). Burn-together groups enable wildfire preparedness (brand value). Evacuation convoys are critical capability (adoption driver)."
+  },
+  "S": {
+    "S1_cybersecurity": "Geo-boundary data is public (census tracts are public). Evacuation zone queries require authentication (user_id). Suggestion algorithm doesn't leak individual user locations (aggregates before returning). Burn-together algorithm uses only public hazard data.",
+    "S2_data_privacy": "Group membership is semi-public within group (members see each other). Location can be inferred from neighborhood group membership (acceptable: neighborhood groups are opt-in). School enrollment data handled per FERPA.",
+    "S3_encryption_requirements": "Evacuation convoy routes encrypted in transit (TLS). Burn-together hazard data not encrypted (public).",
+    "S4_access_control": "Suggestion algorithm visible to authenticated users only. Geo-boundary data queries authenticated. Evacuation convoys only visible to members during event.",
+    "S5_audit_requirements": "Log group creation (system-generated vs user-initiated). Log evacuation convoy generation (time, affected users). Audit trail retention: 1 year (longer for events)."
+  },
+  "X": {
+    "X1_notes": "Group types are multi-level: (1) automatic discovery (neighborhood, parent-community), (2) algorithmic matching (burn-together), (3) emergency auto-creation (evacuation convoy). Each type serves different user need. Integration with external data (census, school enrollment, hazard zones) is critical. Evacuation convoys are new capability (field testing needed).",
+    "X2_open_questions": [
+      "Geo-boundary source? (US Census Bureau for tracts? Fire departments for districts?)",
+      "Burn-together hazard data source? (USGS fire data? Insurance company risk scores?)",
+      "School enrollment data source? (state education dept? districts directly?)",
+      "Evacuation zone definition? (official evacuation orders from county? predictive models?)",
+      "Can users opt-out of automatic group suggestions? (privacy consideration)"
+    ],
+    "X3_related_research": "Geo-spatial databases. Census data APIs. Fire hazard mapping. Insurance risk scoring. School district APIs. Emergency management (FEMA/ICS). Group recommendation algorithms. Evacuation routing."
+  }
+}

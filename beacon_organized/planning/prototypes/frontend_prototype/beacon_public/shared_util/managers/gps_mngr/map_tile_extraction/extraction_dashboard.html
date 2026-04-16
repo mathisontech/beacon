@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSM Tile Extraction Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0097b2 0%, #006b7d 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 160px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #0097b2 0%, #006b7d 100%);
+            color: white;
+        }
+
+        .btn-pause {
+            background: linear-gradient(135deg, #0097b2 0%, #006b7d 100%);
+            color: white;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+
+
+
+        .map-panel {
+            grid-column: 1 / -1;
+        }
+
+        .map-container {
+            height: 600px;
+            background: #f0f8ff;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #ddd;
+            margin-top: 20px;
+        }
+
+        .map-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .map-selector {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .map-button {
+            padding: 8px 16px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            background: #0097b2;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .map-button:hover {
+            background: #006b7d;
+            transform: translateY(-2px);
+        }
+
+        .map-button.active {
+            background: #00b8d4;
+        }
+
+        .log-container {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .timestamp {
+            color: #888;
+            font-size: 0.9em;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .error {
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .success {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            color: #2f855a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        #controlMessage {
+            min-height: 20px;
+            text-align: center;
+        }
+
+        .extraction-details {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 10px;
+        }
+
+        .progress-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .progress-row:last-child {
+            border-bottom: none;
+        }
+
+        .progress-row .label {
+            font-weight: 600;
+            color: #495057;
+            flex: 1;
+        }
+
+        .progress-row span:last-child {
+            font-weight: 700;
+            color: #0097b2;
+            text-align: right;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗺️ OSM Tile Extraction Dashboard</h1>
+            <p>Batch Processing Progress Monitor</p>
+        </div>
+
+
+
+        <div class="panel map-panel">
+            <h2 class="section-title">🗺️ Interactive Grid Coverage Map</h2>
+            <div class="map-selector">
+                <button class="map-button active" onclick="loadMap('overview')">Overview</button>
+                <button class="map-button" onclick="loadMap('california')">California</button>
+                <button class="map-button" onclick="loadMap('texas')">Texas</button>
+                <button class="map-button" onclick="loadMap('florida')">Florida</button>
+                <button class="map-button" onclick="loadMap('northeast')">Northeast</button>
+            </div>
+            <div class="map-container">
+                <iframe id="mapFrame" class="map-iframe" src="/api/map/overview"></iframe>
+            </div>
+        </div>
+
+        <div class="panel control-panel">
+            <h2 class="section-title">🎮 Extraction Controls</h2>
+            <div class="control-buttons">
+                <button id="playBtn" class="btn btn-play" onclick="startExtraction()">
+                    ▶️ Start Extraction
+                </button>
+                <button id="pauseBtn" class="btn btn-pause" onclick="stopExtraction()" disabled>
+                    ⏸️ Pause Extraction
+                </button>
+                <button id="refreshBtn" class="btn btn-play" onclick="refreshStatus()">
+                    🔄 Refresh Data
+                </button>
+            </div>
+            <div id="controlMessage"></div>
+        </div>
+
+        <div class="panel">
+            <h2 class="section-title">📊 Extraction Progress</h2>
+            <div id="extractionDetails" class="extraction-details">
+                <div class="progress-row">
+                    <span class="label">Current Batch:</span>
+                    <span id="currentBatch">-</span>
+                </div>
+                <div class="progress-row">
+                    <span class="label">Grid Progress:</span>
+                    <span id="gridProgress">-</span>
+                </div>
+                <div class="progress-row">
+                    <span class="label">Session Tiles:</span>
+                    <span id="sessionTiles">-</span>
+                </div>
+                <div class="progress-row">
+                    <span class="label">Session Time:</span>
+                    <span id="sessionTime">-</span>
+                </div>
+                <div class="progress-row">
+                    <span class="label">Overall Progress:</span>
+                    <span id="overallProgress">-</span>
+                </div>
+                <div class="progress-row">
+                    <span class="label">Completed Batches:</span>
+                    <span id="completedBatches">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2 class="section-title">📝 Activity Log</h2>
+            <div id="activityLog" class="log-container">
+                Waiting for activity...
+            </div>
+        </div>
+
+        <div class="timestamp">
+            Last updated: <span id="lastUpdate">Never</span>
+        </div>
+    </div>
+
+    <script>
+        let extractionRunning = false;
+        let refreshInterval = null;
+
+        // Start auto-refresh when page loads
+        window.addEventListener('load', function() {
+            refreshStatus();
+            startAutoRefresh();
+        });
+
+        function startAutoRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            refreshInterval = setInterval(refreshStatus, 3000); // Refresh every 3 seconds
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        }
+
+
+        async function refreshStatus() {
+            try {
+                const response = await fetch('/api/extraction-status');
+                const data = await response.json();
+
+                updateControlButtons(data);
+                updateExtractionDetails(data);
+                logActivity(`Status updated: ${data.completed_batches} batches completed`);
+
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+
+            } catch (error) {
+                console.error('Failed to refresh status:', error);
+                logActivity(`Error refreshing status: ${error.message}`);
+            }
+        }
+
+
+        async function startExtraction() {
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const messageDiv = document.getElementById('controlMessage');
+
+            playBtn.disabled = true;
+            pauseBtn.disabled = false;
+
+            messageDiv.innerHTML = '<div class="success">🚀 Starting extraction...</div>';
+
+            try {
+                const response = await fetch('/api/start-extraction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    messageDiv.innerHTML = '<div class="success">✅ Extraction started successfully!</div>';
+                    extractionRunning = true;
+                } else {
+                    messageDiv.innerHTML = `<div class="error">❌ Failed to start: ${result.error}</div>`;
+                    playBtn.disabled = false;
+                    pauseBtn.disabled = true;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="error">❌ Network error: ${error.message}</div>`;
+                playBtn.disabled = false;
+                pauseBtn.disabled = true;
+            }
+        }
+
+        async function stopExtraction() {
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const messageDiv = document.getElementById('controlMessage');
+
+            pauseBtn.disabled = true;
+            messageDiv.innerHTML = '<div class="success">⏸️ Requesting pause...</div>';
+
+            try {
+                const response = await fetch('/api/stop-extraction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    messageDiv.innerHTML = '<div class="success">✅ Extraction paused - will finish current grid</div>';
+                    playBtn.disabled = false;
+                } else {
+                    messageDiv.innerHTML = `<div class="error">❌ ${result.error}</div>`;
+                    pauseBtn.disabled = false;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `<div class="error">❌ Network error: ${error.message}</div>`;
+                pauseBtn.disabled = false;
+            }
+        }
+
+        function updateControlButtons(data) {
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+
+            if (data.is_running) {
+                playBtn.disabled = true;
+                pauseBtn.disabled = false;
+                extractionRunning = true;
+            } else {
+                playBtn.disabled = false;
+                pauseBtn.disabled = true;
+                extractionRunning = false;
+            }
+        }
+
+        function updateExtractionDetails(data) {
+            // Format session time
+            const sessionTimeHours = (data.session_time / 3600).toFixed(1);
+            const sessionTimeFormatted = sessionTimeHours < 1 ?
+                `${Math.floor(data.session_time / 60)}m ${Math.floor(data.session_time % 60)}s` :
+                `${sessionTimeHours}h`;
+
+            // Update all the detail fields
+            document.getElementById('currentBatch').textContent = data.current_batch_id || 'None';
+            document.getElementById('gridProgress').textContent =
+                `${data.current_grid_index}/${data.total_grids_in_batch} grids`;
+            document.getElementById('sessionTiles').textContent =
+                `${data.session_tiles_extracted.toLocaleString()} tiles`;
+            document.getElementById('sessionTime').textContent = sessionTimeFormatted;
+            document.getElementById('overallProgress').textContent =
+                `${data.completion_percentage.toFixed(1)}% (${data.extracted_tiles.toLocaleString()}/${data.total_tiles.toLocaleString()})`;
+            document.getElementById('completedBatches').textContent =
+                `${data.completed_batches}/${data.total_batches} batches`;
+        }
+
+        function logActivity(message) {
+            const logContainer = document.getElementById('activityLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\\n`;
+
+            logContainer.textContent = logEntry + logContainer.textContent;
+
+            // Keep only last 50 lines
+            const lines = logContainer.textContent.split('\\n');
+            if (lines.length > 50) {
+                logContainer.textContent = lines.slice(0, 50).join('\\n');
+            }
+        }
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopAutoRefresh();
+            } else {
+                startAutoRefresh();
+            }
+        });
+
+        // Map functionality
+        let currentMapType = 'overview';
+
+        function loadMap(mapType) {
+            currentMapType = mapType;
+
+            // Update button states
+            document.querySelectorAll('.map-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Load new map
+            const mapFrame = document.getElementById('mapFrame');
+            mapFrame.src = `/api/map/${mapType}`;
+        }
+
+        function refreshMap() {
+            // Refresh current map
+            const mapFrame = document.getElementById('mapFrame');
+            mapFrame.src = `/api/map/${currentMapType}?t=${Date.now()}`;
+        }
+    </script>
+</body>
+</html>

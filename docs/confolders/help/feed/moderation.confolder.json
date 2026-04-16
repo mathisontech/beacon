@@ -1,0 +1,144 @@
+{
+  "module_id": "help.feed.moderation",
+  "module_name": "Feed Moderation",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "updated_by": "claude-opus-4",
+  "bookmark": {
+    "status": "Content moderation pipeline for help feed",
+    "return_note": "in-progress",
+    "priority": [
+      "Auto-hide threshold tuning",
+      "Appeal process design"
+    ]
+  },
+  "M": {
+    "M1_beacon_versions": [
+      "MVP"
+    ],
+    "M2_module_type": "service",
+    "M3_hierarchy_path": "Product Manager > Help > Feed > Moderation",
+    "M4_parent": "help.feed",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-opus-4",
+        "role": "architect",
+        "from": "2026-04-04T14:58:58Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "flag_report",
+        "source": "public-app",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": [
+          "community.identity"
+        ]
+      },
+      {
+        "name": "moderator_action",
+        "source": "beacon-dev.help.admin",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "moderation_result",
+        "consumers": [
+          "help.feed",
+          "help.stories"
+        ],
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "event-driven",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Accept flag reports. Auto-hide after threshold. Route to moderator queue. Apply actions.",
+        "algorithm": "Threshold-based auto-hide + manual review",
+        "latency_sla": "<1s for auto-hide",
+        "accuracy_target": null
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity",
+        "description": "Reporter and content author identified",
+        "data_format": "JWT",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.admin",
+        "description": "Flagged items in moderator queue",
+        "data_format": "JSON",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Moderator queue volume during events.",
+    "P2_defensibility": "Threshold auto-hide reduces moderator load. Manual review prevents false positives.",
+    "P3_confidence_level": "NR",
+    "P4_failure_modes": [
+      "Over-flagging hides legitimate content",
+      "Under-moderation lets harmful content persist",
+      "Moderator burnout during events"
+    ],
+    "P5_backup_plan": "Adjustable auto-hide threshold. Moderator rotation schedule.",
+    "P6_backup_plan_test": "Simulate failure scenario in staging with mock data",
+    "P7_testing_strategy": "Test flag flow end-to-end. Test auto-hide threshold. Test appeal process.",
+    "P8_benchmarks": "Auto-hide threshold: 3 flags from unique users."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T14:58:58Z",
+        "who": "claude-opus-4",
+        "description": "Initial CONFolder creation",
+        "version": "0.1"
+      }
+    ],
+    "CH2_current_version": "0.1"
+  },
+  "L": {
+    "L1_legal_considerations": "Moderation actions must respect due process. Appeal mechanism required.",
+    "L2_regulatory_frameworks": [
+      "CCPA"
+    ],
+    "L3_consent_requirements": "NR",
+    "L4_liability_notes": "Reporter identity protected from content author."
+  },
+  "F": {
+    "F1_cost_considerations": "Moderator queue management cost.",
+    "F2_accounting_considerations": "Allocated to help module operational budget",
+    "F3_revenue_impact": "NR"
+  },
+  "S": {
+    "S1_cybersecurity": "Flag reports contain reporter ID (not public). Moderation actions logged.",
+    "S2_data_privacy": "Reporter identity never exposed to flagged user.",
+    "S3_encryption_requirements": "NR",
+    "S4_access_control": "Moderators: group admins in area + Beacon staff.",
+    "S5_audit_requirements": "Full audit trail on all moderation actions."
+  },
+  "X": {
+    "X1_notes": 2,
+    "X2_open_questions": "Design appeal process",
+    "X3_related_research": "NR"
+  }
+}

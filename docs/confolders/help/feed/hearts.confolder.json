@@ -1,0 +1,137 @@
+{
+  "module_id": "help.feed.hearts",
+  "module_name": "Heart System",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "updated_by": "claude-opus-4",
+  "bookmark": {
+    "status": "Anonymous engagement metric for stories",
+    "return_note": "in-progress",
+    "priority": []
+  },
+  "M": {
+    "M1_beacon_versions": [
+      "MVP"
+    ],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Help > Feed > Hearts",
+    "M4_parent": "help.feed",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-opus-4",
+        "role": "architect",
+        "from": "2026-04-04T14:58:58Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "heart_action",
+        "source": "public-app",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": [
+          "community.identity"
+        ]
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "heart_count",
+        "consumers": [
+          "help.feed",
+          "help.stories"
+        ],
+        "format": "number",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Toggle heart on resolved story. One per user per story. Increment/decrement count.",
+        "algorithm": "Idempotent toggle",
+        "latency_sla": "<100ms",
+        "accuracy_target": null
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity",
+        "description": "User authenticated",
+        "data_format": "JWT",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.feed",
+        "description": "Heart count displayed on story card",
+        "data_format": "number",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "help.stories",
+        "description": "Hearts contribute to trending sort",
+        "data_format": "number",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "High concurrency on popular stories. Counter accuracy.",
+    "P2_defensibility": "Anonymous hearts encourage engagement without social pressure.",
+    "P3_confidence_level": "NR",
+    "P4_failure_modes": [
+      "Counter drift under high concurrency",
+      "Bot-driven heart manipulation"
+    ],
+    "P5_backup_plan": "Redis counter with periodic DB sync. Rate limit: 100 hearts/min per user.",
+    "P6_backup_plan_test": "Simulate failure scenario in staging with mock data",
+    "P7_testing_strategy": "Load test concurrent hearts on single story. Verify counter accuracy.",
+    "P8_benchmarks": "Toggle <100ms. Counter accurate within 1."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T14:58:58Z",
+        "who": "claude-opus-4",
+        "description": "Initial CONFolder creation",
+        "version": "0.1"
+      }
+    ],
+    "CH2_current_version": "0.1"
+  },
+  "L": {
+    "L1_legal_considerations": "NR",
+    "L2_regulatory_frameworks": "NR",
+    "L3_consent_requirements": "NR",
+    "L4_liability_notes": "NR"
+  },
+  "F": {
+    "F1_cost_considerations": "Negligible. Redis counter + DB write.",
+    "F2_accounting_considerations": "Allocated to help module operational budget",
+    "F3_revenue_impact": "NR"
+  },
+  "S": {
+    "S1_cybersecurity": "Hearts are anonymous. No public 'liked by' list.",
+    "S2_data_privacy": "Who hearted what is stored but never exposed publicly.",
+    "S3_encryption_requirements": "NR",
+    "S4_access_control": "Authenticated users only.",
+    "S5_audit_requirements": "NR"
+  },
+  "X": {
+    "X1_notes": 3,
+    "X2_open_questions": null,
+    "X3_related_research": "NR"
+  }
+}

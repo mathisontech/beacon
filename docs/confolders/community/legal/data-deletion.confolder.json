@@ -1,0 +1,178 @@
+{
+  "module_id": "community.legal.data-deletion",
+  "module_name": "Data Deletion & Right-to-Erase",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting definition of grace period (30 days). Data retention policy for audit and safety events needed.",
+    "priority": 2
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Legal > Data Deletion",
+    "M4_parent": "community.legal",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "deletion_request",
+        "source": "User requests account deletion",
+        "format": "JSON",
+        "schema_ref": "{ user_id, reason?: string, request_timestamp }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "grace_period_expiry",
+        "source": "Background job: 30-day grace period elapsed",
+        "format": "JSON",
+        "schema_ref": "{ user_id, grace_period_end_date }",
+        "frequency": "daily",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "deletion_confirmation",
+        "consumers": ["user notification"],
+        "format": "JSON",
+        "schema_ref": "{ user_id, deletion_requested_at, grace_period_days: 30, can_reactivate_until }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "data_export",
+        "consumers": ["user download"],
+        "format": "JSON (downloadable file)",
+        "schema_ref": "complete user data export (before deletion)",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Mark account for deletion",
+        "algorithm": "Set deleted_at flag (not hard delete). Set reactivation_deadline = now + 30 days.",
+        "latency_sla": "<500ms",
+        "accuracy_target": "100% correct soft delete"
+      },
+      {
+        "operation": "Execute data deletion cascade",
+        "algorithm": "At reactivation_deadline: anonymize messages (author='Deleted User'), remove from groups, delete contacts, purge verification data, delete location history. Keep: audit log (for safety), event history (for analytics).",
+        "latency_sla": "<5 min for cascade",
+        "accuracy_target": "100% deletion, zero plaintext data remaining"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "user_account",
+        "description": "User account exists",
+        "data_format": "user_id",
+        "dependencies": ["community.identity.account-creation"]
+      },
+      {
+        "step": 2,
+        "module_id": "user_action",
+        "description": "User requests account deletion",
+        "data_format": "deletion_request",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 3,
+        "module_id": "export_option",
+        "description": "User offered option to export all data before deletion",
+        "data_format": "data_export.json file",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "soft_delete",
+        "description": "Account marked for deletion. User can reactivate within 30 days.",
+        "data_format": "deleted_at flag set, reactivation_deadline set",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "grace_period",
+        "description": "User cannot access account (show 'deleted' message). Account still in database.",
+        "data_format": "account inaccessible, data persists",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "cascade_deletion",
+        "description": "At grace period expiry: anonymize messages, remove from groups, delete contacts, purge verification data, delete location history",
+        "data_format": "hard deletion of personal data",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Data export generation (must aggregate data from many tables). Cascade deletion (many DELETE statements, must be atomic). Grace period job (runs daily, checks for expired soft deletes).",
+    "P2_defensibility": "Grace period allows reactivation (mistakes happen). Export before deletion (user has backup). Audit log kept (safety record, legal discovery). Cascade is complete and atomic (no orphaned data).",
+    "P3_confidence_level": "High confidence. Standard soft-delete pattern with grace period.",
+    "P4_failure_modes": [
+      "Cascade deletion fails → data not deleted (mitigate: retry job, manual cleanup)",
+      "Export generation fails → user cannot backup (mitigate: offer manual export option)",
+      "Reactivation within grace period fails → user cannot recover account (mitigate: manual admin intervention)"
+    ],
+    "P5_backup_plan": "If cascade fails: retry, escalate to manual deletion. If export fails: show error, try again. If reactivation fails: admin override.",
+    "P6_backup_plan_test": "Test grace period job (set deleted_at to 31 days ago, verify cascade runs). Test cascade atomicity (fail partway, verify rollback). Test reactivation (delete, reactivate, verify data restored).",
+    "P7_testing_strategy": "Unit tests for cascade logic (verify each table updated correctly). Integration tests for grace period job. End-to-end tests for full deletion workflow (request → export → grace period → cascade). Data integrity tests (verify no orphaned references).",
+    "P8_benchmarks": "Deletion request: <500ms. Export generation: <30s for 10k messages. Cascade deletion: <5 min for full user data. Grace period check: background job, completes within 1 hour. Reactivation: <500ms."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for data deletion module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "GDPR Article 17: right to erasure. CCPA: right to deletion. Grace period is reasonable (30 days). Export allows user to retain data (portability right). Audit log retention justified for legal discovery.",
+    "L2_regulatory_frameworks": ["GDPR Article 17 (right to erasure)", "CCPA (right to deletion)", "CCPA Section 1798.145 (exemptions for safety/law enforcement)"],
+    "L3_consent_requirements": "User explicitly requests deletion (clear confirmation required).",
+    "L4_liability_notes": "Over-deletion (delete too much) violates user rights. Mitigation: careful cascade logic, data export first. Under-deletion (incomplete deletion) violates GDPR. Mitigation: verify cascade completes, audit trail verification. Grace period may hold data longer than required. Mitigation: clearly communicate 30-day window."
+  },
+  "F": {
+    "F1_cost_considerations": "Grace period storage: minimal (deleted accounts take less space). Data export: negligible compute. Cascade deletion: negligible compute.",
+    "F2_accounting_considerations": "Operational cost, no special accounting.",
+    "F3_revenue_impact": "Data deletion is compliance requirement (not optional). User trust increases with clear deletion (positive impact)."
+  },
+  "S": {
+    "S1_cybersecurity": "Deleted accounts cannot login (immediate lockout). Soft delete prevents accidental hard deletion. Cascade deletion removes all plaintext data. Audit log retained (encrypted or not).",
+    "S2_data_privacy": "User data fully deleted (including PII, location history, verification data). Audit log retained (for compliance).",
+    "S3_encryption_requirements": "During grace period: data still encrypted (if it was). After cascade: data deleted (no encryption needed).",
+    "S4_access_control": "Deleted account locked (no access). Only admin can reactivate within grace period.",
+    "S5_audit_requirements": "Log deletion request. Log cascade execution (which tables deleted, timestamps). Audit trail retention: 7 years (legal requirement for compliance proof)."
+  },
+  "X": {
+    "X1_notes": "Data deletion is critical for GDPR/CCPA compliance and user trust. Grace period protects against accidental deletion (user can reactivate). Export gives user right to portability. Cascade ensures no orphaned data (messages still attribute author, groups still reference deleted member). Audit log retention justified for legal/safety.",
+    "X2_open_questions": [
+      "Grace period length: 30 days or configurable? (30 days is standard)",
+      "Can admin force deletion before grace period? (for abuse/safety, yes)",
+      "What about group messages from deleted users? (anonymize with 'Deleted User' or hard delete from group?)"
+    ],
+    "X3_related_research": "GDPR right-to-erasure requirements. CCPA deletion procedures. Soft delete vs hard delete patterns. Cascade delete design. Data export formats (JSON, CSV)."
+  }
+}

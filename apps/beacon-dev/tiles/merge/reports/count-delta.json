@@ -1,0 +1,12 @@
+{
+  "admin_1": {
+    "world": 234,
+    "us": 56,
+    "delta_frac": 0.761,
+    "flag": true
+  },
+  "populated_places": {
+    "world": 1266,
+    "us": null
+  }
+}

@@ -10,6 +10,8 @@ import { useLeafletCdn } from "./use-leaflet-cdn";
 import { VolcanoDetailPanel } from "./volcano-detail-panel";
 import { getRecentlyErupting } from "./get-recent-eruptions";
 import { RecentEruptionsFlyout } from "./recent-eruptions-flyout";
+import { OfInterestFlyout } from "./of-interest-flyout";
+import { getVolcanoesOfInterest, getEvacuationIds } from "./of-interest";
 import { volcanoSvg } from "./volcano-svg";
 
 // Minimal surface of the Leaflet globals we touch. Keeps us from
@@ -51,6 +53,11 @@ export function VolcanoPlayground() {
   const [offLevels, setOffLevels] = useState<Set<AlertLevel>>(() => new Set());
   const [selected, setSelected] = useState<Volcano | null>(null);
   const [recentOpen, setRecentOpen] = useState(false);
+  // Volcanoes of interest panel opens by default so the map lands on what
+  // the user most likely wants to look at.
+  const [ofInterestOpen, setOfInterestOpen] = useState(true);
+  const ofInterest = useMemo(() => getVolcanoesOfInterest(), []);
+  const evacuationIds = useMemo(() => getEvacuationIds(), []);
 
   const counts = useMemo(() => {
     const out: Record<string, number> = {};
@@ -91,7 +98,7 @@ export function VolcanoPlayground() {
     ) as Record<AlertLevel, LLayerGroup>;
 
     ALL_VOLCANOES.forEach((v) => {
-      const icon = makePinIcon(L, v.level);
+      const icon = makePinIcon(L, v.level, evacuationIds.has(v.id));
       const m = L.marker([v.lat, v.lng], { icon });
       m.on("click", () => setSelected(v));
       (groups[v.level] || groups.unknown).addLayer(m);
@@ -105,7 +112,7 @@ export function VolcanoPlayground() {
       mapRef.current = null;
       groupsRef.current = null;
     };
-  }, [L]);
+  }, [L, evacuationIds]);
 
   // Apply per-level visibility when the legend toggles.
   useEffect(() => {
@@ -131,6 +138,7 @@ export function VolcanoPlayground() {
 
   const closePanel = useCallback(() => setSelected(null), []);
   const closeFlyout = useCallback(() => setRecentOpen(false), []);
+  const closeOfInterest = useCallback(() => setOfInterestOpen(false), []);
 
   const flyToVolcano = useCallback((v: Volcano) => {
     const map = mapRef.current;
@@ -182,6 +190,16 @@ export function VolcanoPlayground() {
           <div className="ct">{recent.length}</div>
         </div>
 
+        <div
+          className={`vp-legend-row vp-legend-recent${ofInterestOpen ? " active" : ""}`}
+          title="Erupting, high human risk, or evacuation ongoing"
+          onClick={() => setOfInterestOpen((v) => !v)}
+        >
+          <div className="sw sw-of-interest" />
+          <div className="lbl">Of interest</div>
+          <div className="ct">{ofInterest.length}</div>
+        </div>
+
         <hr />
         <div className="footnote">
           Click a level to toggle.
@@ -195,6 +213,13 @@ export function VolcanoPlayground() {
         items={recent}
         onSelect={flyToVolcano}
         onClose={closeFlyout}
+      />
+
+      <OfInterestFlyout
+        open={ofInterestOpen}
+        items={ofInterest}
+        onSelect={flyToVolcano}
+        onClose={closeOfInterest}
       />
 
       <VolcanoDetailPanel volcano={selected} onClose={closePanel} />

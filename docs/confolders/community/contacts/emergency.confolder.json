@@ -1,0 +1,207 @@
+{
+  "module_id": "community.contacts.emergency",
+  "module_name": "Emergency Contacts",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting decision on non-Beacon contact notification (SMS fallback?). Evacuation integration design needed.",
+    "priority": 1
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Contacts > Emergency",
+    "M4_parent": "community.contacts",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "emergency_contact_entry",
+        "source": "User adds emergency contact (name, phone, relationship, location)",
+        "format": "JSON",
+        "schema_ref": "{ name, phone, relationship, location_lat?, location_lng?, contact_user_id? }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "emergency_contact_reorder",
+        "source": "User drag-reorders contacts (sets priority)",
+        "format": "JSON",
+        "schema_ref": "{ contact_id, priority }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "user_status_change",
+        "source": "User status updates to safe/sheltering/evacuating/need help",
+        "format": "JSON",
+        "schema_ref": "{ user_id, status, timestamp }",
+        "frequency": "real-time",
+        "dependencies": ["community.messages.templates"]
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "emergency_contact_list",
+        "consumers": ["contact UI", "evacuation system"],
+        "format": "JSON",
+        "schema_ref": "[{ contact_id, name, phone, relationship, priority, contact_user_id?, is_nearby }]",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "status_notification",
+        "consumers": ["emergency contacts (Beacon or SMS)", "help request system"],
+        "format": "JSON",
+        "schema_ref": "{ contact_id, user_name, status, location?, timestamp }",
+        "frequency": "real-time",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Normalize and validate phone number",
+        "algorithm": "E.164 format. Check valid digits. Geocode to country.",
+        "latency_sla": "<200ms",
+        "accuracy_target": "100% valid E.164 format"
+      },
+      {
+        "operation": "Match phone to Beacon user",
+        "algorithm": "Hash phone, lookup user_id. Fuzzy name match if multiple results.",
+        "latency_sla": "<500ms",
+        "accuracy_target": "95%+ phone match accuracy"
+      },
+      {
+        "operation": "Auto-notify emergency contacts on status change",
+        "algorithm": "Iterate priority-ordered contacts. Send Beacon notification if user_id exists, SMS if not.",
+        "latency_sla": "<2s for all notifications",
+        "accuracy_target": "100% delivery or clear failure"
+      },
+      {
+        "operation": "Calculate is_nearby flag",
+        "algorithm": "If contact has location and distance < 10 miles, is_nearby=true",
+        "latency_sla": "<100ms",
+        "accuracy_target": "Correct distance calc"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity.account-creation",
+        "description": "User account exists",
+        "data_format": "user_id",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "user_input",
+        "description": "User enters emergency contact details",
+        "data_format": "name, phone, relationship, location (optional)",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 3,
+        "module_id": "phone_validation",
+        "description": "Phone normalized to E.164",
+        "data_format": "E.164 format phone",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "user_matching",
+        "description": "Phone number matched against Beacon users (hashed lookup)",
+        "data_format": "contact_user_id or null",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "persistence",
+        "description": "Contact stored in emergency_contacts table",
+        "data_format": "INSERT emergency_contacts",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "user_status_change",
+        "description": "When user status changes, notify emergency contacts",
+        "data_format": "notification payload",
+        "dependencies": ["community.messages.templates"]
+      },
+      {
+        "step": 7,
+        "module_id": "notification_routing",
+        "description": "If contact_user_id exists: Beacon notification. Else: SMS (if configured).",
+        "data_format": "push notification or SMS",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Phone number matching latency (database lookup for hashed phone). Notification dispatch to multiple contacts (iteration + async delivery). SMS rate limits (Twilio/Nexmo limits). Location distance calculation (if location sharing enabled).",
+    "P2_defensibility": "E.164 normalization ensures consistency. Hashed phone matching prevents server from seeing plaintext numbers (privacy-friendly). Priority ordering ensures most important contacts notified first. SMS fallback for non-Beacon contacts.",
+    "P3_confidence_level": "Very high confidence in phone normalization and matching (standard practices). High confidence in notification dispatch (async queuing proven pattern). Medium confidence on SMS cost optimization (needs monitoring).",
+    "P4_failure_modes": [
+      "Phone not found in Beacon → SMS fallback may fail if SMS not enabled or user doesn't have phone number (mitigate: allow manual SMS or other contact method)",
+      "Multiple users with same phone number → wrong contact matched (mitigate: fuzzy name match, user can manually link)",
+      "Status notification fails → contact not notified (mitigate: retry with exponential backoff, user can manually call)",
+      "SMS rate limits exhausted → some contacts not notified (mitigate: queue SMS, notify user of delay)"
+    ],
+    "P5_backup_plan": "If phone matching fails: treat as non-Beacon contact, SMS only. If SMS fails: queue retry. If notification dispatch fails: user can manually call. If SMS not enabled: user sees 'SMS not configured' prompt.",
+    "P6_backup_plan_test": "Simulate phone match failure (invalid phone format). Simulate SMS rate limit (inject error). Simulate notification failure (mock delivery service error). Test edge case: contact has no phone or email.",
+    "P7_testing_strategy": "Unit tests for phone normalization (test vectors for various formats). Integration tests for phone matching (mock user database). Load tests for notification dispatch (1000 contacts notify simultaneously). End-to-end tests for status change → notification flow. SMS delivery confirmation tests.",
+    "P8_benchmarks": "Phone normalization: <100ms. Phone matching: <500ms. Contact list retrieval: <200ms. Status notification dispatch: <2s for all contacts. SMS delivery: >95% within 30s. Contact creation: <1s."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for emergency contacts module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Emergency contacts enable critical communication during crises. PII storage (name, phone, location). SMS notification may be subject to telecom regulation (CAN-SPAM, TCPA). Notification timing critical (delay could cause harm). User must affirmatively consent to contact emergency contacts.",
+    "L2_regulatory_frameworks": ["TCPA (Telephone Consumer Protection Act)", "CAN-SPAM", "GDPR (contact data)", "Telecom regulations (SMS)"],
+    "L3_consent_requirements": "Separate consent for: (1) storing emergency contacts, (2) automatic notification on status change, (3) SMS notification to non-Beacon contacts. Explicit opt-in required for each.",
+    "L4_liability_notes": "Failure to notify emergency contact could expose liability if harm results. Mitigation: clear policy on notification timing, no SLA guarantee (best effort only), user education on reliable contact methods. SMS delivery failures out of Beacon's control (carrier responsibility)."
+  },
+  "F": {
+    "F1_cost_considerations": "Emergency contact storage: ~500B per contact. SMS: ~$0.01 per message (varies by carrier). At 10k users with 5 contacts each, and 1 status change per event (avg 10 events/year), ~$500/year SMS cost.",
+    "F2_accounting_considerations": "SMS cost scales with event frequency. Variable cost tied to emergency events. Budget for SMS accordingly (could spike during major events).",
+    "F3_revenue_impact": "Emergency notification feature critical to product value prop. May increase user trust and adoption."
+  },
+  "S": {
+    "S1_cybersecurity": "Phone numbers hashed before server-side lookup (privacy). Contact list encryption at rest (AES-256). Status notifications encrypted in transit (TLS). SMS unencrypted (out of Beacon's control). Rate limiting on status change notifications (prevent spam/DoS).",
+    "S2_data_privacy": "Contact list visible only to user. Location data (if stored) encrypted. Phone numbers hashed (not plaintext). User can delete contacts. Archive on account deletion.",
+    "S3_encryption_requirements": "Phone hash: SHA-256 or similar. Contact data: AES-256 at rest. Notification transport: TLS. SMS: unencrypted (telecom standard).",
+    "S4_access_control": "User sees own emergency contacts only. Contacts do not know they're on user's list (until notification). Status notifications routed only to designated contacts.",
+    "S5_audit_requirements": "Audit log of contact additions/deletions. Audit log of status notifications sent. Audit trail retention: 7 years (legal requirement for telecom)."
+  },
+  "X": {
+    "X1_notes": "Emergency contacts are critical Beacon feature. Priority ordering (near vs far) is important for evacuation. Hashed phone matching balances privacy with functionality. SMS fallback essential for non-Beacon users. Integration with evacuation system needed (Wave F & H).",
+    "X2_open_questions": [
+      "SMS fallback enabled by default or opt-in? (opt-in is safer, but reduces reach)",
+      "Notification frequency limits? (prevent spam if user spam-triggers status changes)",
+      "Should emergency contacts see location? (privacy vs safety tradeoff)",
+      "Should user confirm before emergency contact notification? (adds friction, but prevents false alarms)"
+    ],
+    "X3_related_research": "Emergency communication systems. SMS gateway providers (Twilio, Nexmo, AWS SNS). Phone number normalization (libphonenumber). TCPA regulations. Crisis communication best practices."
+  }
+}

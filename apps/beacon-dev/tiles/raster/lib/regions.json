@@ -1,0 +1,27 @@
+{
+  "_doc": "Pre-defined build regions. Pass region name to build.sh: bash build.sh la_county",
+  "la_county": {
+    "bbox": [-118.95, 33.70, -117.65, 34.82],
+    "label": "Los Angeles County, CA"
+  },
+  "sf_bay": {
+    "bbox": [-123.0, 36.9, -121.5, 38.5],
+    "label": "SF Bay Area, CA"
+  },
+  "socal": {
+    "bbox": [-121.0, 32.5, -114.5, 35.8],
+    "label": "Southern California"
+  },
+  "conus": {
+    "bbox": [-125.0, 24.4, -66.9, 49.4],
+    "label": "Continental US"
+  },
+  "california": {
+    "bbox": [-124.5, 32.5, -114.1, 42.0],
+    "label": "California"
+  },
+  "global": {
+    "bbox": [-180, -90, 180, 90],
+    "label": "Global (warning: massive)"
+  }
+}

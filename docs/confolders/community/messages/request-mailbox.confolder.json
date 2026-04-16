@@ -1,0 +1,208 @@
+{
+  "module_id": "community.messages.request-mailbox",
+  "module_name": "Request Mailbox (Non-Contact DMs)",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting tuning parameters for spam filter (keyword patterns, rate limits, false positive tolerance)",
+    "priority": 2
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Messages > Request Mailbox",
+    "M4_parent": "community.messages",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "incoming_dm",
+        "source": "User sends DM to non-contact user",
+        "format": "JSON",
+        "schema_ref": "{ from_user_id, to_user_id, text, timestamp }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "user_action",
+        "source": "User accepts/rejects/blocks sender from request inbox",
+        "format": "JSON",
+        "schema_ref": "{ request_id, action: 'accept'|'reject'|'block' }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "request_mailbox_message",
+        "consumers": ["request inbox UI", "notification system"],
+        "format": "JSON",
+        "schema_ref": "{ request_id, from_user_id, preview, spam_score, timestamp }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "promoted_dm_thread",
+        "consumers": ["direct messages list"],
+        "format": "JSON",
+        "schema_ref": "{ thread_id, from_user_id, status: 'active' }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "block_notification",
+        "consumers": ["sender notification (optional)", "moderation system"],
+        "format": "JSON",
+        "schema_ref": "{ blocked_user_id, reason: 'user_blocked'|'spam_filtered' }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Spam score incoming DM",
+        "algorithm": "Sender verification status (weight 50%), message length (15%), keyword patterns (20%), sender rate history (15%)",
+        "latency_sla": "<500ms per message",
+        "accuracy_target": "Identify 90% of spam, <5% false positive rate"
+      },
+      {
+        "operation": "Route DM to mailbox or thread",
+        "algorithm": "If spam_score > 0.6: mailbox. Else if contact exists: thread. Else: mailbox.",
+        "latency_sla": "<200ms",
+        "accuracy_target": "100% correct routing"
+      },
+      {
+        "operation": "Accept request (promote to contact)",
+        "algorithm": "Move all messages from request mailbox to active thread. Create contact relationship.",
+        "latency_sla": "<500ms",
+        "accuracy_target": "All messages visible in thread. No message loss."
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity.account-creation",
+        "description": "Both users must be registered",
+        "data_format": "user_id, verification_status",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "contact_check",
+        "description": "Check if sender is in recipient's contact list",
+        "data_format": "contact_id or null",
+        "dependencies": []
+      },
+      {
+        "step": 3,
+        "module_id": "incoming_dm",
+        "description": "User sends DM to non-contact",
+        "data_format": "from_user_id, to_user_id, text",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 4,
+        "module_id": "spam_scoring",
+        "description": "DM scored for spam likelihood",
+        "data_format": "spam_score (0.0 - 1.0)",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "mailbox_routing",
+        "description": "If spam_score > threshold: route to request mailbox. Else: create active thread.",
+        "data_format": "request_id or thread_id",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "message_encryption",
+        "description": "Message encrypted",
+        "data_format": "encrypted_blob",
+        "dependencies": ["community.messages.encryption"]
+      },
+      {
+        "step": 7,
+        "module_id": "persistence",
+        "description": "Message stored in request_mailbox or messages table",
+        "data_format": "database record",
+        "dependencies": []
+      },
+      {
+        "step": 8,
+        "module_id": "notification",
+        "description": "Notification sent to recipient (unless muted requests)",
+        "data_format": "push notification with sender info + message preview",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Spam filter tuning (false positives vs false negatives tradeoff). Sender verification status lookup (requires database join). Message preview generation for notification (must not expose full encrypted content). User action on request (accept/reject/block) must be atomic.",
+    "P2_defensibility": "Verified users have lower spam score (trust signal). Rate limiting on request sends prevents spam floods. Block list prevents re-contact from blocked senders. Granular actions (accept, reject, block) give users control. Request mailbox is visible but does not create notification fatigue (optional notification).",
+    "P3_confidence_level": "High confidence in spam filtering baseline (verification status + keyword patterns). Medium confidence on false positive rate (tuning needed). High confidence in routing logic (simple rules-based).",
+    "P4_failure_modes": [
+      "Spam filter false positives → legitimate requests marked as spam (mitigate: user can unblock, auto-accept verified users)",
+      "Spam filter false negatives → spam reaches user (mitigate: user can block, report spam)",
+      "Block list bypass → blocked user sends from alt account (mitigate: alert if alt is unverified)",
+      "Request mailbox notification fatigue → user disables, misses legitimate requests (mitigate: smart notification only for verified senders)"
+    ],
+    "P5_backup_plan": "If spam filter unavailable: route all requests to mailbox (safer, some false positives). If block fails: silently drop future messages from blocked user, no error shown to sender. If notification fails: message still queued, user sees in mailbox.",
+    "P6_backup_plan_test": "Simulate spam filter failure (mock spam score service). Test block list edge cases (block then unblock, etc). Test notification failure (mock FCM/APNS error). Test atomic accept operation (verify all messages moved, contact created).",
+    "P7_testing_strategy": "Unit tests for spam score calculation (test vectors with known scores). Integration tests for routing (send DM → check mailbox vs thread). Load tests for rate limiting (send 100 requests from one user). End-to-end tests for accept/reject/block flow. Manual testing of UX (notification clarity, mailbox organization).",
+    "P8_benchmarks": "Spam scoring: <500ms per message. Routing: <200ms. Accept action: <500ms (move messages, create contact). Block: <200ms (add to block list, drop future messages). False positive rate: <5%. False negative rate: <10%."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for request mailbox module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Request mailbox enables harassment and spam prevention (good). Must not automatically delete messages without user consent. Block feature may create legal questions if user claims blocking prevented legitimate contact. Spam filter may have bias if not carefully tuned (avoid protected classes in keyword patterns).",
+    "L2_regulatory_frameworks": ["CAN-SPAM (anti-spam messaging)", "GDPR (user control over unwanted contact)", "State harassment laws"],
+    "L3_consent_requirements": "Users implicitly consent to request mailbox by using DM feature. No separate consent needed. Ability to block and disable request notifications must be explicit.",
+    "L4_liability_notes": "Spam filtering may have false positives (legitimate message classified as spam). Mitigation: user can unblock, message remains in history. Block feature may prevent legitimate contact. Mitigation: users can unblock. Clear policy on spam filter basis (no protected class discrimination)."
+  },
+  "F": {
+    "F1_cost_considerations": "Spam filtering: negligible (client-side scoring). Database queries for contact lookup and block list: minimal. Request mailbox storage: same as messages (~500B per message).",
+    "F2_accounting_considerations": "Operational cost, no special accounting needed.",
+    "F3_revenue_impact": "Request mailbox reduces spam, improves UX, may increase user retention and trust."
+  },
+  "S": {
+    "S1_cybersecurity": "Spam scoring uses only metadata (sender status, message length), not content. Block list persisted securely. Rate limiting enforced per sender per hour (prevent abuse).",
+    "S2_data_privacy": "Request mailbox messages encrypted same as DMs. Block list private to user. No sharing of block information.",
+    "S3_encryption_requirements": "Same as messages: Signal Protocol or AES-256-GCM",
+    "S4_access_control": "Only recipient can see request mailbox. Sender does not know if message is in mailbox vs thread. Blocked sender cannot send or receive (full separation).",
+    "S5_audit_requirements": "Audit log of block/unblock actions. Audit log of accept/reject. Audit trail retention: 1 year."
+  },
+  "X": {
+    "X1_notes": "Request mailbox is critical for preventing harassment and spam. Verified badge helps spam filter (unverified senders more likely spam). Rate limiting prevents spam floods. User control (accept, reject, block) is essential.",
+    "X2_open_questions": [
+      "Spam filter threshold? (0.5, 0.6, 0.7 confidence?)",
+      "Should verified users auto-accept? (risk: verified badge could be gamed)",
+      "Request notification enabled by default? (risk: spam notification fatigue)",
+      "What happens to blocked sender's old messages? (delete? archive? keep?)"
+    ],
+    "X3_related_research": "Spam filtering in messaging systems (Slack, Discord). Block list implementations. Harassment prevention in social networks. CAN-SPAM regulations. ML spam classification if needed (future optimization)."
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "layers": [
+    {
+      "name": "land",
+      "source": "https://naciscdn.org/naturalearth/50m/physical/ne_50m_land.zip",
+      "minzoom": 0,
+      "maxzoom": 6
+    },
+    {
+      "name": "ocean",
+      "source": "https://naciscdn.org/naturalearth/50m/physical/ne_50m_ocean.zip",
+      "minzoom": 0,
+      "maxzoom": 6
+    },
+    {
+      "name": "countries",
+      "source": "https://naciscdn.org/naturalearth/50m/cultural/ne_50m_admin_0_countries.zip",
+      "minzoom": 0,
+      "maxzoom": 7
+    },
+    {
+      "name": "states",
+      "source": "https://naciscdn.org/naturalearth/50m/cultural/ne_50m_admin_1_states_provinces.zip",
+      "minzoom": 2,
+      "maxzoom": 7
+    },
+    {
+      "name": "lakes",
+      "source": "https://naciscdn.org/naturalearth/50m/physical/ne_50m_lakes.zip",
+      "minzoom": 2,
+      "maxzoom": 7
+    },
+    {
+      "name": "rivers",
+      "source": "https://naciscdn.org/naturalearth/50m/physical/ne_50m_rivers_lake_centerlines.zip",
+      "minzoom": 3,
+      "maxzoom": 7
+    }
+  ]
+}

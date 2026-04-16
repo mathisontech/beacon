@@ -1,0 +1,211 @@
+{
+  "module_id": "community.identity.selfie-capture",
+  "module_name": "Selfie Capture & Liveness Detection",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "blocked",
+    "return_note": "Awaiting vendor decision: on-device (MediaPipe) vs cloud (AWS Rekognition). Liveness detection requirements need security review.",
+    "priority": 1
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Identity > Selfie Capture",
+    "M4_parent": "community.identity",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "camera_permission",
+        "source": "User grants camera permission",
+        "format": "JSON",
+        "schema_ref": "{ granted: bool }",
+        "frequency": "on-demand",
+        "dependencies": ["community.legal.sensor-consent"]
+      },
+      {
+        "name": "camera_frame",
+        "source": "Device camera captures live frame",
+        "format": "binary image",
+        "schema_ref": "raw camera frame (JPEG or H.264)",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "liveness_gesture",
+        "source": "User performs liveness check (blink, turn head)",
+        "format": "JSON",
+        "schema_ref": "{ gesture: 'blink'|'turn_left'|'turn_right'|'smile' }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "selfie_capture_trigger",
+        "source": "User taps button to capture selfie",
+        "format": "JSON",
+        "schema_ref": "{ capture: true }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "selfie_photo",
+        "consumers": ["face match module", "storage"],
+        "format": "encrypted JPEG",
+        "schema_ref": "encrypted face photo (delete after match)",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "liveness_check_result",
+        "consumers": ["verification workflow"],
+        "format": "JSON",
+        "schema_ref": "{ liveness_confirmed: bool, confidence: 0.0-1.0 }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "camera_permission_request",
+        "consumers": ["OS permission system"],
+        "format": "JSON",
+        "schema_ref": "{ permission: 'camera', reason: 'ID verification' }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Detect face in frame",
+        "algorithm": "Face detection (MediaPipe or Rekognition). Return bounding box and confidence.",
+        "latency_sla": "<100ms per frame",
+        "accuracy_target": "Detect face 98%+ accuracy, no false positives on non-face objects"
+      },
+      {
+        "operation": "Detect liveness gesture",
+        "algorithm": "Blink detection (eye closure), head turn detection (face rotation). Require gesture for confirmation.",
+        "latency_sla": "<500ms per gesture",
+        "accuracy_target": "Detect genuine gestures 95%+, reject spoofing (photo, video) 99%+"
+      },
+      {
+        "operation": "Capture and encrypt selfie",
+        "algorithm": "Capture frame. Encrypt with user's public key. Hash for later face matching (drop plaintext photo).",
+        "latency_sla": "<500ms",
+        "accuracy_target": "100% successful encryption, zero plaintext leakage"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.legal.sensor-consent",
+        "description": "User grants camera permission and consent",
+        "data_format": "camera_permission_granted: true",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "camera_initialization",
+        "description": "App requests camera access. User approves.",
+        "data_format": "camera stream available",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 3,
+        "module_id": "face_detection_loop",
+        "description": "Real-time face detection on camera frames",
+        "data_format": "face_detected: bool, bounding_box",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "liveness_check",
+        "description": "Prompt user to blink or turn head. Detect gesture.",
+        "data_format": "gesture detected or timeout",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "capture_selfie",
+        "description": "On liveness confirmed: capture frame, encrypt, hash",
+        "data_format": "encrypted_selfie, face_hash",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "face_match",
+        "description": "Compare selfie to ID photo (next module in workflow)",
+        "data_format": "face_hash from selfie",
+        "dependencies": ["community.identity.face-match"]
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Real-time face detection latency (must be <100ms for smooth UX). Liveness detection tuning (balance security vs usability). Photo encryption overhead (negligible). User mobile device camera quality variation (affects accuracy).",
+    "P2_defensibility": "Liveness check prevents spoofing with printed photos or videos. Real-time detection ensures user is present. Encrypted storage prevents plaintext photo exposure. Hashing for matching prevents offline brute-force.",
+    "P3_confidence_level": "High confidence in face detection (MediaPipe is proven). Medium confidence on liveness (tuning needed for spoofing resistance). High confidence on encryption (standard AES).",
+    "P4_failure_modes": [
+      "Poor lighting → face not detected (mitigate: guide user to better lighting, timeout after 30s)",
+      "Multiple faces → wrong face selected (mitigate: prompt user to be alone, select face manually)",
+      "Liveness spoofed → video of real person's face used (mitigate: require gesture, increase gesture difficulty)",
+      "Camera permission denied → cannot proceed (mitigate: show error, guide to settings)",
+      "Encryption fails → plaintext stored (mitigate: check encryption before storing)"
+    ],
+    "P5_backup_plan": "If face detection fails: show error, retry. If liveness fails: retry with different gesture. If encryption fails: reject and show error (fail-closed). If timeout: prompt for manual ID upload.",
+    "P6_backup_plan_test": "Test face detection with various lighting (bright, dim, side-lit). Test with multiple faces (should detect all). Test spoofing attempts (photo, video, mask). Test encryption (verify plaintext not stored). Test on slow devices (latency target met?).",
+    "P7_testing_strategy": "Unit tests for face detection algorithm (test vectors with known faces). Unit tests for liveness detection (test synthetic vs real gestures). Integration tests for encryption. Load tests for concurrent captures (100 users simultaneously). Adversarial tests for spoofing resistance. Privacy tests (verify no plaintext storage).",
+    "P8_benchmarks": "Face detection: <100ms per frame. Liveness detection: <500ms per gesture. Encryption: <200ms. Selfie capture: <500ms total. Face detection accuracy: 98%+. Liveness spoofing rejection: 99%+. Encryption: zero plaintext leakage."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for selfie capture module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Biometric data (face photo) is sensitive PII protected by BIPA (Illinois), CCPA, GDPR. Liveness check may trigger video recording (different consent). Spoofing prevention may require advanced techniques (regulatory approval?). Plaintext face photos must be deleted after verification (GDPR right-to-delete).",
+    "L2_regulatory_frameworks": ["BIPA (biometric data Illinois)", "CCPA", "GDPR", "FCRA (face recognition accuracy)"],
+    "L3_consent_requirements": "Explicit consent for camera access. Explicit consent for biometric processing (face photo storage and matching). Separate consent for video recording (if liveness uses video).",
+    "L4_liability_notes": "Face match failures could prevent legitimate users from verification. Mitigation: allow manual ID upload as fallback. False positives (wrong person matched) could enable fraud. Mitigation: high confidence threshold (>95%), human review for borderline cases. Data breaches exposing face photos are high-impact. Mitigation: encrypt plaintext, delete after use, strong access control."
+  },
+  "F": {
+    "F1_cost_considerations": "On-device: negligible (uses device GPU). Cloud (AWS Rekognition): ~$0.001 per image comparison. Encryption/hashing: negligible. Photo storage (encrypted): ~500KB per user, deleted after verification.",
+    "F2_accounting_considerations": "If on-device: no per-use cost. If cloud-based: ~$10 per 10k verifications.",
+    "F3_revenue_impact": "Verified badge increases trust and retention. Face verification is key value prop."
+  },
+  "S": {
+    "S1_cybersecurity": "Plaintext photo deleted immediately after encryption and hashing. Encrypted storage uses AES-256. Liveness check prevents spoofing. Rate limiting on capture attempts (prevent brute-force). Face hash stored (cannot derive face from hash).",
+    "S2_data_privacy": "Face photo encrypted at rest. Plaintext never persisted. Hash non-reversible (cannot derive photo from hash). User can request deletion of verification data (GDPR right-to-delete).",
+    "S3_encryption_requirements": "Face photo: AES-256 at rest (if temporarily stored). Encryption in transit: TLS.",
+    "S4_access_control": "User can view own selfie (during verification flow only). Admin cannot view selfies (encrypted). Only face hash stored for matching (admin-accessible).",
+    "S5_audit_requirements": "Log all selfie captures (for fraud detection). Log all verification attempts (success/failure). Log access to verification data. Audit trail retention: 7 years."
+  },
+  "X": {
+    "X1_notes": "Selfie capture is critical for ID verification. Liveness check is essential anti-spoofing measure. On-device processing (MediaPipe) is preferred for privacy, but cloud (AWS Rekognition) may have better accuracy. Plaintext photo must never be stored (GDPR compliance, security). Encryption key management is critical.",
+    "X2_open_questions": [
+      "On-device vs cloud? (MediaPipe vs AWS Rekognition - accuracy vs privacy tradeoff)",
+      "Which liveness gestures? (blink, head turn, smile - combine for security)",
+      "Photo retention: delete immediately or keep encrypted? (delete = better privacy, keep = audit trail)",
+      "Accuracy threshold: how high? (95%, 99%, 99.9% - tradeoff with false negatives)"
+    ],
+    "X3_related_research": "Face detection libraries (MediaPipe, OpenCV, TensorFlow). Liveness detection (anti-spoofing techniques). Biometric data regulation (BIPA, CCPA, GDPR). Face recognition accuracy standards (NIST FRVT). Encryption best practices for photos."
+  }
+}

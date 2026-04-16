@@ -1,0 +1,132 @@
+{
+  "module_id": "help.feed.prayers",
+  "module_name": "Prayer Requests",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "updated_by": "claude-opus-4",
+  "bookmark": {
+    "status": "Low-friction community engagement feature",
+    "return_note": "placeholder",
+    "priority": [
+      "Moderation policy for prayer content",
+      "Whether to allow comments on prayers"
+    ]
+  },
+  "M": {
+    "M1_beacon_versions": [
+      "MVP"
+    ],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Help > Feed > Prayers",
+    "M4_parent": "help.feed",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-opus-4",
+        "role": "architect",
+        "from": "2026-04-04T14:58:58Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "prayer_form",
+        "source": "public-app",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": [
+          "community.identity"
+        ]
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "prayer_post",
+        "consumers": [
+          "help.feed"
+        ],
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Create prayer request post. No location sharing, no claiming, no resolution. Soft expire 7 days.",
+        "algorithm": null,
+        "latency_sla": "<200ms",
+        "accuracy_target": null
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity",
+        "description": "User authenticated",
+        "data_format": "JWT",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.feed",
+        "description": "Prayer appears in feed with distinct styling",
+        "data_format": "JSON",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Minimal. Text-only posts with no geospatial component.",
+    "P2_defensibility": "Low-friction way to engage community without committing to action.",
+    "P3_confidence_level": "NR",
+    "P4_failure_modes": [
+      "Moderation: inappropriate content",
+      "Spam"
+    ],
+    "P5_backup_plan": "Standard moderation pipeline. Rate limit creation.",
+    "P6_backup_plan_test": "Simulate failure scenario in staging with mock data",
+    "P7_testing_strategy": "Test creation, display, expiry, moderation flag.",
+    "P8_benchmarks": "7-day auto-expiry."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T14:58:58Z",
+        "who": "claude-opus-4",
+        "description": "Initial CONFolder creation",
+        "version": "0.1"
+      }
+    ],
+    "CH2_current_version": "0.1"
+  },
+  "L": {
+    "L1_legal_considerations": "NR",
+    "L2_regulatory_frameworks": "NR",
+    "L3_consent_requirements": "NR",
+    "L4_liability_notes": "NR"
+  },
+  "F": {
+    "F1_cost_considerations": "Negligible DB storage.",
+    "F2_accounting_considerations": "Allocated to help module operational budget",
+    "F3_revenue_impact": "NR"
+  },
+  "S": {
+    "S1_cybersecurity": "Prayer content public within app. No location data.",
+    "S2_data_privacy": "No location sharing. No personally identifying info beyond display name.",
+    "S3_encryption_requirements": "NR",
+    "S4_access_control": "Authenticated users only.",
+    "S5_audit_requirements": "NR"
+  },
+  "X": {
+    "X1_notes": 3,
+    "X2_open_questions": null,
+    "X3_related_research": "NR"
+  }
+}

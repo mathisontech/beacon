@@ -1,0 +1,43 @@
+{
+  "layers": [
+    {
+      "name": "us_states",
+      "source": "https://www2.census.gov/geo/tiger/TIGER2024/STATE/tl_2024_us_state.zip",
+      "format": "shp",
+      "minzoom": 2, "maxzoom": 10
+    },
+    {
+      "name": "us_counties",
+      "source": "https://www2.census.gov/geo/tiger/TIGER2024/COUNTY/tl_2024_us_county.zip",
+      "format": "shp",
+      "minzoom": 4, "maxzoom": 12
+    },
+    {
+      "name": "us_roads_primary",
+      "source": "https://www2.census.gov/geo/tiger/TIGER2024/PRIMARYROADS/tl_2024_us_primaryroads.zip",
+      "format": "shp",
+      "minzoom": 4, "maxzoom": 12
+    },
+    {
+      "name": "us_fire_perims",
+      "manual": true,
+      "how": "Download MTBS perimeters zip from https://www.mtbs.gov/direct-download and unzip into data/us_fire_perims/",
+      "format": "shp",
+      "minzoom": 5, "maxzoom": 12
+    },
+    {
+      "name": "us_faults",
+      "manual": true,
+      "how": "Download Qfaults shapefile from https://earthquake.usgs.gov/hazards/qfaults/ (Download Data) and unzip into data/us_faults/",
+      "format": "shp",
+      "minzoom": 3, "maxzoom": 12
+    },
+    {
+      "name": "us_padus",
+      "manual": true,
+      "how": "Download PAD-US 4.0 Combined Feature Class shapefile from https://www.sciencebase.gov/catalog/item/6759502ed34ef500cfec7e87 and unzip into data/us_padus/",
+      "format": "shp",
+      "minzoom": 5, "maxzoom": 12
+    }
+  ]
+}

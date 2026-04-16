@@ -1,0 +1,390 @@
+{
+  "index_version": "1.0",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "total_confolders": 47,
+  "confolders": [
+    {
+      "module_id": "community",
+      "module_name": "Community Module",
+      "hierarchy_path": "Product Manager > Community",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/community.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 1
+    },
+    {
+      "module_id": "community.messages",
+      "module_name": "Messages Module",
+      "hierarchy_path": "Product Manager > Community > Messages",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/messages/messages.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 1
+    },
+    {
+      "module_id": "community.messages.encryption",
+      "module_name": "Message Encryption (E2E)",
+      "hierarchy_path": "Product Manager > Community > Messages > Encryption",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/messages/encryption.confolder.json",
+      "bookmark_status": "blocked",
+      "priority": 1
+    },
+    {
+      "module_id": "community.messages.request-mailbox",
+      "module_name": "Request Mailbox (Non-Contact DMs)",
+      "hierarchy_path": "Product Manager > Community > Messages > Request Mailbox",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/messages/request-mailbox.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 2
+    },
+    {
+      "module_id": "community.messages.reactions",
+      "module_name": "Message Reactions",
+      "hierarchy_path": "Product Manager > Community > Messages > Reactions",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/messages/reactions.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 3
+    },
+    {
+      "module_id": "community.messages.templates",
+      "module_name": "Message Templates (Status Messages & Mesh Optimization)",
+      "hierarchy_path": "Product Manager > Community > Messages > Templates",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/messages/templates.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 2
+    },
+    {
+      "module_id": "community.contacts.emergency",
+      "module_name": "Emergency Contacts",
+      "hierarchy_path": "Product Manager > Community > Contacts > Emergency",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/contacts/emergency.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 1
+    },
+    {
+      "module_id": "community.contacts.trusted-neighbors",
+      "module_name": "Trusted Neighbors",
+      "hierarchy_path": "Product Manager > Community > Contacts > Trusted Neighbors",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/contacts/trusted-neighbors.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 2
+    },
+    {
+      "module_id": "community.contacts.location-sharing",
+      "module_name": "Location Sharing & Granularity",
+      "hierarchy_path": "Product Manager > Community > Contacts > Location Sharing",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/contacts/location-sharing.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 1
+    },
+    {
+      "module_id": "community.groups.types",
+      "module_name": "Group Types (Neighborhood, Parent-Community, Burn-Together, Evacuation Convoy)",
+      "hierarchy_path": "Product Manager > Community > Groups > Types",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/groups/types.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 1
+    },
+    {
+      "module_id": "community.groups.roles",
+      "module_name": "Group Roles & Permissions",
+      "hierarchy_path": "Product Manager > Community > Groups > Roles",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/groups/roles.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 2
+    },
+    {
+      "module_id": "community.groups.invite-codes",
+      "module_name": "Invite Codes & QR",
+      "hierarchy_path": "Product Manager > Community > Groups > Invite Codes",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/groups/invite-codes.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 2
+    },
+    {
+      "module_id": "community.groups.channels",
+      "module_name": "Group Channels",
+      "hierarchy_path": "Product Manager > Community > Groups > Channels",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/groups/channels.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 2
+    },
+    {
+      "module_id": "community.household.members",
+      "module_name": "Household Members",
+      "hierarchy_path": "Product Manager > Community > Household > Members",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/household/members.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 2
+    },
+    {
+      "module_id": "community.household.evacuation-profile",
+      "module_name": "Household Evacuation Profile",
+      "hierarchy_path": "Product Manager > Community > Household > Evacuation Profile",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/household/evacuation-profile.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 1
+    },
+    {
+      "module_id": "community.identity.account-creation",
+      "module_name": "Account Creation & Registration",
+      "hierarchy_path": "Product Manager > Community > Identity > Account Creation",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/identity/account-creation.confolder.json",
+      "bookmark_status": "blocked",
+      "priority": 1
+    },
+    {
+      "module_id": "community.identity.selfie-capture",
+      "module_name": "Selfie Capture & Liveness Detection",
+      "hierarchy_path": "Product Manager > Community > Identity > Selfie Capture",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/identity/selfie-capture.confolder.json",
+      "bookmark_status": "blocked",
+      "priority": 1
+    },
+    {
+      "module_id": "community.identity.face-match",
+      "module_name": "Face Matching (Selfie to ID)",
+      "hierarchy_path": "Product Manager > Community > Identity > Face Match",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/identity/face-match.confolder.json",
+      "bookmark_status": "blocked",
+      "priority": 1
+    },
+    {
+      "module_id": "community.identity.background-check",
+      "module_name": "Background Check (NSOPW, Criminal)",
+      "hierarchy_path": "Product Manager > Community > Identity > Background Check",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/identity/background-check.confolder.json",
+      "bookmark_status": "blocked",
+      "priority": 1
+    },
+    {
+      "module_id": "community.identity.verified-badge",
+      "module_name": "Verified Badge Logic",
+      "hierarchy_path": "Product Manager > Community > Identity > Verified Badge",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/identity/verified-badge.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 2
+    },
+    {
+      "module_id": "community.legal.consent-manager",
+      "module_name": "Consent Manager",
+      "hierarchy_path": "Product Manager > Community > Legal > Consent Manager",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/legal/consent-manager.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 1
+    },
+    {
+      "module_id": "community.legal.data-deletion",
+      "module_name": "Data Deletion & Right-to-Erase",
+      "hierarchy_path": "Product Manager > Community > Legal > Data Deletion",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/legal/data-deletion.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 2
+    },
+    {
+      "module_id": "community.legal.sensor-consent",
+      "module_name": "Sensor Consent (GPS, Barometer, Camera, Microphone)",
+      "hierarchy_path": "Product Manager > Community > Legal > Sensor Consent",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/legal/sensor-consent.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 2
+    },
+    {
+      "module_id": "community.equipment.registry",
+      "module_name": "Equipment Registry",
+      "hierarchy_path": "Product Manager > Community > Equipment > Registry",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/equipment/registry.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 3
+    },
+    {
+      "module_id": "community.equipment.skills",
+      "module_name": "Skills Registry (Professional & Practical)",
+      "hierarchy_path": "Product Manager > Community > Equipment > Skills",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/equipment/skills.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 3
+    },
+    {
+      "module_id": "community.equipment.vehicles",
+      "module_name": "Vehicle Registry & Specs",
+      "hierarchy_path": "Product Manager > Community > Equipment > Vehicles",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/equipment/vehicles.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 2
+    },
+    {
+      "module_id": "community.equipment.resource-matching",
+      "module_name": "Resource Matching (Equipment, Skills, Vehicles)",
+      "hierarchy_path": "Product Manager > Community > Equipment > Resource Matching",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/equipment/resource-matching.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 1
+    },
+    {
+      "module_id": "community.mesh.protocol",
+      "module_name": "Mesh Protocol",
+      "hierarchy_path": "Product Manager > Community > Mesh > Protocol",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/mesh/protocol.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 1
+    },
+    {
+      "module_id": "community.mesh.offline-queue",
+      "module_name": "Mesh Offline-Queue",
+      "hierarchy_path": "Product Manager > Community > Mesh > Offline-Queue",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/mesh/offline-queue.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 1
+    },
+    {
+      "module_id": "community.mesh.security",
+      "module_name": "Mesh Security",
+      "hierarchy_path": "Product Manager > Community > Mesh > Security",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/mesh/security.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 1
+    },
+    {
+      "module_id": "community.history.events",
+      "module_name": "History Events",
+      "hierarchy_path": "Product Manager > Community > History > Events",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/history/events.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 3
+    },
+    {
+      "module_id": "community.history.helping",
+      "module_name": "History Helping",
+      "hierarchy_path": "Product Manager > Community > History > Helping",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/community/history/helping.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 3
+    },
+    {
+      "module_id": "help",
+      "module_name": "Help Module",
+      "hierarchy_path": "Product Manager > Help",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/help.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 1
+    },
+    {
+      "module_id": "help.requests.lifecycle",
+      "module_name": "Help Request Lifecycle",
+      "hierarchy_path": "Product Manager > Help > Requests > Lifecycle",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/requests/lifecycle.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 1
+    },
+    {
+      "module_id": "help.requests.location-recording",
+      "module_name": "Location Recording on Accept",
+      "hierarchy_path": "Product Manager > Help > Requests > Location Recording",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/requests/location-recording.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 1
+    },
+    {
+      "module_id": "help.routing.proximity",
+      "module_name": "Geofence Proximity Module",
+      "hierarchy_path": "Product Manager > Help > Routing > Proximity",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/routing/proximity.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 1
+    },
+    {
+      "module_id": "help.routing.capability",
+      "module_name": "Capability-Based Routing",
+      "hierarchy_path": "Product Manager > Help > Routing > Capability",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/routing/capability.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 2
+    },
+    {
+      "module_id": "help.routing.notifications",
+      "module_name": "Help Notification Routing & Privacy",
+      "hierarchy_path": "Product Manager > Help > Routing > Notifications",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/routing/notifications.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 1
+    },
+    {
+      "module_id": "help.feed",
+      "module_name": "Help Feed & Rankings",
+      "hierarchy_path": "Product Manager > Help > Feed",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/feed/feed.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 1
+    },
+    {
+      "module_id": "help.feed.hearts",
+      "module_name": "Heart System",
+      "hierarchy_path": "Product Manager > Help > Feed > Hearts",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/feed/hearts.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 3
+    },
+    {
+      "module_id": "help.feed.prayers",
+      "module_name": "Prayer Requests",
+      "hierarchy_path": "Product Manager > Help > Feed > Prayers",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/feed/prayers.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 3
+    },
+    {
+      "module_id": "help.feed.moderation",
+      "module_name": "Feed Moderation",
+      "hierarchy_path": "Product Manager > Help > Feed > Moderation",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/feed/moderation.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 2
+    },
+    {
+      "module_id": "help.stories",
+      "module_name": "Stories & Public Library",
+      "hierarchy_path": "Product Manager > Help > Stories",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/stories/stories.confolder.json",
+      "bookmark_status": "in-progress",
+      "priority": 2
+    },
+    {
+      "module_id": "help.missing",
+      "module_name": "Missing People & Animals",
+      "hierarchy_path": "Product Manager > Help > Missing",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/missing/missing.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 2
+    },
+    {
+      "module_id": "help.neighbors.verified",
+      "module_name": "Verified Neighbor Badge for Help",
+      "hierarchy_path": "Product Manager > Help > Neighbors > Verified Badge",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/neighbors/verified-neighbor.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 3
+    },
+    {
+      "module_id": "help.neighbors.trusted-geofence",
+      "module_name": "Trusted Neighbor Geofence Request",
+      "hierarchy_path": "Product Manager > Help > Neighbors > Trusted Geofence",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/neighbors/trusted-geofence.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 2
+    },
+    {
+      "module_id": "help.admin",
+      "module_name": "Help Manager (beacon-dev)",
+      "hierarchy_path": "Product Manager > Help > Admin",
+      "confolder_path": "/sessions/modest-gallant-ritchie/mnt/beacon/docs/confolders/help/admin/dashboard.confolder.json",
+      "bookmark_status": "placeholder",
+      "priority": 2
+    }
+  ],
+  "summary": {
+    "complete": 0,
+    "in_progress": 19,
+    "blocked": 5,
+    "placeholder": 8,
+    "total": 47
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "module_id": "community.equipment.resource-matching",
+  "module_name": "Resource Matching (Equipment, Skills, Vehicles)",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "placeholder",
+    "return_note": "Matching algorithm needs spec (distance, relevance, verification level weighting). Notification workflow needed.",
+    "priority": 1
+  },
+  "M": {
+    "M1_beacon_versions": ["V1+"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Equipment > Resource Matching",
+    "M4_parent": "community.equipment",
+    "M5_children": [],
+    "M6_owner_history": [{ "who": "claude-agent", "role": "framework-builder", "from": "2026-04-04T00:00:00Z", "to": "current" }]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      { "name": "help_request", "source": "User or system requests help (equipment, skill, or vehicle)", "format": "JSON", "schema_ref": "{ request_type: 'equipment'|'skill'|'vehicle', what_needed, location, urgency }", "frequency": "on-demand", "dependencies": [] }
+    ],
+    "IO2_direct_outputs": [
+      { "name": "matched_resources", "consumers": ["help system", "user notifications"], "format": "JSON", "schema_ref": "[{ resource_id, owner_id, distance_miles, relevance_score, available }]", "frequency": "on-demand", "dependencies": [] }
+    ],
+    "IO3_transformations": [
+      { "operation": "Match resources to request", "algorithm": "Score = (1/distance) × relevance × verification_boost. Rank by score.", "latency_sla": "<5s", "accuracy_target": "Top 3 matches within 10 miles" }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      { "step": 1, "module_id": "help_request", "description": "User requests help (calls 911 equivalent, help request system)", "data_format": "request details", "dependencies": [] }
+    ],
+    "DW2_downstream_pipeline": [
+      { "step": 2, "module_id": "resource_matching", "description": "Equipment/skills/vehicles matched to request", "data_format": "ranked matched_resources", "dependencies": [] },
+      { "step": 3, "module_id": "notification", "description": "Matched resource owners notified of opportunity to help", "data_format": "push notification", "dependencies": [] }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Spatial query (find nearby resources). Relevance scoring (weighted factors). Notification delivery (many concurrent requests).",
+    "P2_defensibility": "Distance-based (nearest first). Verification-based (trusted skills/equipment prioritized). Opt-in (matched users can decline).",
+    "P3_confidence_level": "Medium (algorithm tuning needed). Spatial queries well-established.",
+    "P4_failure_modes": [
+      "Matching returns wrong resource (algorithm tuning issue) (mitigate: user can decline, request alternative)",
+      "Owner not notified (notification failure) (mitigate: retry, show in-app alert)",
+      "Stale availability (owner marked available but resource gone) (mitigate: owner confirmation before assignment)"
+    ],
+    "P5_backup_plan": "If matching fails: show all available resources sorted by distance. If notification fails: show in-app alert.",
+    "P6_backup_plan_test": "Test matching algorithm with various request types. Test notification failure. Test stale availability.",
+    "P7_testing_strategy": "Unit tests for scoring algorithm. Integration tests for spatial queries. Load tests for concurrent matching. End-to-end tests for full help request workflow.",
+    "P8_benchmarks": "Matching: <5s for 10k nearby resources. Notification delivery: >95% within 30s. Match accuracy: top 3 matches are relevant 90%+."
+  },
+  "CH": {
+    "CH1_change_log": [
+      { "date": "2026-04-04T00:00:00Z", "who": "claude-agent", "description": "Initial CONFolder for resource matching (placeholder)", "version": "1.0" }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": { "L1_legal_considerations": "Matching creates expectation of help (liability if help not provided).", "L2_regulatory_frameworks": [], "L3_consent_requirements": "Opt-in to resource matching. Owner can decline requests.", "L4_liability_notes": "No obligation for matched resources to help. Clear disclaimer needed." },
+  "F": { "F1_cost_considerations": "Spatial queries: minimal cost.", "F2_accounting_considerations": "Operational cost.", "F3_revenue_impact": "Resource matching is core value prop (enables mutual aid)." },
+  "S": { "S1_cybersecurity": "Location queries require authentication.", "S2_data_privacy": "Request shown only to matched resources.", "S3_encryption_requirements": "Location in transit (TLS).", "S4_access_control": "Matched resources see request location (per consent). Requester sees matched resource location.", "S5_audit_requirements": "Log all matching attempts." },
+  "X": {
+    "X1_notes": "Resource matching is critical mutual aid feature. Algorithm simplicity important (distance + relevance). Owner opt-in for notifications. Stale availability is key challenge.",
+    "X2_open_questions": [
+      "Scoring weights: distance vs verification level? (tune based on user feedback)",
+      "Notification: immediate or batch? (immediate = better UX, batch = less spam)",
+      "Owner confirmation: before assignment or optional? (before = better reliability)"
+    ],
+    "X3_related_research": "Matching algorithms. Spatial indexing. Notification delivery optimization. Mutual aid platforms."
+  }
+}

@@ -225,13 +225,18 @@ export async function flyTo(
   altitude?: number
 ) {
   const Cesium = await getCesium();
-  const v = viewer as InstanceType<typeof Cesium.Viewer>;
+  const v = viewer as InstanceType<typeof Cesium.Viewer> | undefined;
+
+  // Guard against stale viewer references — when the user switches from a
+  // Cesium view to MapLibre 2D, the viewer is destroyed but consumer effects
+  // may still hold the old reference and call flyTo on it.
+  if (!v || v.isDestroyed?.()) return;
 
   _flightActive = true;
 
   const onComplete = () => {
     _flightActive = false;
-    saveCamera(v.camera);
+    if (!v.isDestroyed?.()) saveCamera(v.camera);
   };
 
   if (bbox) {

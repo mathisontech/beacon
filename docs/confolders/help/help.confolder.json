@@ -1,0 +1,217 @@
+{
+  "module_id": "help",
+  "module_name": "Help Module",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "updated_by": "claude-opus-4",
+  "bookmark": {
+    "status": "Top-level help module orchestrating mutual aid",
+    "return_note": "in-progress",
+    "priority": [
+      "Good Samaritan liability framework by state",
+      "Notification frequency caps during mass events"
+    ]
+  },
+  "M": {
+    "M1_beacon_versions": [
+      "MVP",
+      "Beta",
+      "V1"
+    ],
+    "M2_module_type": "component",
+    "M3_hierarchy_path": "Product Manager > Help",
+    "M4_parent": "product-manager",
+    "M5_children": [
+      "help.requests",
+      "help.routing",
+      "help.feed",
+      "help.stories",
+      "help.missing",
+      "help.neighbors",
+      "help.admin"
+    ],
+    "M6_owner_history": [
+      {
+        "who": "claude-opus-4",
+        "role": "architect",
+        "from": "2026-04-04T14:58:58Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "user_session",
+        "source": "community.identity",
+        "format": "JWT",
+        "schema_ref": null,
+        "frequency": "real-time",
+        "dependencies": [
+          "community.identity.account-creation"
+        ]
+      },
+      {
+        "name": "user_location",
+        "source": "community.contacts.location-sharing",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "real-time",
+        "dependencies": [
+          "community.contacts.location-sharing"
+        ]
+      },
+      {
+        "name": "verified_status",
+        "source": "community.identity.verified-badge",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": [
+          "community.identity.verified-badge"
+        ]
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "help_feed",
+        "consumers": [
+          "public-app.help-page"
+        ],
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "help_notifications",
+        "consumers": [
+          "community.messages.notification-routing"
+        ],
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "event-driven",
+        "dependencies": [
+          "community.messages"
+        ]
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Aggregate help requests, stories, missing reports into unified feed",
+        "algorithm": "Ranking by recency + urgency + proximity",
+        "latency_sla": "<200ms",
+        "accuracy_target": null
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity",
+        "description": "User authenticates",
+        "data_format": "JWT",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "community.contacts.location-sharing",
+        "description": "User location resolved at appropriate granularity",
+        "data_format": "JSON",
+        "dependencies": [
+          "community.identity"
+        ]
+      },
+      {
+        "step": 3,
+        "module_id": "community.identity.verified-badge",
+        "description": "Verification status checked",
+        "data_format": "JSON",
+        "dependencies": [
+          "community.identity"
+        ]
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.feed",
+        "description": "Feed renders requests and stories",
+        "data_format": "JSON",
+        "dependencies": [
+          "help.requests"
+        ]
+      },
+      {
+        "step": 2,
+        "module_id": "community.messages",
+        "description": "DMs between helper and requester",
+        "data_format": "encrypted",
+        "dependencies": [
+          "help.requests"
+        ]
+      },
+      {
+        "step": 3,
+        "module_id": "help.stories",
+        "description": "Resolved requests nominated to stories",
+        "data_format": "JSON",
+        "dependencies": [
+          "help.requests"
+        ]
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Feed aggregation across requests/stories/missing with geospatial queries",
+    "P2_defensibility": "Unified mutual-aid system unlike fragmented alternatives",
+    "P3_confidence_level": "NR",
+    "P4_failure_modes": [
+      "Feed latency during mass-casualty events",
+      "Notification storms during regional emergencies",
+      "Location recording consent confusion"
+    ],
+    "P5_backup_plan": "Degrade to list view without geospatial ranking if DB overloaded",
+    "P6_backup_plan_test": "Simulate failure scenario in staging with mock data",
+    "P7_testing_strategy": "Unit + integration + load testing with simulated emergency scenarios",
+    "P8_benchmarks": "Feed load <200ms p95, notification delivery <5s"
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T14:58:58Z",
+        "who": "claude-opus-4",
+        "description": "Initial CONFolder creation",
+        "version": "0.1"
+      }
+    ],
+    "CH2_current_version": "0.1"
+  },
+  "L": {
+    "L1_legal_considerations": "Location recording during help requires explicit consent. Story publication requires all-party consent.",
+    "L2_regulatory_frameworks": [
+      "CCPA",
+      "GDPR",
+      "Good Samaritan laws"
+    ],
+    "L3_consent_requirements": "Consent for location recording, story publication, missing person data",
+    "L4_liability_notes": "Good Samaritan liability shields vary by state. Beacon facilitates but does not direct help."
+  },
+  "F": {
+    "F1_cost_considerations": "DB storage for requests/stories/locations. Push notification costs (FCM/APNS). Geospatial query compute.",
+    "F2_accounting_considerations": "Allocated to help module operational budget",
+    "F3_revenue_impact": "NR"
+  },
+  "S": {
+    "S1_cybersecurity": "Rate limiting on request creation. Spam prevention on feed.",
+    "S2_data_privacy": "Location logs encrypted at rest. Stories use neighborhood-level location only.",
+    "S3_encryption_requirements": "AES-256 for location logs. TLS for all API calls.",
+    "S4_access_control": "Verified users only for missing reports. Any user for help requests.",
+    "S5_audit_requirements": "Full audit trail on location recording, story publication, moderation actions."
+  },
+  "X": {
+    "X1_notes": 1,
+    "X2_open_questions": "Finalize liability framework with legal counsel",
+    "X3_related_research": "NR"
+  }
+}

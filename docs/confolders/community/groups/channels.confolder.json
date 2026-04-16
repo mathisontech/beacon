@@ -1,0 +1,209 @@
+{
+  "module_id": "community.groups.channels",
+  "module_name": "Group Channels",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting channel type taxonomy (emergency, resources, off-topic, etc). Auto-channel creation rules for event mode needed.",
+    "priority": 2
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Groups > Channels",
+    "M4_parent": "community.groups",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "channel_creation",
+        "source": "Founder/admin creates new channel in group",
+        "format": "JSON",
+        "schema_ref": "{ group_id, name, type: 'general'|'emergency'|'resources'|'custom', description?, private?: bool }",
+        "frequency": "on-demand",
+        "dependencies": ["community.groups.roles"]
+      },
+      {
+        "name": "channel_message",
+        "source": "Member posts message to channel",
+        "format": "JSON",
+        "schema_ref": "{ channel_id, author_id, text }",
+        "frequency": "real-time",
+        "dependencies": ["community.messages.encryption"]
+      },
+      {
+        "name": "emergency_event",
+        "source": "System detects emergency affecting group",
+        "format": "JSON",
+        "schema_ref": "{ event_id, group_affected: true }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "channel_list",
+        "consumers": ["group UI - channel sidebar"],
+        "format": "JSON",
+        "schema_ref": "[{ channel_id, name, unread_count, last_message_at }]",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "channel_messages",
+        "consumers": ["message thread display"],
+        "format": "JSON",
+        "schema_ref": "[{ message_id, author_id, text, timestamp, reactions }]",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "auto_channels",
+        "consumers": ["emergency system"],
+        "format": "JSON",
+        "schema_ref": "[{ channel_id, name, type, auto_created: true, event_id }]",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Create channel",
+        "algorithm": "Verify creator has permission (founder/admin/mod). Insert into group_channels table. Initialize message thread. Add channel to group sidebar.",
+        "latency_sla": "<200ms",
+        "accuracy_target": "100% channel creation, correct permissions"
+      },
+      {
+        "operation": "Post message to channel",
+        "algorithm": "Verify member has access to channel. Encrypt message. Insert into messages table with channel_id. Broadcast to members.",
+        "latency_sla": "<500ms",
+        "accuracy_target": "100% correct message delivery, no loss"
+      },
+      {
+        "operation": "Auto-create emergency channels",
+        "algorithm": "On emergency: create #emergency-updates (read-only, admins post), #shelter-locations (curated), #help-needed (members post requests). Auto-pin to top.",
+        "latency_sla": "<10s",
+        "accuracy_target": "All channels created, pinned, members can see immediately"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "group_creation",
+        "description": "Group created. Default #general channel auto-created.",
+        "data_format": "group_id, default channel_id",
+        "dependencies": ["community.groups.types"]
+      },
+      {
+        "step": 2,
+        "module_id": "member_join",
+        "description": "Member joins group. Can see all non-private channels.",
+        "data_format": "user_id, group_id",
+        "dependencies": []
+      },
+      {
+        "step": 3,
+        "module_id": "channel_action",
+        "description": "Member creates channel or posts message",
+        "data_format": "action (create or post)",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 4,
+        "module_id": "permission_check",
+        "description": "Verify user has permission to create channel (founder/admin/mod) or post (member+)",
+        "data_format": "permitted: true/false",
+        "dependencies": ["community.groups.roles"]
+      },
+      {
+        "step": 5,
+        "module_id": "channel_persistence",
+        "description": "Channel created in group_channels table. Message inserted into messages table.",
+        "data_format": "channel_id or message_id",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "broadcast",
+        "description": "New channel appears in all members' channel list (real-time). Message appears in thread (real-time).",
+        "data_format": "WebSocket or push update",
+        "dependencies": []
+      },
+      {
+        "step": 7,
+        "module_id": "audit_log",
+        "description": "Channel creation and admin actions logged",
+        "data_format": "audit entry",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Channel list updates to many members (fan-out on new channel). Message broadcasting (real-time sync). Emergency channel auto-creation coordination (many groups simultaneously). Private channel access control (permission checks on message fetch).",
+    "P2_defensibility": "Default #general channel provided (no empty groups). Private channels prevent off-topic spam. Auto-emergency channels are system-provided (consistent, reliable). Channel-level mute enables filtering.",
+    "P3_confidence_level": "Very high confidence. Channel system is straightforward CRUD with broadcast. No novel complexity.",
+    "P4_failure_modes": [
+      "Channel creation fails → group stuck with only #general (mitigate: retry, system admin override)",
+      "Emergency channels not created → admins can't post official updates (mitigate: alert admins, manual creation option)",
+      "Message not broadcast → member sees old message list (mitigate: retry broadcast, user refresh)",
+      "Private channel access leaked → member sees private channel they shouldn't (mitigate: permission check on every fetch)"
+    ],
+    "P5_backup_plan": "If channel creation fails: retry. If emergency channels fail: manual creation. If broadcast fails: async retry. If private access fails: deny access, log incident.",
+    "P6_backup_plan_test": "Simulate channel creation failure. Test emergency channel auto-creation failure. Test broadcast failure (disconnect network). Test private channel access edge cases.",
+    "P7_testing_strategy": "Unit tests for channel creation logic. Integration tests for permission checks. Load tests for channel list broadcast (10k members, new channel). End-to-end tests for full channel workflow (create, post, read). Emergency channel tests (verify creation, permissions, pinning). Private channel tests (verify access control).",
+    "P8_benchmarks": "Channel creation: <200ms. Message post: <500ms. Broadcast: <2s for 10k members. Emergency channel creation: <10s for all channels. Private access check: <50ms. Channel list update: real-time (WebSocket) or <5s (polling). False positive (wrong member sees private channel): 0%."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for channels module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Channels enable moderation (off-topic in dedicated channels). Private channels prevent unintended disclosure. Auto-emergency channels ensure official information visible (legal authority). Channel history may be subpoenaed (retention policy needed).",
+    "L2_regulatory_frameworks": ["GDPR (channel data retention)", "CDA Section 230 (moderation)", "Accessibility (channel descriptions)"],
+    "L3_consent_requirements": "Implicit consent by joining group and using channels.",
+    "L4_liability_notes": "Private channel message leakage could expose sensitive data. Mitigation: strict permission checks. Off-topic discussion in wrong channel could spread misinformation. Mitigation: channel descriptions, moderation tools."
+  },
+  "F": {
+    "F1_cost_considerations": "Channel metadata: ~200B per channel. Message storage: same as DMs (~500B per message). At 100k groups with 5 channels each, 500k channels. Minimal storage overhead.",
+    "F2_accounting_considerations": "Operational cost, no special accounting.",
+    "F3_revenue_impact": "Channels improve group organization and engagement (retention). Positive impact."
+  },
+  "S": {
+    "S1_cybersecurity": "Private channels require permission check on every access (no caching of public/private status). Channel list visible only to members (no enumeration of private channels from outside). Rate limiting on channel creation (prevent spam).",
+    "S2_data_privacy": "Channel names visible to all group members. Channel descriptions visible to members. Private channel existence hidden from non-members. Message encryption same as DMs.",
+    "S3_encryption_requirements": "Messages encrypted same as DMs: Signal Protocol or AES-256-GCM",
+    "S4_access_control": "Public channels visible to all members. Private channels require permission (set by creator). Only permitted members can read private channel messages. Founder/admin can view all channels.",
+    "S5_audit_requirements": "Log channel creation and deletion. Log permission changes (public to private, etc). Log moderation actions (message removal, member removal). Audit trail retention: 1 year."
+  },
+  "X": {
+    "X1_notes": "Channels are essential for group organization. Default #general prevents empty groups. Private channels enable confidential discussions. Auto-emergency channels ensure consistent official communication during crises. Channel-level mute prevents notification spam.",
+    "X2_open_questions": [
+      "Max channels per group? (no limit, or tiered by group size?)",
+      "Should members create channels or only founders? (permissioning question)",
+      "Channel types beyond general/emergency/resources? (custom types?)",
+      "Channel archival? (delete vs archive vs hidden?)"
+    ],
+    "X3_related_research": "Slack channel architecture. Discord channel permissions. Emergency communication protocols. Information architecture for groups. Notification management in channels."
+  }
+}

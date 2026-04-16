@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Beacon — Volcano Layer Playground</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Leaflet: lightweight slippy map, loaded from CDN so no build step. -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+/* ════════════════════════════════════════════════════════════════════
+   TWEAK ZONE 1 — global chrome
+   Change background, font, panel positions here.
+   ════════════════════════════════════════════════════════════════════ */
+html, body { margin: 0; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Arial, sans-serif; background: #0b0f1a; color: #f5f5f5; }
+#map { position: absolute; inset: 0; }
+
+/* ════════════════════════════════════════════════════════════════════
+   TWEAK ZONE 2 — alert level colors (USGS HANS codes)
+   These CSS variables drive EVERY volcano pin + legend swatch.
+   Change one value and the whole layer restyles.
+   ════════════════════════════════════════════════════════════════════ */
+:root {
+  --alert-warning:  #d62728;   /* RED    — hazardous eruption imminent / underway */
+  --alert-watch:    #ff7f0e;   /* ORANGE — heightened / escalating unrest         */
+  --alert-advisory: #ffcc00;   /* YELLOW — elevated unrest above background       */
+  --alert-normal:   #2ca02c;   /* GREEN  — typical background activity            */
+  --alert-unknown:  #6b7280;   /* GRAY   — not monitored / unassigned             */
+
+  --pin-ring: rgba(255,255,255,0.92);
+  --pin-shadow: rgba(0,0,0,0.55);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   TWEAK ZONE 3 — pin icon
+   Pins are Leaflet `divIcon`s, so they're just HTML+CSS. To change
+   the shape (triangle? house? custom SVG?), edit the makeIcon()
+   function below AND these styles.
+   ════════════════════════════════════════════════════════════════════ */
+.volcano-pin {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--pin-ring);
+  box-shadow: 0 0 0 1px var(--pin-shadow), 0 2px 6px var(--pin-shadow);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: transform .12s ease;
+}
+.volcano-pin:hover { transform: translate(-50%, -50%) scale(1.25); }
+
+/* Size escalates with alert level. */
+.volcano-pin.level-normal   { width: 12px; height: 12px; background: var(--alert-normal); }
+.volcano-pin.level-advisory { width: 15px; height: 15px; background: var(--alert-advisory); }
+.volcano-pin.level-watch    { width: 18px; height: 18px; background: var(--alert-watch); }
+.volcano-pin.level-warning  { width: 22px; height: 22px; background: var(--alert-warning); }
+.volcano-pin.level-unknown  { width: 11px; height: 11px; background: var(--alert-unknown); }
+
+/* Pulsing ring for WATCH + WARNING. Delete the @keyframes to disable. */
+.volcano-pin.level-watch::after,
+.volcano-pin.level-warning::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  color: inherit;
+  animation: pulse 1.8s ease-out infinite;
+  pointer-events: none;
+}
+.volcano-pin.level-warning { color: var(--alert-warning); }
+.volcano-pin.level-watch   { color: var(--alert-watch); }
+@keyframes pulse {
+  0%   { transform: scale(0.8); opacity: 0.9; }
+  100% { transform: scale(1.9); opacity: 0;   }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   TWEAK ZONE 4 — legend panel
+   ════════════════════════════════════════════════════════════════════ */
+.legend {
+  position: absolute;
+  left: 16px; bottom: 16px;
+  z-index: 400;
+  background: rgba(11, 15, 26, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 14px 16px 12px;
+  min-width: 220px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.legend h3 {
+  margin: 0 0 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+.legend-row .sw {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--pin-ring);
+  flex-shrink: 0;
+}
+.legend-row .lbl { flex: 1; color: rgba(255,255,255,0.9); }
+.legend-row .ct  { color: rgba(255,255,255,0.45); font-variant-numeric: tabular-nums; }
+.legend-row.off .sw  { opacity: 0.25; }
+.legend-row.off .lbl { color: rgba(255,255,255,0.35); text-decoration: line-through; }
+.legend hr { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 10px 0 8px; }
+.legend .footnote { font-size: 10px; color: rgba(255,255,255,0.4); }
+
+/* ════════════════════════════════════════════════════════════════════
+   TWEAK ZONE 5 — popup card (click a pin)
+   ════════════════════════════════════════════════════════════════════ */
+.leaflet-popup-content-wrapper {
+  background: rgba(11, 15, 26, 0.92);
+  backdrop-filter: blur(10px);
+  color: #f5f5f5;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.leaflet-popup-tip { background: rgba(11, 15, 26, 0.92); }
+.leaflet-popup-content { margin: 12px 14px; min-width: 200px; }
+.vcard-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.vcard-sub  { font-size: 11px; color: rgba(255,255,255,0.55); margin-bottom: 10px; }
+.vcard-row  { display: flex; justify-content: space-between; font-size: 11px; padding: 3px 0; }
+.vcard-row span:first-child { color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.6px; font-size: 9px; }
+.vcard-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+.vcard-chip.level-warning  { background: var(--alert-warning);  color: #fff; }
+.vcard-chip.level-watch    { background: var(--alert-watch);    color: #fff; }
+.vcard-chip.level-advisory { background: var(--alert-advisory); color: #111; }
+.vcard-chip.level-normal   { background: var(--alert-normal);   color: #fff; }
+.vcard-chip.level-unknown  { background: var(--alert-unknown);  color: #fff; }
+
+/* ════════════════════════════════════════════════════════════════════
+   TWEAK ZONE 6 — header strip
+   ════════════════════════════════════════════════════════════════════ */
+.header {
+  position: absolute;
+  top: 14px; left: 14px; right: 14px;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.header .title {
+  background: rgba(11, 15, 26, 0.82);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  pointer-events: auto;
+}
+.header .stat {
+  background: rgba(11, 15, 26, 0.82);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.85);
+  pointer-events: auto;
+  font-variant-numeric: tabular-nums;
+}
+.header .stat b { color: #fff; }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="header">
+  <div class="title">Beacon · Volcano Layer</div>
+  <div class="stat" id="stat">&mdash;</div>
+</div>
+
+<div class="legend" id="legend">
+  <h3>Alert Levels (USGS HANS)</h3>
+  <!-- Rows injected by JS so the counts stay in sync. Click to filter. -->
+  <hr>
+  <div class="footnote">Click any level to toggle.<br>Click a pin for details.</div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   TWEAK ZONE 7 — data
+   Same shape as the live USGS HANS feed (apps/beacon-dev via
+   @beacon/data-sources/volcano/usgs-volcanoes.ts). Swap lat/lng,
+   add entries, or rewire the `level` field to test design.
+   Levels: "warning" | "watch" | "advisory" | "normal" | "unknown"
+   ════════════════════════════════════════════════════════════════════ */
+const VOLCANOES = [
+  // ── WARNING — red, pulsing, largest ──
+  { id: "kilauea",       name: "Kīlauea",            region: "Hawaiʻi",           lat: 19.4069, lng: -155.2834, level: "warning",  elevation_m: 1247, last_eruption: "2024-09", obs: "HVO" },
+  { id: "mauna-loa",     name: "Mauna Loa",          region: "Hawaiʻi",           lat: 19.4750, lng: -155.6080, level: "warning",  elevation_m: 4169, last_eruption: "2022-12", obs: "HVO" },
+
+  // ── WATCH — orange, pulsing ──
+  { id: "great-sitkin",  name: "Great Sitkin",       region: "Aleutians, AK",     lat: 52.0764, lng: -176.1306, level: "watch",    elevation_m: 1740, last_eruption: "2021-05", obs: "AVO" },
+  { id: "semisopochnoi", name: "Semisopochnoi",      region: "Aleutians, AK",     lat: 51.9290, lng: 179.5800,  level: "watch",    elevation_m: 1221, last_eruption: "2021-02", obs: "AVO" },
+  { id: "shishaldin",    name: "Shishaldin",         region: "Aleutians, AK",     lat: 54.7554, lng: -163.9711, level: "watch",    elevation_m: 2857, last_eruption: "2023-07", obs: "AVO" },
+  { id: "pavlof",        name: "Pavlof",             region: "AK Peninsula",      lat: 55.4173, lng: -161.8937, level: "watch",    elevation_m: 2518, last_eruption: "2021-08", obs: "AVO" },
+
+  // ── ADVISORY — yellow ──
+  { id: "yellowstone",   name: "Yellowstone",        region: "Wyoming",           lat: 44.4280, lng: -110.5885, level: "advisory", elevation_m: 2805, last_eruption: "70 kya",  obs: "YVO" },
+  { id: "long-valley",   name: "Long Valley Caldera",region: "California",        lat: 37.7000, lng: -118.8700, level: "advisory", elevation_m: 3390, last_eruption: "100 kya", obs: "CalVO" },
+  { id: "mt-hood",       name: "Mount Hood",         region: "Oregon",            lat: 45.3735, lng: -121.6956, level: "advisory", elevation_m: 3429, last_eruption: "1866",    obs: "CVO" },
+  { id: "mt-rainier",    name: "Mount Rainier",      region: "Washington",        lat: 46.8523, lng: -121.7603, level: "advisory", elevation_m: 4392, last_eruption: "1894",    obs: "CVO" },
+  { id: "lassen",        name: "Lassen Peak",        region: "California",        lat: 40.4882, lng: -121.5050, level: "advisory", elevation_m: 3187, last_eruption: "1917",    obs: "CalVO" },
+  { id: "newberry",      name: "Newberry Volcano",   region: "Oregon",            lat: 43.7226, lng: -121.2291, level: "advisory", elevation_m: 2434, last_eruption: "1300 ya", obs: "CVO" },
+  { id: "crater-lake",   name: "Crater Lake",        region: "Oregon",            lat: 42.9446, lng: -122.1090, level: "advisory", elevation_m: 2487, last_eruption: "4800 ya", obs: "CVO" },
+
+  // ── NORMAL — green, small ──
+  { id: "mt-baker",      name: "Mount Baker",        region: "Washington",        lat: 48.7768, lng: -121.8145, level: "normal",   elevation_m: 3286, last_eruption: "1880",     obs: "CVO" },
+  { id: "glacier-peak",  name: "Glacier Peak",       region: "Washington",        lat: 48.1116, lng: -121.1137, level: "normal",   elevation_m: 3213, last_eruption: "1700 ya",  obs: "CVO" },
+  { id: "mt-st-helens",  name: "Mount St. Helens",   region: "Washington",        lat: 46.1914, lng: -122.1956, level: "normal",   elevation_m: 2549, last_eruption: "2008",     obs: "CVO" },
+  { id: "mt-adams",      name: "Mount Adams",        region: "Washington",        lat: 46.2024, lng: -121.4909, level: "normal",   elevation_m: 3743, last_eruption: "1000 ya",  obs: "CVO" },
+  { id: "mt-jefferson",  name: "Mount Jefferson",    region: "Oregon",            lat: 44.6742, lng: -121.7996, level: "normal",   elevation_m: 3199, last_eruption: "950 ya",   obs: "CVO" },
+  { id: "three-sisters", name: "Three Sisters",      region: "Oregon",            lat: 44.1033, lng: -121.7681, level: "normal",   elevation_m: 3157, last_eruption: "2000 ya",  obs: "CVO" },
+  { id: "mt-shasta",     name: "Mount Shasta",       region: "California",        lat: 41.4092, lng: -122.1949, level: "normal",   elevation_m: 4321, last_eruption: "1250 CE",  obs: "CalVO" },
+  { id: "medicine-lake", name: "Medicine Lake",      region: "California",        lat: 41.6110, lng: -121.5540, level: "normal",   elevation_m: 2412, last_eruption: "950 ya",   obs: "CalVO" },
+  { id: "clear-lake",    name: "Clear Lake Volcanics",region: "California",       lat: 38.9700, lng: -122.7700, level: "normal",   elevation_m: 1439, last_eruption: "10 kya",   obs: "CalVO" },
+  { id: "mono-inyo",     name: "Mono-Inyo Craters",  region: "California",        lat: 37.8800, lng: -119.0000, level: "normal",   elevation_m: 2796, last_eruption: "250 ya",   obs: "CalVO" },
+  { id: "haleakala",     name: "Haleakalā",          region: "Maui, Hawaiʻi",     lat: 20.7097, lng: -156.2533, level: "normal",   elevation_m: 3055, last_eruption: "1790",     obs: "HVO" },
+  { id: "mauna-kea",     name: "Mauna Kea",          region: "Hawaiʻi",           lat: 19.8207, lng: -155.4681, level: "normal",   elevation_m: 4207, last_eruption: "4500 ya",  obs: "HVO" },
+  { id: "hualalai",      name: "Hualālai",           region: "Hawaiʻi",           lat: 19.6920, lng: -155.8700, level: "normal",   elevation_m: 2523, last_eruption: "1801",     obs: "HVO" },
+  { id: "cleveland",     name: "Cleveland",          region: "Aleutians, AK",     lat: 52.8222, lng: -169.9450, level: "normal",   elevation_m: 1730, last_eruption: "2020",     obs: "AVO" },
+  { id: "veniaminof",    name: "Veniaminof",         region: "AK Peninsula",      lat: 56.1979, lng: -159.3931, level: "normal",   elevation_m: 2507, last_eruption: "2021",     obs: "AVO" },
+  { id: "redoubt",       name: "Redoubt",            region: "Cook Inlet, AK",    lat: 60.4852, lng: -152.7438, level: "normal",   elevation_m: 3108, last_eruption: "2009",     obs: "AVO" },
+  { id: "augustine",     name: "Augustine",          region: "Cook Inlet, AK",    lat: 59.3626, lng: -153.4350, level: "normal",   elevation_m: 1260, last_eruption: "2006",     obs: "AVO" },
+];
+
+/* ════════════════════════════════════════════════════════════════════
+   Level metadata — label, description, sort order.
+   ════════════════════════════════════════════════════════════════════ */
+const LEVELS = [
+  { id: "warning",  label: "Warning",  blurb: "Hazardous eruption imminent or underway" },
+  { id: "watch",    label: "Watch",    blurb: "Heightened / escalating unrest"         },
+  { id: "advisory", label: "Advisory", blurb: "Elevated unrest above background"        },
+  { id: "normal",   label: "Normal",   blurb: "Typical background activity"             },
+  { id: "unknown",  label: "Unknown",  blurb: "Not assigned"                             },
+];
+
+/* ════════════════════════════════════════════════════════════════════
+   Map — Esri World Imagery (satellite) base layer.
+   Swap the tile URL below for a different base look:
+     • Satellite (current): https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}
+     • Dark street:         https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png
+     • OSM:                 https://tile.openstreetmap.org/{z}/{x}/{y}.png
+     • Terrain:             https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png
+   ════════════════════════════════════════════════════════════════════ */
+const map = L.map("map", { zoomControl: true, worldCopyJump: true }).setView([40, -130], 4);
+
+L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  { attribution: "Tiles © Esri", maxZoom: 18 }
+).addTo(map);
+
+// Dim-everything-except-the-pins overlay. Set opacity to 0 to disable.
+L.tileLayer(
+  "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
+  { opacity: 0.35, attribution: "" }
+).addTo(map);
+
+/* ════════════════════════════════════════════════════════════════════
+   Icon factory — returns a Leaflet divIcon for a given level.
+   To try a different shape (triangle, SVG, image), replace the html
+   string. The className adds our CSS-variable colors.
+   ════════════════════════════════════════════════════════════════════ */
+function makeIcon(level) {
+  return L.divIcon({
+    className: "",
+    html: `<div class="volcano-pin level-${level}"></div>`,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   Popup card — edit the HTML template here.
+   ════════════════════════════════════════════════════════════════════ */
+function makePopup(v) {
+  const lvl = LEVELS.find(l => l.id === v.level) || LEVELS[4];
+  return `
+    <div class="vcard-name">${v.name}</div>
+    <div class="vcard-sub">${v.region} · ${v.obs}</div>
+    <div class="vcard-row"><span>Elevation</span><span>${v.elevation_m.toLocaleString()} m</span></div>
+    <div class="vcard-row"><span>Last eruption</span><span>${v.last_eruption}</span></div>
+    <div class="vcard-row"><span>Lat / Lng</span><span>${v.lat.toFixed(3)}, ${v.lng.toFixed(3)}</span></div>
+    <div class="vcard-chip level-${v.level}">${lvl.label}</div>
+  `;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   Render — per-level layer groups so the legend can toggle them.
+   ════════════════════════════════════════════════════════════════════ */
+const groups = {};
+LEVELS.forEach(l => { groups[l.id] = L.layerGroup().addTo(map); });
+
+VOLCANOES.forEach(v => {
+  const m = L.marker([v.lat, v.lng], { icon: makeIcon(v.level) });
+  m.bindPopup(makePopup(v), { closeButton: false });
+  (groups[v.level] || groups.unknown).addLayer(m);
+});
+
+/* ════════════════════════════════════════════════════════════════════
+   Legend — injects rows with live counts + toggle behavior.
+   ════════════════════════════════════════════════════════════════════ */
+const legend = document.getElementById("legend");
+const counts = Object.fromEntries(LEVELS.map(l => [l.id, 0]));
+VOLCANOES.forEach(v => { counts[v.level] = (counts[v.level] || 0) + 1; });
+
+LEVELS.forEach(l => {
+  if (!counts[l.id]) return;
+  const row = document.createElement("div");
+  row.className = "legend-row";
+  row.dataset.level = l.id;
+  row.innerHTML = `
+    <div class="sw" style="background: var(--alert-${l.id})"></div>
+    <div class="lbl">${l.label}</div>
+    <div class="ct">${counts[l.id]}</div>
+  `;
+  row.title = l.blurb;
+  row.addEventListener("click", () => {
+    const off = row.classList.toggle("off");
+    if (off) map.removeLayer(groups[l.id]);
+    else     map.addLayer(groups[l.id]);
+    updateStat();
+  });
+  legend.insertBefore(row, legend.querySelector("hr"));
+});
+
+/* ════════════════════════════════════════════════════════════════════
+   Stat strip — top-right "x of y visible" counter.
+   ════════════════════════════════════════════════════════════════════ */
+function updateStat() {
+  const total = VOLCANOES.length;
+  const offLevels = new Set(
+    Array.from(document.querySelectorAll(".legend-row.off")).map(r => r.dataset.level)
+  );
+  const visible = VOLCANOES.filter(v => !offLevels.has(v.level)).length;
+  document.getElementById("stat").innerHTML = `<b>${visible}</b> of ${total} volcanoes`;
+}
+updateStat();
+</script>
+</body>
+</html>

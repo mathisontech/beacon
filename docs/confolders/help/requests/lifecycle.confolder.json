@@ -1,0 +1,161 @@
+{
+  "module_id": "help.requests.lifecycle",
+  "module_name": "Help Request Lifecycle",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "updated_by": "claude-opus-4",
+  "bookmark": {
+    "status": "Core lifecycle for help requests",
+    "return_note": "in-progress",
+    "priority": [
+      "Auto-resolve policy for abandoned requests",
+      "Max active requests per user"
+    ]
+  },
+  "M": {
+    "M1_beacon_versions": [
+      "MVP"
+    ],
+    "M2_module_type": "service",
+    "M3_hierarchy_path": "Product Manager > Help > Requests > Lifecycle",
+    "M4_parent": "help.requests",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-opus-4",
+        "role": "architect",
+        "from": "2026-04-04T14:58:58Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "request_form_data",
+        "source": "public-app.help-page",
+        "format": "JSON",
+        "schema_ref": "help_requests schema",
+        "frequency": "on-demand",
+        "dependencies": [
+          "community.identity"
+        ]
+      },
+      {
+        "name": "map_tag_data",
+        "source": "public-app.map-page",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": [
+          "community.contacts.location-sharing"
+        ]
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "help_request",
+        "consumers": [
+          "help.routing",
+          "help.feed"
+        ],
+        "format": "JSON",
+        "schema_ref": "help_requests table",
+        "frequency": "event-driven",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Validate request, assign category, set urgency, geocode location, create record",
+        "algorithm": null,
+        "latency_sla": "<500ms",
+        "accuracy_target": null
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity",
+        "description": "User authenticated",
+        "data_format": "JWT",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "community.contacts.location-sharing",
+        "description": "Location resolved",
+        "data_format": "JSON",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.routing",
+        "description": "Request routed to nearby helpers",
+        "data_format": "JSON",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "help.feed",
+        "description": "Request appears in feed",
+        "data_format": "JSON",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "State machine transitions under concurrent claims",
+    "P2_defensibility": "Standard state-machine pattern with optimistic locking",
+    "P3_confidence_level": "NR",
+    "P4_failure_modes": [
+      "Race condition on simultaneous claims",
+      "Orphaned requests from offline users",
+      "Spam request creation"
+    ],
+    "P5_backup_plan": "Queue claims with DB-level locking. Auto-expire orphaned requests after 72h.",
+    "P6_backup_plan_test": "Simulate failure scenario in staging with mock data",
+    "P7_testing_strategy": "Unit test all state transitions. Integration test claim race conditions. Load test 1000 concurrent requests.",
+    "P8_benchmarks": "State transition <100ms. 72h auto-expiry for non-critical."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T14:58:58Z",
+        "who": "claude-opus-4",
+        "description": "Initial CONFolder creation",
+        "version": "0.1"
+      }
+    ],
+    "CH2_current_version": "0.1"
+  },
+  "L": {
+    "L1_legal_considerations": "Request data retention per CCPA. Location data in requests uses user's sharing granularity.",
+    "L2_regulatory_frameworks": [
+      "CCPA",
+      "GDPR"
+    ],
+    "L3_consent_requirements": "Standard app consent covers request creation. Location recording consent separate.",
+    "L4_liability_notes": "Beacon facilitates connection, not liable for help quality."
+  },
+  "F": {
+    "F1_cost_considerations": "Minimal: DB writes + geospatial index. ~$0.001 per request.",
+    "F2_accounting_considerations": "Allocated to help module operational budget",
+    "F3_revenue_impact": "NR"
+  },
+  "S": {
+    "S1_cybersecurity": "Input validation prevents XSS/injection. Rate limit: max 5 active requests per user.",
+    "S2_data_privacy": "Request descriptions stored in plaintext (not E2E encrypted - visible on public feed). Location precision controlled by user settings.",
+    "S3_encryption_requirements": "TLS in transit. DB encryption at rest.",
+    "S4_access_control": "Any authenticated user can create. Only requester can resolve.",
+    "S5_audit_requirements": "Log all state transitions with timestamps and actor IDs."
+  },
+  "X": {
+    "X1_notes": 1,
+    "X2_open_questions": "Implement claim race condition handling",
+    "X3_related_research": "NR"
+  }
+}

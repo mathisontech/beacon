@@ -1,0 +1,31 @@
+{
+  "name": "@beacon/design-system",
+  "version": "1.0.0",
+  "description": "Shared design system for Beacon emergency management applications",
+  "main": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./tokens": "./tokens.ts",
+    "./components": "./components.ts",
+    "./tailwind.config": "./tailwind.config.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "design-system",
+    "beacon",
+    "tailwind",
+    "emergency-management"
+  ],
+  "author": "Mathison",
+  "license": "UNLICENSED",
+  "peerDependencies": {
+    "tailwindcss": "^3.0.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.0.0"
+  }
+}

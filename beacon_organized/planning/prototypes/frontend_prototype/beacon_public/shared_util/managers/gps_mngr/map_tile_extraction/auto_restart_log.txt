@@ -1,0 +1,56 @@
+🤖 Auto-Restart 50-State Extraction System
+This will automatically restart the extraction when it stops
+Press Ctrl+C to stop gracefully
+
+[2025-09-29 02:14:14] 🤖 AUTO-RESTART 50-STATE EXTRACTION SYSTEM
+[2025-09-29 02:14:14] ============================================================
+[2025-09-29 02:14:14] 💡 This system will automatically restart the extraction on failures
+[2025-09-29 02:14:14] 💡 Press Ctrl+C to stop gracefully
+[2025-09-29 02:14:14] ============================================================
+[2025-09-29 02:14:14] 📊 Current progress: State 4/50: New Mexico
+
+🌶️ PHASE: NEW MEXICO EXTRACTION
+============================================================
+🔄 Creati
+[2025-09-29 02:14:14] 🔄 Starting extraction attempt #1
+[2025-09-29 02:14:14] 🚀 Starting 50-state extraction process...
+[2025-09-29 02:18:46] 🛑 Received signal 15, shutting down gracefully...
+[2025-09-29 02:18:46] 💀 Terminating current extraction process...
+[2025-09-29 02:18:56] 🔥 Force killing extraction process...
+[2025-09-29 02:18:56] 👋 Auto-restart system shutdown complete
+29 02:18:56] 🔄 Total restart attempts: 1
+[2025-09-29 02:18:56] ❌ Final consecutive failures: 0
+[2025-09-29 02:18:56] 📊 Final progress: State 4/50: New Mexico
+
+🌶️ PHASE: NEW MEXICO EXTRACTION
+============================================================
+🔄 Creati
+[2025-09-29 02:18:56] 📈 Completion: 8.0% (4/50 states)
+[2025-09-29 02:18:56] 👋 Auto-restart system shutdown
+[2025-09-29 02:18:56] 🔥 Force killing extraction process...
+[2025-09-29 02:18:56] 👋 Auto-restart system shutdown complete
+[2025-09-29 16:06:48] 🤖 AUTO-RESTART 50-STATE EXTRACTION SYSTEM
+[2025-09-29 16:06:48] ============================================================
+[2025-09-29 16:06:48] 💡 This system will automatically restart the extraction on failures
+[2025-09-29 16:06:48] 💡 Press Ctrl+C to stop gracefully
+[2025-09-29 16:06:48] ============================================================
+[2025-09-29 16:06:48] 📊 Current progress: State 4/50: New Mexico
+
+🌶️ PHASE: NEW MEXICO EXTRACTION
+============================================================
+🔄 Creati
+[2025-09-29 16:06:48] 🔄 Starting extraction attempt #1
+[2025-09-29 16:06:48] 🚀 Starting 50-state extraction process...
+[2025-09-29 16:06:48] 🎉 50-state extraction completed successfully!
+[2025-09-29 16:06:48] ============================================================
+[2025-09-29 16:06:48] 🏁 AUTO-RESTART SYSTEM SUMMARY
+[2025-09-29 16:06:48] ⏱️ Total runtime: 0.0 hours
+[2025-09-29 16:06:48] 🔄 Total restart attempts: 1
+[2025-09-29 16:06:48] ❌ Final consecutive failures: 0
+[2025-09-29 16:06:48] 📊 Final progress: State 4/50: New Mexico
+
+🌶️ PHASE: NEW MEXICO EXTRACTION
+============================================================
+🔄 Creati
+[2025-09-29 16:06:48] 📈 Completion: 8.0% (4/50 states)
+[2025-09-29 16:06:48] 👋 Auto-restart system shutdown

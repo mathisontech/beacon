@@ -17,6 +17,7 @@ export * from "./human";
 export * from "./volcano";
 export * from "./cameras";
 export * from "./travel";
+export * from "./weather";
 
 export const ALL_FEEDS: Feed[] = [
   ...naturalFeeds,

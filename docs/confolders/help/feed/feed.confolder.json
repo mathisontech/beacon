@@ -1,0 +1,171 @@
+{
+  "module_id": "help.feed",
+  "module_name": "Help Feed & Rankings",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "updated_by": "claude-opus-4",
+  "bookmark": {
+    "status": "Main help page feed component",
+    "return_note": "in-progress",
+    "priority": [
+      "Feed refresh strategy (polling vs websocket)",
+      "Collapse behavior during mass events"
+    ]
+  },
+  "M": {
+    "M1_beacon_versions": [
+      "MVP"
+    ],
+    "M2_module_type": "component",
+    "M3_hierarchy_path": "Product Manager > Help > Feed",
+    "M4_parent": "help",
+    "M5_children": [
+      "help.feed.hearts",
+      "help.feed.prayers",
+      "help.feed.moderation"
+    ],
+    "M6_owner_history": [
+      {
+        "who": "claude-opus-4",
+        "role": "architect",
+        "from": "2026-04-04T14:58:58Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "help_requests",
+        "source": "help.requests",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "real-time",
+        "dependencies": [
+          "help.requests"
+        ]
+      },
+      {
+        "name": "stories",
+        "source": "help.stories",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": [
+          "help.stories"
+        ]
+      },
+      {
+        "name": "user_location",
+        "source": "community.contacts.location-sharing",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "real-time",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "feed_view",
+        "consumers": [
+          "public-app.help-page"
+        ],
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "real-time",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Aggregate requests + stories, rank by sort criteria, filter by tab and location",
+        "algorithm": "Weighted ranking: urgency > recency > distance > hearts",
+        "latency_sla": "<200ms",
+        "accuracy_target": null
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.requests",
+        "description": "Active requests loaded",
+        "data_format": "JSON",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "help.stories",
+        "description": "Published stories loaded",
+        "data_format": "JSON",
+        "dependencies": []
+      },
+      {
+        "step": 3,
+        "module_id": "community.contacts.location-sharing",
+        "description": "User location for proximity sort",
+        "data_format": "JSON",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "public-app",
+        "description": "Feed rendered in help page",
+        "data_format": "React components",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Feed query with geospatial sort on large dataset. Real-time updates.",
+    "P2_defensibility": "Tabs (Open/Ongoing/Resolved) reduce cognitive load. Urgency always surfaces critical.",
+    "P3_confidence_level": "NR",
+    "P4_failure_modes": [
+      "Stale feed during offline",
+      "Feed manipulation via fake requests",
+      "Information overload during mass events"
+    ],
+    "P5_backup_plan": "Cache feed with 30s TTL. Collapse similar requests during events. Moderation for fake requests.",
+    "P6_backup_plan_test": "Simulate failure scenario in staging with mock data",
+    "P7_testing_strategy": "Load test feed with 10K requests. Test tab filtering. Test sort stability.",
+    "P8_benchmarks": "Feed load <200ms p95. Infinite scroll pagination."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T14:58:58Z",
+        "who": "claude-opus-4",
+        "description": "Initial CONFolder creation",
+        "version": "0.1"
+      }
+    ],
+    "CH2_current_version": "0.1"
+  },
+  "L": {
+    "L1_legal_considerations": "Feed content is public within the app. No PII beyond first name + last initial.",
+    "L2_regulatory_frameworks": [
+      "CCPA"
+    ],
+    "L3_consent_requirements": "Standard app consent.",
+    "L4_liability_notes": "NR"
+  },
+  "F": {
+    "F1_cost_considerations": "Feed queries: geospatial index + pagination. Caching reduces DB load.",
+    "F2_accounting_considerations": "Allocated to help module operational budget",
+    "F3_revenue_impact": "NR"
+  },
+  "S": {
+    "S1_cybersecurity": "No exact locations in feed cards (neighborhood-level only).",
+    "S2_data_privacy": "Feed shows neighborhood-level location, not exact addresses.",
+    "S3_encryption_requirements": "NR",
+    "S4_access_control": "Authenticated users only.",
+    "S5_audit_requirements": "NR"
+  },
+  "X": {
+    "X1_notes": 1,
+    "X2_open_questions": "Decide polling vs websocket for real-time updates",
+    "X3_related_research": "NR"
+  }
+}

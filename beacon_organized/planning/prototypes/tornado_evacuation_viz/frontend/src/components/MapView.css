@@ -1,0 +1,85 @@
+.map {
+  width: 100%;
+  height: 100%;
+}
+
+.tornado-marker {
+  cursor: pointer;
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.timestamp-marker {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #ff0000;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.timestamp-content {
+  text-align: center;
+}
+
+.ef-rating {
+  color: #ff6666;
+  font-size: 10px;
+}
+
+.building-marker {
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.building-marker:hover {
+  transform: scale(1.3);
+}
+
+.building-marker.vulnerable {
+  filter: drop-shadow(0 0 4px #ff0000);
+}
+
+.building-marker.commercial {
+  filter: drop-shadow(0 0 4px #4444ff);
+}
+
+.shelter-marker {
+  font-size: 24px;
+  cursor: pointer;
+  filter: drop-shadow(0 0 4px #00ff00);
+  transition: transform 0.2s;
+}
+
+.shelter-marker:hover {
+  transform: scale(1.3);
+}
+
+.person-marker {
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.person-marker:hover {
+  transform: scale(1.5);
+}
+
+.mapboxgl-popup-content {
+  background: #2d2d2d;
+  color: #fff;
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 12px;
+}
+
+.mapboxgl-popup-content strong {
+  color: #00ff00;
+}

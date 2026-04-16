@@ -1,0 +1,210 @@
+{
+  "module_id": "community.identity.account-creation",
+  "module_name": "Account Creation & Registration",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "blocked",
+    "return_note": "Awaiting decision on auth provider (NextAuth, Auth0, custom). Phone vs email requirement. Password vs magic link. Legal review on TOS.",
+    "priority": 1
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Identity > Account Creation",
+    "M4_parent": "community.identity",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "signup_form",
+        "source": "User submits signup form",
+        "format": "JSON",
+        "schema_ref": "{ email?, phone, name, password?, agree_to_tos: bool }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "email_verification",
+        "source": "User clicks email verification link",
+        "format": "JSON",
+        "schema_ref": "{ email, verification_token }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "phone_verification",
+        "source": "User enters SMS code or scans phone link",
+        "format": "JSON",
+        "schema_ref": "{ phone, sms_code }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "user_account",
+        "consumers": ["all community modules", "authentication system"],
+        "format": "JSON",
+        "schema_ref": "{ user_id, email?, phone, name, created_at, verified_at?, verified_badge_candidate: bool }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "verification_email",
+        "consumers": ["email service"],
+        "format": "JSON",
+        "schema_ref": "{ to_email, verification_link, token_expiry }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "verification_sms",
+        "consumers": ["SMS service"],
+        "format": "JSON",
+        "schema_ref": "{ to_phone, sms_code, code_expiry }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Validate signup inputs",
+        "algorithm": "Email format (if provided). Phone E.164 format. Name non-empty. Password strength (if password-based). TOS accepted.",
+        "latency_sla": "<200ms",
+        "accuracy_target": "100% validation correctness"
+      },
+      {
+        "operation": "Generate verification token/code",
+        "algorithm": "Cryptographically random. 32-char token for email, 6-digit code for SMS. 30-min expiry.",
+        "latency_sla": "<100ms",
+        "accuracy_target": "Cryptographically secure, zero collisions"
+      },
+      {
+        "operation": "Create user record",
+        "algorithm": "INSERT users table. Hash password (bcrypt, cost 12) if provided. Set verified_at = NULL until verification complete.",
+        "latency_sla": "<500ms",
+        "accuracy_target": "100% account creation success"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "user_input",
+        "description": "User accesses signup form",
+        "data_format": "form fields: email|phone, name, password|magic-link",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 2,
+        "module_id": "validation",
+        "description": "Inputs validated (format, strength, required fields)",
+        "data_format": "validation result: pass/fail",
+        "dependencies": []
+      },
+      {
+        "step": 3,
+        "module_id": "duplicate_check",
+        "description": "Check if email or phone already in users table",
+        "data_format": "duplicate: true/false",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "user_creation",
+        "description": "INSERT users record, hash password (if provided), set verified_at=NULL",
+        "data_format": "user_id, created_at",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "verification_dispatch",
+        "description": "Generate verification token/code. Send email or SMS.",
+        "data_format": "verification_email or verification_sms",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "verification_completion",
+        "description": "User verifies (clicks link or enters code). UPDATE verified_at timestamp.",
+        "data_format": "user_id, verified_at",
+        "dependencies": []
+      },
+      {
+        "step": 7,
+        "module_id": "profile_onboarding",
+        "description": "User directed to fill profile (basic info, household, identity verification)",
+        "data_format": "user_id, profile_completion_stage",
+        "dependencies": ["community.identity.selfie-capture", "community.household.members"]
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Email/SMS delivery latency (third-party service). Verification code expiry management (cleanup job). Duplicate detection (database query). Password hashing (CPU-intensive bcrypt).",
+    "P2_defensibility": "Email or phone verification prevents throwaway accounts. Password strength requirements prevent weak passwords. TOS acceptance creates legal record. Verification tokens have short expiry (limits replay).",
+    "P3_confidence_level": "Very high confidence. Standard account creation flow. Well-established practices.",
+    "P4_failure_modes": [
+      "Email/SMS delivery fails → user cannot verify (mitigate: resend button, alternative verification method)",
+      "Verification token collision → security issue (mitigate: use cryptographically secure random, collision test)",
+      "Duplicate email/phone not caught → two users with same email (mitigate: database unique constraint)",
+      "Password hash not salted → rainbow table attack (mitigate: bcrypt includes salt)",
+      "Verification link intercepted → attacker verifies account (mitigate: short expiry, one-time use)"
+    ],
+    "P5_backup_plan": "If email fails: offer SMS as alternative. If SMS fails: offer manual code entry. If verification fails: allow retry with new code. If duplicate check fails: show error, suggest password reset.",
+    "P6_backup_plan_test": "Simulate email/SMS delivery failure. Test token collision (generate 1M tokens, check for collisions). Test duplicate detection edge cases. Test token expiry (try to use expired token). Test password hashing (verify correct hash with wrong password rejected).",
+    "P7_testing_strategy": "Unit tests for input validation. Unit tests for token generation (collision test). Integration tests for email/SMS dispatch. Integration tests for duplicate detection. Load tests for concurrent signups (100/s). End-to-end tests for full signup flow (enter email → receive email → click link → verified).",
+    "P8_benchmarks": "Signup form validation: <200ms. User creation: <500ms. Email/SMS dispatch: varies (service-dependent, ~5-30s delivery). Verification processing: <100ms. Password hash: <500ms (bcrypt). Duplicate detection: <100ms. Token collision: 0 in 1M generated."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for account creation module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "TOS acceptance at signup creates legal contract (must be clear and unambiguous). Privacy policy must be linked. Phone collection may require consent (TCPA, telecom regulation). Email collection for marketing requires opt-in. Children under 13 subject to COPPA (parental consent required).",
+    "L2_regulatory_frameworks": ["COPPA (children <13)", "TCPA (SMS consent)", "GDPR (data processing, email)", "CCPA (consent)", "CAN-SPAM (email marketing)"],
+    "L3_consent_requirements": "Explicit acceptance of TOS (checkbox required). Privacy policy linked (must be readable). For minors: parental consent to be collected (how? COPPA model).",
+    "L4_liability_notes": "Unverified accounts could enable fraud or abuse. Mitigation: email/phone verification required. Account takeover risk (if password weak). Mitigation: password strength requirements, account recovery flow. Children signing up without parental consent violates COPPA. Mitigation: age gate at signup (ask DOB, require parental consent if <13)."
+  },
+  "F": {
+    "F1_cost_considerations": "Email delivery: ~$0.10-0.50 per 10k emails (SendGrid, etc). Phone SMS: ~$0.01-0.03 per SMS. At 10k signups, ~$100-500/month for verification. Password hashing (bcrypt): CPU cost, ~500ms per signup (negligible at scale).",
+    "F2_accounting_considerations": "Email/SMS costs scale with signup volume. Budget ~$2k/year for verification at 10k users.",
+    "F3_revenue_impact": "Account creation is foundational. No direct monetization, but enables all other features."
+  },
+  "S": {
+    "S1_cybersecurity": "Password hashing: bcrypt with cost 12+. Email/phone verification prevents account takeover immediately after creation. Token expiry prevents replay. Verification tokens stored hashed (not plaintext). Rate limiting on signup (prevent spam registration). Rate limiting on verification attempts (prevent brute-force SMS codes).",
+    "S2_data_privacy": "Email address encrypted at rest (AES-256). Phone number hashed (E.164 format). Password never stored plaintext. Verification tokens deleted after use.",
+    "S3_encryption_requirements": "Password: bcrypt hash (not encryption, one-way). Email: AES-256 at rest. Phone: hashed (SHA-256 or similar). Verification token: hashed after verification.",
+    "S4_access_control": "User sees own account credentials. No one else has access to email/phone/password.",
+    "S5_audit_requirements": "Log signup attempts (for fraud detection). Log failed verification attempts (for abuse detection). Audit trail retention: 1 year."
+  },
+  "X": {
+    "X1_notes": "Account creation is critical onboarding step. Email or phone verification is essential for security and legal compliance. Password strength and hashing are non-negotiable security practices. COPPA compliance required if marketing to minors.",
+    "X2_open_questions": [
+      "Auth provider: NextAuth + custom, Auth0, or completely custom? (tradeoff: managed vs control)",
+      "Email or phone required? (phone useful for SMS alerts, email for verification)",
+      "Password vs magic link? (magic link removes password complexity, but requires email)",
+      "COPPA compliance: ask age at signup? (required if minors might sign up)"
+    ],
+    "X3_related_research": "OAuth/OIDC standards. OWASP authentication guidelines. Password hashing best practices (bcrypt vs argon2). COPPA compliance. TCPA SMS regulations. Email verification best practices."
+  }
+}

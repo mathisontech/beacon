@@ -1,0 +1,301 @@
+/* ============================================================================
+   OSM MAP STYLES - Styling for GPS navigation component
+   ============================================================================ */
+
+.osm-map-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.osm-map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 400px;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 8px;
+  color: white;
+}
+
+.loading-content {
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid #dc2626;
+  border-radius: 50%;
+  /* DISABLED: animation: spin 1s linear infinite; */
+  margin: 0 auto 16px;
+}
+
+.map-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(30, 41, 59, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  color: white;
+  font-size: 14px;
+}
+
+/* Emergency mode styling */
+.osm-map-container.emergency-mode {
+  border: 3px solid #dc2626;
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+}
+
+.emergency-overlay {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+  background: rgba(220, 38, 38, 0.95);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* DISABLED: animation: emergency-pulse 2s ease-in-out infinite; */
+}
+
+.emergency-indicator {
+  font-size: 14px;
+  /* DISABLED: animation: emergency-blink 1s ease-in-out infinite; */
+}
+
+.emergency-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Map info overlay */
+.map-info-overlay {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  backdrop-filter: blur(4px);
+}
+
+.map-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.map-stats span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Popup styling */
+.user-location-popup,
+.emergency-popup {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.user-location-popup h4,
+.emergency-popup h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.user-location-popup p,
+.emergency-popup p {
+  margin: 4px 0;
+  font-size: 12px;
+}
+
+.emergency-popup {
+  max-width: 250px;
+}
+
+.emergency-popup h4 {
+  color: #dc2626;
+}
+
+/* Leaflet overrides for emergency theme */
+.osm-map-container.emergency-mode .leaflet-control-zoom {
+  border: 2px solid #dc2626;
+}
+
+.osm-map-container.emergency-mode .leaflet-control-zoom a {
+  background-color: rgba(220, 38, 38, 0.1);
+  border-color: #dc2626;
+}
+
+.osm-map-container.emergency-mode .leaflet-control-zoom a:hover {
+  background-color: rgba(220, 38, 38, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .map-info-overlay {
+    bottom: 8px;
+    left: 8px;
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+
+  .emergency-overlay {
+    top: 8px;
+    left: 8px;
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+
+  .osm-map-container {
+    min-height: 300px;
+  }
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes emergency-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(220, 38, 38, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.8);
+  }
+}
+
+@keyframes emergency-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Placeholder map content */
+.map-placeholder-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+.placeholder-map {
+  max-width: 600px;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+}
+
+.placeholder-header h2 {
+  color: #ffffff;
+  margin-bottom: 12px;
+  font-size: 24px;
+}
+
+.placeholder-header p {
+  color: #e5e7eb;
+  margin-bottom: 24px;
+}
+
+.location-info {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+}
+
+.location-info h3 {
+  color: #93c5fd;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.coordinates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.alerts-info {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+}
+
+.alerts-info h3 {
+  color: #fbbf24;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.next-steps {
+  padding: 20px;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 8px;
+}
+
+.next-steps h3 {
+  color: #86efac;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.next-steps p {
+  color: #e5e7eb;
+  font-size: 14px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .osm-map-container {
+    border: 2px solid #000;
+  }
+
+  .map-info-overlay {
+    background: #000;
+    border: 1px solid #fff;
+  }
+
+  .emergency-overlay {
+    background: #000;
+    border: 2px solid #ff0000;
+  }
+}

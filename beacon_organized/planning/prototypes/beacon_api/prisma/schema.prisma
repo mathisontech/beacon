@@ -1,0 +1,1133 @@
+// Beacon Emergency Management System - Prisma Schema
+// PostgreSQL with PostGIS extension for geospatial capabilities
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+// ============================================================================
+// ENUMS - User Related
+// ============================================================================
+
+enum AdminRole {
+  SUPER_ADMIN
+  PLATFORM_ADMIN
+  SUPPORT_ADMIN
+  CONTENT_ADMIN
+}
+
+enum EMSRole {
+  INCIDENT_COMMANDER
+  OPERATIONS_CHIEF
+  DISPATCHER
+  FIELD_RESPONDER
+  COORDINATOR
+  ANALYST
+  VOLUNTEER_LEADER
+}
+
+enum VerificationLevel {
+  UNVERIFIED
+  EMAIL_VERIFIED
+  PHONE_VERIFIED
+  IDENTITY_VERIFIED
+  TRUSTED_MEMBER
+}
+
+// ============================================================================
+// ENUMS - Organization Related
+// ============================================================================
+
+enum ClientType {
+  MUNICIPAL_GOVERNMENT
+  COUNTY_GOVERNMENT
+  STATE_AGENCY
+  FEDERAL_AGENCY
+  FIRE_DEPARTMENT
+  POLICE_DEPARTMENT
+  EMS_AGENCY
+  HOSPITAL
+  UTILITY_COMPANY
+  NONPROFIT
+  PRIVATE_ENTERPRISE
+  EDUCATIONAL_INSTITUTION
+}
+
+enum PlanType {
+  FREE_TRIAL
+  BASIC
+  PROFESSIONAL
+  ENTERPRISE
+  GOVERNMENT
+  NONPROFIT_DISCOUNT
+}
+
+enum ClientStatus {
+  PENDING_APPROVAL
+  ACTIVE
+  SUSPENDED
+  DEACTIVATED
+  TRIAL_EXPIRED
+}
+
+enum GroupType {
+  EMERGENCY_RESPONSE
+  VOLUNTEER
+  NEIGHBORHOOD_WATCH
+  COMMUNITY_SUPPORT
+  SEARCH_AND_RESCUE
+  MEDICAL_RESPONSE
+  LOGISTICS
+  COMMUNICATIONS
+  COMMAND
+}
+
+// ============================================================================
+// ENUMS - Event Related
+// ============================================================================
+
+enum EventType {
+  WILDFIRE
+  EARTHQUAKE
+  FLOOD
+  HURRICANE
+  TORNADO
+  TSUNAMI
+  WINTER_STORM
+  HEAT_WAVE
+  DROUGHT
+  LANDSLIDE
+  VOLCANIC_ACTIVITY
+  HAZMAT_SPILL
+  INFRASTRUCTURE_FAILURE
+  CIVIL_UNREST
+  ACTIVE_SHOOTER
+  MISSING_PERSON
+  MASS_CASUALTY
+  PANDEMIC
+  UTILITY_OUTAGE
+  TRAFFIC_INCIDENT
+  OTHER
+}
+
+enum Severity {
+  MINOR
+  MODERATE
+  SEVERE
+  EXTREME
+  CATASTROPHIC
+}
+
+enum EventStatus {
+  MONITORING
+  ALERT
+  ACTIVE_RESPONSE
+  CONTAINED
+  RECOVERY
+  RESOLVED
+  ARCHIVED
+}
+
+// ============================================================================
+// ENUMS - Workspace Related
+// ============================================================================
+
+enum AccessLevel {
+  VIEWER
+  CONTRIBUTOR
+  EDITOR
+  MANAGER
+  ADMIN
+}
+
+// ============================================================================
+// ENUMS - Person Status Related
+// ============================================================================
+
+enum ReporterType {
+  SELF
+  FAMILY_MEMBER
+  NEIGHBOR
+  RESPONDER
+  OFFICIAL
+  ANONYMOUS
+}
+
+enum SubjectType {
+  SELF
+  FAMILY_MEMBER
+  DEPENDENT
+  PET
+  OTHER_PERSON
+}
+
+enum SafetyStatus {
+  SAFE
+  NEEDS_ASSISTANCE
+  INJURED
+  IN_DANGER
+  EVACUATING
+  SHELTERING
+  UNKNOWN
+  DECEASED
+}
+
+enum StatusConfidence {
+  CONFIRMED
+  REPORTED
+  UNVERIFIED
+  CONFLICTING
+}
+
+// ============================================================================
+// ENUMS - Map Tag Related
+// ============================================================================
+
+enum CreatorType {
+  PUBLIC_USER
+  EMS_USER
+  ADMIN_USER
+  SYSTEM
+  EXTERNAL_FEED
+}
+
+enum TagType {
+  HAZARD
+  ROAD_CLOSURE
+  SHELTER
+  RESOURCE_POINT
+  MEDICAL_STATION
+  EVACUATION_ROUTE
+  STAGING_AREA
+  COMMAND_POST
+  DAMAGE_REPORT
+  UTILITY_OUTAGE
+  WATER_DISTRIBUTION
+  FOOD_DISTRIBUTION
+  VOLUNTEER_NEEDED
+  PET_FRIENDLY
+  ACCESSIBILITY
+  CUSTOM
+}
+
+enum TagVisibility {
+  PUBLIC
+  RESPONDERS_ONLY
+  COMMAND_ONLY
+  CLIENT_ONLY
+}
+
+enum TagStatus {
+  ACTIVE
+  VERIFIED
+  UNVERIFIED
+  DISPUTED
+  RESOLVED
+  EXPIRED
+}
+
+// ============================================================================
+// ENUMS - Community Post Related
+// ============================================================================
+
+enum PostType {
+  SITUATION_REPORT
+  RESOURCE_OFFER
+  RESOURCE_REQUEST
+  VOLUNTEER_OFFER
+  VOLUNTEER_REQUEST
+  INFORMATION
+  QUESTION
+  WARNING
+  THANK_YOU
+  MEMORIAL
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  FLAGGED
+  REJECTED
+  AUTO_APPROVED
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  HIDDEN
+  ARCHIVED
+  DELETED
+}
+
+// ============================================================================
+// ENUMS - Alert Related
+// ============================================================================
+
+enum AlertType {
+  EMERGENCY
+  WARNING
+  WATCH
+  ADVISORY
+  STATEMENT
+  UPDATE
+  ALL_CLEAR
+  TEST
+}
+
+enum AlertSource {
+  NWS
+  FEMA
+  LOCAL_GOVERNMENT
+  EMS_OFFICIAL
+  SYSTEM_GENERATED
+  THIRD_PARTY
+}
+
+// ============================================================================
+// ENUMS - Notification Related
+// ============================================================================
+
+enum NotificationType {
+  PUSH
+  SMS
+  EMAIL
+  IN_APP
+  EMERGENCY_BROADCAST
+}
+
+// ============================================================================
+// ENUMS - Admin Related
+// ============================================================================
+
+enum ContactCategory {
+  FIRE
+  POLICE
+  MEDICAL
+  UTILITY_ELECTRIC
+  UTILITY_GAS
+  UTILITY_WATER
+  GOVERNMENT
+  SHELTER
+  HOSPITAL
+  POISON_CONTROL
+  MENTAL_HEALTH
+  ANIMAL_SERVICES
+  RED_CROSS
+  FEMA
+  OTHER
+}
+
+enum DatasetType {
+  PARCEL_DATA
+  BUILDING_FOOTPRINTS
+  ROAD_NETWORK
+  HYDROLOGY
+  ELEVATION
+  LAND_USE
+  CRITICAL_INFRASTRUCTURE
+  EVACUATION_ZONES
+  FLOOD_ZONES
+  FIRE_HAZARD_ZONES
+  CENSUS_DATA
+  UTILITY_NETWORK
+  CUSTOM
+}
+
+enum DatasetStatus {
+  PENDING_UPLOAD
+  PROCESSING
+  ACTIVE
+  OUTDATED
+  ARCHIVED
+  ERROR
+}
+
+// ============================================================================
+// MODELS - Users
+// ============================================================================
+
+model AdminUser {
+  id                  String    @id @default(uuid())
+  email               String    @unique
+  passwordHash        String
+  firstName           String
+  lastName            String
+  role                AdminRole
+  phone               String?
+  isActive            Boolean   @default(true)
+  lastLoginAt         DateTime?
+  mfaEnabled          Boolean   @default(false)
+  mfaSecret           String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relations
+  createdEvents       Event[]            @relation("EventCreatedByAdmin")
+  createdAlerts       Alert[]            @relation("AlertCreatedByAdmin")
+  createdMapTags      MapTag[]           @relation("MapTagCreatedByAdmin")
+  createdDatasets     MapDataset[]       @relation("DatasetCreatedByAdmin")
+  managedDemos        Demo[]
+  demoSessions        DemoSession[]
+
+  @@map("admin_users")
+}
+
+model EMSUser {
+  id                  String    @id @default(uuid())
+  email               String    @unique
+  passwordHash        String
+  firstName           String
+  lastName            String
+  role                EMSRole
+  badgeNumber         String?
+  phone               String?
+  certifications      String[]
+  isActive            Boolean   @default(true)
+  isOnDuty            Boolean   @default(false)
+  lastLocationLat     Float?
+  lastLocationLng     Float?
+  lastLocationAt      DateTime?
+  lastLoginAt         DateTime?
+  mfaEnabled          Boolean   @default(false)
+  mfaSecret           String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Client association
+  clientId            String
+  client              Client    @relation(fields: [clientId], references: [id])
+
+  // Relations
+  groupMemberships    EMSGroupMember[]
+  workspaceParticipations WorkspaceParticipant[] @relation("EMSWorkspaceParticipant")
+  createdEvents       Event[]            @relation("EventCreatedByEMS")
+  createdMapTags      MapTag[]           @relation("MapTagCreatedByEMS")
+  personStatusReports PersonStatus[]     @relation("PersonStatusByEMS")
+  tagConfirmations    TagConfirmation[]  @relation("TagConfirmationByEMS")
+  sentNotifications   UserNotification[] @relation("NotificationSentByEMS")
+
+  @@map("ems_users")
+}
+
+model PublicUser {
+  id                  String            @id @default(uuid())
+  email               String            @unique
+  passwordHash        String
+  firstName           String
+  lastName            String
+  displayName         String?
+  phone               String?
+  verificationLevel   VerificationLevel @default(UNVERIFIED)
+  profileImageUrl     String?
+  bio                 String?
+
+  // Location preferences
+  homeLocationLat     Float?
+  homeLocationLng     Float?
+  homeZipCode         String?
+  notificationRadius  Float             @default(25) // miles
+
+  // Settings
+  isActive            Boolean           @default(true)
+  pushNotifications   Boolean           @default(true)
+  smsNotifications    Boolean           @default(false)
+  emailNotifications  Boolean           @default(true)
+  shareLocationDuringEmergency Boolean  @default(false)
+
+  lastLocationLat     Float?
+  lastLocationLng     Float?
+  lastLocationAt      DateTime?
+  lastLoginAt         DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  // Relations
+  groupMemberships    PublicGroupMember[]
+  workspaceParticipations WorkspaceParticipant[] @relation("PublicWorkspaceParticipant")
+  createdMapTags      MapTag[]           @relation("MapTagCreatedByPublic")
+  personStatusReports PersonStatus[]     @relation("PersonStatusByPublic")
+  personStatusSubject PersonStatus[]     @relation("PersonStatusSubject")
+  tagConfirmations    TagConfirmation[]  @relation("TagConfirmationByPublic")
+  communityPosts      CommunityPost[]
+  postVotes           PostVote[]
+  postComments        PostComment[]
+  notifications       UserNotification[]
+
+  @@map("public_users")
+}
+
+// ============================================================================
+// MODELS - Organizations
+// ============================================================================
+
+model Client {
+  id                  String       @id @default(uuid())
+  name                String
+  type                ClientType
+  planType            PlanType     @default(FREE_TRIAL)
+  status              ClientStatus @default(PENDING_APPROVAL)
+
+  // Contact info
+  primaryContactName  String
+  primaryContactEmail String
+  primaryContactPhone String?
+  billingEmail        String?
+
+  // Address
+  streetAddress       String?
+  city                String?
+  state               String?
+  zipCode             String?
+  country             String       @default("US")
+
+  // Service area (polygon stored as GeoJSON)
+  serviceAreaGeoJson  Json?
+
+  // Branding
+  logoUrl             String?
+  primaryColor        String?
+
+  // Settings
+  maxUsers            Int          @default(10)
+  maxGroups           Int          @default(5)
+  apiAccessEnabled    Boolean      @default(false)
+  webhookUrl          String?
+
+  trialEndsAt         DateTime?
+  contractStartDate   DateTime?
+  contractEndDate     DateTime?
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  // Relations
+  emsUsers            EMSUser[]
+  groups              Group[]
+  events              Event[]
+  emergencyContacts   EmergencyContact[]
+  mutualAidAgreementsFrom MutualAidAgreement[] @relation("MutualAidFrom")
+  mutualAidAgreementsTo   MutualAidAgreement[] @relation("MutualAidTo")
+  datasetAccess       DatasetClientAccess[]
+  alerts              Alert[]
+
+  @@map("clients")
+}
+
+model Group {
+  id                  String     @id @default(uuid())
+  name                String
+  description         String?
+  type                GroupType
+  isActive            Boolean    @default(true)
+  isPublic            Boolean    @default(false)
+  maxMembers          Int?
+
+  // Location
+  baseLocationLat     Float?
+  baseLocationLng     Float?
+  operationalRadius   Float?     // miles
+
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  // Client association
+  clientId            String
+  client              Client     @relation(fields: [clientId], references: [id])
+
+  // Relations
+  emsMembers          EMSGroupMember[]
+  publicMembers       PublicGroupMember[]
+  workspaces          EventWorkspace[]
+
+  @@map("groups")
+}
+
+model EMSGroupMember {
+  id                  String    @id @default(uuid())
+  isLeader            Boolean   @default(false)
+  joinedAt            DateTime  @default(now())
+  leftAt              DateTime?
+  isActive            Boolean   @default(true)
+
+  // Relations
+  userId              String
+  user                EMSUser   @relation(fields: [userId], references: [id])
+  groupId             String
+  group               Group     @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId])
+  @@map("ems_group_members")
+}
+
+model PublicGroupMember {
+  id                  String    @id @default(uuid())
+  isLeader            Boolean   @default(false)
+  joinedAt            DateTime  @default(now())
+  leftAt              DateTime?
+  isActive            Boolean   @default(true)
+  contributionScore   Int       @default(0)
+
+  // Relations
+  userId              String
+  user                PublicUser @relation(fields: [userId], references: [id])
+  groupId             String
+  group               Group      @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId])
+  @@map("public_group_members")
+}
+
+// ============================================================================
+// MODELS - Events & Status
+// ============================================================================
+
+model Event {
+  id                  String      @id @default(uuid())
+  name                String
+  description         String?
+  type                EventType
+  severity            Severity
+  status              EventStatus @default(MONITORING)
+
+  // Location
+  locationLat         Float?
+  locationLng         Float?
+  locationName        String?
+  affectedAreaGeoJson Json?       // Polygon GeoJSON
+
+  // Timeline
+  startedAt           DateTime?
+  expectedEndAt       DateTime?
+  resolvedAt          DateTime?
+
+  // External references
+  externalId          String?     // NWS event ID, etc.
+  externalSource      String?
+  externalUrl         String?
+
+  // Metadata
+  estimatedAffectedPopulation Int?
+  isPublic            Boolean     @default(true)
+  requiresEvacuation  Boolean     @default(false)
+
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  // Client association (optional - some events are global)
+  clientId            String?
+  client              Client?     @relation(fields: [clientId], references: [id])
+
+  // Created by (one of these will be set)
+  createdByAdminId    String?
+  createdByAdmin      AdminUser?  @relation("EventCreatedByAdmin", fields: [createdByAdminId], references: [id])
+  createdByEMSId      String?
+  createdByEMS        EMSUser?    @relation("EventCreatedByEMS", fields: [createdByEMSId], references: [id])
+
+  // Relations
+  workspaces          EventWorkspace[]
+  personStatuses      PersonStatus[]
+  mapTags             MapTag[]
+  communityPosts      CommunityPost[]
+  alerts              Alert[]
+
+  @@map("events")
+}
+
+model EventWorkspace {
+  id                  String       @id @default(uuid())
+  name                String
+  description         String?
+  isActive            Boolean      @default(true)
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  // Relations
+  eventId             String
+  event               Event        @relation(fields: [eventId], references: [id])
+  groupId             String?
+  group               Group?       @relation(fields: [groupId], references: [id])
+
+  participants        WorkspaceParticipant[]
+  mapTags             MapTag[]
+
+  @@map("event_workspaces")
+}
+
+model WorkspaceParticipant {
+  id                  String       @id @default(uuid())
+  accessLevel         AccessLevel  @default(VIEWER)
+  joinedAt            DateTime     @default(now())
+  leftAt              DateTime?
+  isActive            Boolean      @default(true)
+  lastSeenAt          DateTime?
+
+  // Relations
+  workspaceId         String
+  workspace           EventWorkspace @relation(fields: [workspaceId], references: [id])
+
+  // One of these will be set
+  emsUserId           String?
+  emsUser             EMSUser?     @relation("EMSWorkspaceParticipant", fields: [emsUserId], references: [id])
+  publicUserId        String?
+  publicUser          PublicUser?  @relation("PublicWorkspaceParticipant", fields: [publicUserId], references: [id])
+
+  @@unique([workspaceId, emsUserId])
+  @@unique([workspaceId, publicUserId])
+  @@map("workspace_participants")
+}
+
+model PersonStatus {
+  id                  String           @id @default(uuid())
+
+  // Reporter info
+  reporterType        ReporterType
+  reporterNote        String?
+
+  // Subject info
+  subjectType         SubjectType
+  subjectName         String?
+  subjectPhone        String?
+  subjectEmail        String?
+  numberOfPeople      Int              @default(1) // For family/group reports
+
+  // Status
+  safetyStatus        SafetyStatus
+  confidence          StatusConfidence @default(REPORTED)
+  needsDescription    String?
+
+  // Location
+  locationLat         Float?
+  locationLng         Float?
+  locationDescription String?
+
+  // Verification
+  isVerified          Boolean          @default(false)
+  verifiedAt          DateTime?
+  verifiedByEMSId     String?
+
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  // Relations
+  eventId             String
+  event               Event            @relation(fields: [eventId], references: [id])
+
+  // Reported by (one of these will be set)
+  reportedByPublicId  String?
+  reportedByPublic    PublicUser?      @relation("PersonStatusByPublic", fields: [reportedByPublicId], references: [id])
+  reportedByEMSId     String?
+  reportedByEMS       EMSUser?         @relation("PersonStatusByEMS", fields: [reportedByEMSId], references: [id])
+
+  // Subject (if a registered user)
+  subjectUserId       String?
+  subjectUser         PublicUser?      @relation("PersonStatusSubject", fields: [subjectUserId], references: [id])
+
+  @@map("person_statuses")
+}
+
+// ============================================================================
+// MODELS - Map Tags
+// ============================================================================
+
+model MapTag {
+  id                  String         @id @default(uuid())
+  title               String
+  description         String?
+  creatorType         CreatorType
+  tagType             TagType
+  visibility          TagVisibility  @default(PUBLIC)
+  status              TagStatus      @default(UNVERIFIED)
+
+  // Location
+  locationLat         Float
+  locationLng         Float
+  locationAddress     String?
+  radiusMeters        Float?         // For area-based tags
+
+  // Rich content
+  imageUrls           String[]
+  externalUrl         String?
+
+  // Validity
+  validFrom           DateTime       @default(now())
+  validUntil          DateTime?
+
+  // Verification
+  confirmationCount   Int            @default(0)
+  disputeCount        Int            @default(0)
+
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  // Relations
+  eventId             String?
+  event               Event?         @relation(fields: [eventId], references: [id])
+  workspaceId         String?
+  workspace           EventWorkspace? @relation(fields: [workspaceId], references: [id])
+
+  // Created by (one of these will be set based on creatorType)
+  createdByAdminId    String?
+  createdByAdmin      AdminUser?     @relation("MapTagCreatedByAdmin", fields: [createdByAdminId], references: [id])
+  createdByEMSId      String?
+  createdByEMS        EMSUser?       @relation("MapTagCreatedByEMS", fields: [createdByEMSId], references: [id])
+  createdByPublicId   String?
+  createdByPublic     PublicUser?    @relation("MapTagCreatedByPublic", fields: [createdByPublicId], references: [id])
+
+  confirmations       TagConfirmation[]
+
+  @@map("map_tags")
+}
+
+model TagConfirmation {
+  id                  String    @id @default(uuid())
+  isConfirmation      Boolean   @default(true) // false = dispute
+  comment             String?
+  createdAt           DateTime  @default(now())
+
+  // Relations
+  tagId               String
+  tag                 MapTag    @relation(fields: [tagId], references: [id])
+
+  // Confirmed by (one of these will be set)
+  confirmedByEMSId    String?
+  confirmedByEMS      EMSUser?  @relation("TagConfirmationByEMS", fields: [confirmedByEMSId], references: [id])
+  confirmedByPublicId String?
+  confirmedByPublic   PublicUser? @relation("TagConfirmationByPublic", fields: [confirmedByPublicId], references: [id])
+
+  @@unique([tagId, confirmedByEMSId])
+  @@unique([tagId, confirmedByPublicId])
+  @@map("tag_confirmations")
+}
+
+// ============================================================================
+// MODELS - Community
+// ============================================================================
+
+model CommunityPost {
+  id                  String       @id @default(uuid())
+  title               String
+  content             String
+  postType            PostType
+  reviewStatus        ReviewStatus @default(PENDING)
+  postStatus          PostStatus   @default(PUBLISHED)
+
+  // Location (optional)
+  locationLat         Float?
+  locationLng         Float?
+  locationName        String?
+
+  // Media
+  imageUrls           String[]
+
+  // Engagement
+  upvoteCount         Int          @default(0)
+  downvoteCount       Int          @default(0)
+  commentCount        Int          @default(0)
+  viewCount           Int          @default(0)
+
+  // Moderation
+  moderationNote      String?
+  moderatedAt         DateTime?
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  // Relations
+  authorId            String
+  author              PublicUser   @relation(fields: [authorId], references: [id])
+  eventId             String?
+  event               Event?       @relation(fields: [eventId], references: [id])
+
+  votes               PostVote[]
+  comments            PostComment[]
+
+  @@map("community_posts")
+}
+
+model PostVote {
+  id                  String    @id @default(uuid())
+  isUpvote            Boolean
+  createdAt           DateTime  @default(now())
+
+  // Relations
+  postId              String
+  post                CommunityPost @relation(fields: [postId], references: [id])
+  userId              String
+  user                PublicUser    @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId])
+  @@map("post_votes")
+}
+
+model PostComment {
+  id                  String       @id @default(uuid())
+  content             String
+  reviewStatus        ReviewStatus @default(AUTO_APPROVED)
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  // Relations
+  postId              String
+  post                CommunityPost @relation(fields: [postId], references: [id])
+  authorId            String
+  author              PublicUser    @relation(fields: [authorId], references: [id])
+
+  // Self-referential for replies
+  parentId            String?
+  parent              PostComment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies             PostComment[] @relation("CommentReplies")
+
+  @@map("post_comments")
+}
+
+// ============================================================================
+// MODELS - Alerts
+// ============================================================================
+
+model Alert {
+  id                  String      @id @default(uuid())
+  title               String
+  message             String
+  alertType           AlertType
+  source              AlertSource
+  severity            Severity
+
+  // Geographic targeting
+  targetLocationLat   Float?
+  targetLocationLng   Float?
+  targetRadiusMiles   Float?
+  targetAreaGeoJson   Json?       // Polygon for complex areas
+  targetZipCodes      String[]
+
+  // External reference
+  externalId          String?
+  externalUrl         String?
+
+  // Timing
+  effectiveAt         DateTime    @default(now())
+  expiresAt           DateTime?
+
+  isActive            Boolean     @default(true)
+
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  // Relations
+  eventId             String?
+  event               Event?      @relation(fields: [eventId], references: [id])
+  clientId            String?
+  client              Client?     @relation(fields: [clientId], references: [id])
+  createdByAdminId    String?
+  createdByAdmin      AdminUser?  @relation("AlertCreatedByAdmin", fields: [createdByAdminId], references: [id])
+
+  notifications       UserNotification[]
+
+  @@map("alerts")
+}
+
+model UserNotification {
+  id                  String           @id @default(uuid())
+  type                NotificationType
+  title               String
+  message             String
+
+  // Delivery status
+  sentAt              DateTime?
+  deliveredAt         DateTime?
+  readAt              DateTime?
+  failedAt            DateTime?
+  failureReason       String?
+
+  // Deep link
+  actionUrl           String?
+
+  createdAt           DateTime         @default(now())
+
+  // Relations
+  userId              String
+  user                PublicUser       @relation(fields: [userId], references: [id])
+  alertId             String?
+  alert               Alert?           @relation(fields: [alertId], references: [id])
+
+  // Sent by (optional - for direct messages from EMS)
+  sentByEMSId         String?
+  sentByEMS           EMSUser?         @relation("NotificationSentByEMS", fields: [sentByEMSId], references: [id])
+
+  @@map("user_notifications")
+}
+
+// ============================================================================
+// MODELS - Admin
+// ============================================================================
+
+model EmergencyContact {
+  id                  String          @id @default(uuid())
+  name                String
+  category            ContactCategory
+  phone               String
+  alternatePhone      String?
+  email               String?
+  website             String?
+  address             String?
+  description         String?
+  is24Hours           Boolean         @default(false)
+  isActive            Boolean         @default(true)
+
+  // Location
+  locationLat         Float?
+  locationLng         Float?
+
+  displayOrder        Int             @default(0)
+
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  // Client association (null = global contact)
+  clientId            String?
+  client              Client?         @relation(fields: [clientId], references: [id])
+
+  @@map("emergency_contacts")
+}
+
+model MutualAidAgreement {
+  id                  String    @id @default(uuid())
+  name                String
+  description         String?
+  documentUrl         String?
+
+  // Terms
+  effectiveDate       DateTime
+  expirationDate      DateTime?
+  autoRenewal         Boolean   @default(false)
+
+  isActive            Boolean   @default(true)
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relations - bidirectional agreement between clients
+  fromClientId        String
+  fromClient          Client    @relation("MutualAidFrom", fields: [fromClientId], references: [id])
+  toClientId          String
+  toClient            Client    @relation("MutualAidTo", fields: [toClientId], references: [id])
+
+  @@unique([fromClientId, toClientId])
+  @@map("mutual_aid_agreements")
+}
+
+model MapDataset {
+  id                  String        @id @default(uuid())
+  name                String
+  description         String?
+  type                DatasetType
+  status              DatasetStatus @default(PENDING_UPLOAD)
+
+  // Source
+  sourceUrl           String?
+  sourceAttribution   String?
+  sourceUpdatedAt     DateTime?
+
+  // Storage
+  storageUrl          String?
+  fileSizeBytes       BigInt?
+
+  // Geographic bounds
+  boundsMinLat        Float?
+  boundsMinLng        Float?
+  boundsMaxLat        Float?
+  boundsMaxLng        Float?
+
+  // Metadata
+  featureCount        Int?
+  processingError     String?
+
+  isPublic            Boolean       @default(false)
+
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  lastProcessedAt     DateTime?
+
+  // Relations
+  createdByAdminId    String
+  createdByAdmin      AdminUser     @relation("DatasetCreatedByAdmin", fields: [createdByAdminId], references: [id])
+
+  clientAccess        DatasetClientAccess[]
+
+  @@map("map_datasets")
+}
+
+model DatasetClientAccess {
+  id                  String    @id @default(uuid())
+  grantedAt           DateTime  @default(now())
+  expiresAt           DateTime?
+  isActive            Boolean   @default(true)
+
+  // Relations
+  datasetId           String
+  dataset             MapDataset @relation(fields: [datasetId], references: [id])
+  clientId            String
+  client              Client     @relation(fields: [clientId], references: [id])
+
+  @@unique([datasetId, clientId])
+  @@map("dataset_client_access")
+}
+
+model Demo {
+  id                  String    @id @default(uuid())
+  name                String
+  description         String?
+  scenarioData        Json      // Pre-configured demo scenario
+
+  isActive            Boolean   @default(true)
+  isPublic            Boolean   @default(false)
+
+  accessCode          String?   @unique
+  maxSessions         Int       @default(100)
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Relations
+  createdByAdminId    String
+  createdByAdmin      AdminUser @relation(fields: [createdByAdminId], references: [id])
+
+  sessions            DemoSession[]
+
+  @@map("demos")
+}
+
+model DemoSession {
+  id                  String    @id @default(uuid())
+  sessionToken        String    @unique @default(uuid())
+
+  // Guest info (for non-authenticated demo users)
+  guestName           String?
+  guestEmail          String?
+  guestCompany        String?
+
+  startedAt           DateTime  @default(now())
+  endedAt             DateTime?
+  lastActivityAt      DateTime  @default(now())
+
+  // Session data
+  sessionState        Json?
+  feedbackRating      Int?
+  feedbackComment     String?
+
+  // Relations
+  demoId              String
+  demo                Demo      @relation(fields: [demoId], references: [id])
+  conductedByAdminId  String?
+  conductedByAdmin    AdminUser? @relation(fields: [conductedByAdminId], references: [id])
+
+  @@map("demo_sessions")
+}

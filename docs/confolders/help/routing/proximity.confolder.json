@@ -1,0 +1,159 @@
+{
+  "module_id": "help.routing.proximity",
+  "module_name": "Geofence Proximity Module",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "updated_by": "claude-opus-4",
+  "bookmark": {
+    "status": "Core proximity engine for help routing",
+    "return_note": "in-progress",
+    "priority": [
+      "Census API integration timing",
+      "Minimum Beacon user density for feature activation"
+    ]
+  },
+  "M": {
+    "M1_beacon_versions": [
+      "MVP"
+    ],
+    "M2_module_type": "service",
+    "M3_hierarchy_path": "Product Manager > Help > Routing > Proximity",
+    "M4_parent": "help.routing",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-opus-4",
+        "role": "architect",
+        "from": "2026-04-04T14:58:58Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "requester_location",
+        "source": "help.requests",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": [
+          "help.requests"
+        ]
+      },
+      {
+        "name": "population_density",
+        "source": "Census API / cached",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "batch-monthly",
+        "dependencies": []
+      },
+      {
+        "name": "beacon_user_density",
+        "source": "users geohash index",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "batch-daily",
+        "dependencies": [
+          "community.identity"
+        ]
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "nearby_radius",
+        "consumers": [
+          "help.routing.capability",
+          "help.routing.notifications"
+        ],
+        "format": "number (meters)",
+        "schema_ref": null,
+        "frequency": "per-request",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Calculate dynamic radius from population density + user density + urgency",
+        "algorithm": "Inverse density scaling with urgency multiplier",
+        "latency_sla": "<50ms",
+        "accuracy_target": null
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity",
+        "description": "User base for density calculation",
+        "data_format": "geohash grid",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "Census API",
+        "description": "Population density data",
+        "data_format": "JSON",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.routing",
+        "description": "Radius used to query nearby helpers",
+        "data_format": "number",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Geospatial query on large user set. Census data staleness.",
+    "P2_defensibility": "Dynamic radius avoids one-size-fits-all. Adapts to rural vs urban automatically.",
+    "P3_confidence_level": "NR",
+    "P4_failure_modes": [
+      "Census data outdated in rapidly changing areas",
+      "Beacon user density too low in new markets",
+      "Radius too large returns irrelevant helpers"
+    ],
+    "P5_backup_plan": "Fallback to fixed radius tiers (2km urban, 10km suburban, 30km rural) if density data unavailable.",
+    "P6_backup_plan_test": "Simulate failure scenario in staging with mock data",
+    "P7_testing_strategy": "Unit test radius calculation. Integration test with mock density grids. A/B test radius sizes.",
+    "P8_benchmarks": "Radius calculation <50ms. Correct tier selection >95% of cases."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T14:58:58Z",
+        "who": "claude-opus-4",
+        "description": "Initial CONFolder creation",
+        "version": "0.1"
+      }
+    ],
+    "CH2_current_version": "0.1"
+  },
+  "L": {
+    "L1_legal_considerations": "NR",
+    "L2_regulatory_frameworks": "NR",
+    "L3_consent_requirements": "NR",
+    "L4_liability_notes": "NR"
+  },
+  "F": {
+    "F1_cost_considerations": "Census API (free). Geohash computation negligible. Cache density grids in Redis.",
+    "F2_accounting_considerations": "Allocated to help module operational budget",
+    "F3_revenue_impact": "NR"
+  },
+  "S": {
+    "S1_cybersecurity": "No PII in density calculations. Aggregated data only.",
+    "S2_data_privacy": "User locations used for proximity only, not stored in this module.",
+    "S3_encryption_requirements": "NR",
+    "S4_access_control": "Authenticated API access only.",
+    "S5_audit_requirements": "NR"
+  },
+  "X": {
+    "X1_notes": 2,
+    "X2_open_questions": "Select Census data granularity level",
+    "X3_related_research": "NR"
+  }
+}

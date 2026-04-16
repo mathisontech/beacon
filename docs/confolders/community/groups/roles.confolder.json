@@ -1,0 +1,202 @@
+{
+  "module_id": "community.groups.roles",
+  "module_name": "Group Roles & Permissions",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting permissions matrix finalization. Founder transfer workflow needs specification.",
+    "priority": 2
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Groups > Roles",
+    "M4_parent": "community.groups",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "role_assignment",
+        "source": "Founder/admin assigns role to member",
+        "format": "JSON",
+        "schema_ref": "{ group_id, user_id, role: 'founder'|'admin'|'moderator'|'member'|'follower' }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "permission_check",
+        "source": "User attempts action requiring permission",
+        "format": "JSON",
+        "schema_ref": "{ user_id, group_id, action: 'create_channel'|'remove_member'|'pin_message'|etc }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "founder_transfer",
+        "source": "Current founder transfers founder status to another member",
+        "format": "JSON",
+        "schema_ref": "{ group_id, from_user_id, to_user_id }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "permission_grant_or_deny",
+        "consumers": ["action executor (send message, create channel, etc)"],
+        "format": "JSON",
+        "schema_ref": "{ action, permitted: boolean, reason?: string }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "member_role_list",
+        "consumers": ["group settings UI, member directory"],
+        "format": "JSON",
+        "schema_ref": "[{ user_id, name, role, date_assigned }]",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "role_change_notification",
+        "consumers": ["notification system, audit log"],
+        "format": "JSON",
+        "schema_ref": "{ user_id, group_id, old_role, new_role, assigned_by, timestamp }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Lookup user's role in group",
+        "algorithm": "Query group_members table for (group_id, user_id). Fetch role.",
+        "latency_sla": "<100ms",
+        "accuracy_target": "100% correct role fetch"
+      },
+      {
+        "operation": "Check permission",
+        "algorithm": "Lookup role. Compare against permissions matrix. Return true/false.",
+        "latency_sla": "<50ms",
+        "accuracy_target": "100% correct permission decision"
+      },
+      {
+        "operation": "Assign role",
+        "algorithm": "Verify assigner has permission to assign (founder/admin only). Update group_members.role. Notify user.",
+        "latency_sla": "<200ms",
+        "accuracy_target": "100% correct role assignment"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "group_creation",
+        "description": "Group created. Creator becomes founder.",
+        "data_format": "group_id, founder_user_id",
+        "dependencies": ["community.groups.types"]
+      },
+      {
+        "step": 2,
+        "module_id": "member_join",
+        "description": "User joins group (via invite code, request, or auto-add). Default role: member (or follower if follower groups enabled).",
+        "data_format": "group_members entry with default role",
+        "dependencies": []
+      },
+      {
+        "step": 3,
+        "module_id": "user_action",
+        "description": "User attempts action in group",
+        "data_format": "action, user_id, group_id",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 4,
+        "module_id": "permission_check",
+        "description": "User's role looked up and permission checked against matrix",
+        "data_format": "permitted: true/false",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "action_execution_or_denial",
+        "description": "If permitted: execute action (send message, create channel, etc). If denied: show error.",
+        "data_format": "action result or error",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "audit_log",
+        "description": "If action taken: log to audit_log (especially for admin/mod actions)",
+        "data_format": "audit entry",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Permission checking latency (should be very fast, <50ms). Role assignment coordination (especially founder transfer). Permissions matrix complexity (many roles × many actions).",
+    "P2_defensibility": "Explicit roles prevent unauthorized actions. Permissions matrix is simple and verifiable. Founder transfer is controlled operation (only founder can initiate). Audit log tracks all role changes.",
+    "P3_confidence_level": "Very high confidence. Simple role-based access control (RBAC) is well-established pattern. Permissions matrix is deterministic.",
+    "P4_failure_modes": [
+      "Permission check fails → action denied even though user has permission (mitigate: comprehensive test of permissions matrix)",
+      "Role assignment race condition → two people promoted simultaneously (mitigate: database constraint on founder, one-founder-per-group)",
+      "Founder transfer blocked → group stuck without admin (mitigate: super-admin override in system)",
+      "Permission escalation → user gains unauthorized permission (mitigate: audit all role changes)"
+    ],
+    "P5_backup_plan": "If permission check unavailable: deny action (fail-closed). If role assignment fails: retry with exponential backoff. If founder transfer fails: system admin can override.",
+    "P6_backup_plan_test": "Simulate permission check failure. Test race condition on founder transfer. Test permission escalation attempts. Test edge cases: user has role, role gets deleted, user still has old permissions.",
+    "P7_testing_strategy": "Unit tests for permissions matrix (test each role × action combination). Integration tests for role assignment. Load tests for permission checking (1000 checks/s). End-to-end tests for founder transfer workflow. Security audit for permission escalation possibilities.",
+    "P8_benchmarks": "Permission check: <50ms. Role lookup: <100ms. Role assignment: <200ms. Founder transfer: <500ms. False positive (permission granted incorrectly): 0%. False negative (permission denied incorrectly): 0%."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for roles module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Role-based access prevents unauthorized moderation/removal. Audit trail tracks who did what (accountability). Founder transfer is controlled (prevents hostile takeover). Follower role enables observation without participation (reduces liability).",
+    "L2_regulatory_frameworks": ["GDPR (access control, audit trail)", "CDA Section 230 (platform moderator actions)"],
+    "L3_consent_requirements": "Implicit consent to role rules by joining group. No separate consent needed.",
+    "L4_liability_notes": "Moderation actions (member removal) must be auditable. Mitigation: all mod actions logged. Founder transfer must be transparent (both parties see change). Permission escalation could enable abuse. Mitigation: audit trail + regular review."
+  },
+  "F": {
+    "F1_cost_considerations": "Role storage: <10B per member (just role enum). Permissions matrix: static (no cost). Permission checking: negligible compute.",
+    "F2_accounting_considerations": "Operational cost, no special accounting.",
+    "F3_revenue_impact": "Role system enables moderation (safe groups, higher engagement). Moderate positive impact."
+  },
+  "S": {
+    "S1_cybersecurity": "Roles are stored plaintext (low sensitivity). Founder role has single-leader constraint (database-enforced). Permission checks cached (prevent oracle attacks on permission system). Rate limiting on role assignment (prevent spam promotion).",
+    "S2_data_privacy": "Role list is semi-public (members see each other's roles). No sensitive data in roles.",
+    "S3_encryption_requirements": "NR - no encryption needed (roles are not sensitive)",
+    "S4_access_control": "Only founder/admin can assign roles. Users can view own role and group member roles. Public roles list visible to group members.",
+    "S5_audit_requirements": "Log all role assignments and changes. Log all permission denials (for troubleshooting). Audit trail retention: 1 year."
+  },
+  "X": {
+    "X1_notes": "Roles are essential for group governance. Five-level hierarchy (founder, admin, moderator, member, follower) balances flexibility with simplicity. Founder single-leader constraint prevents power struggles. Follower role unique to Beacon (enables observation without participation).",
+    "X2_open_questions": [
+      "Can admin promote another admin? (yes, for delegation)",
+      "Can founder transfer to admin? (yes, with both parties confirming)",
+      "What if founder leaves group? (admin auto-inherits founder? or group orphaned?)",
+      "Can member see who has admin role? (yes, but not admin emails or sensitive info)"
+    ],
+    "X3_related_research": "Role-based access control (RBAC) patterns. Permission matrices in governance. Community moderation best practices."
+  }
+}

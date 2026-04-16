@@ -207,6 +207,36 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
         signs: "NE Rift fed the 2022 and 1984 eruptions and is the more probable next vent location, but still no short-term precursors.",
       },
     ],
+    hazardRisks: {
+      lava: {
+        level: "extreme",
+        note: "1950 SW Rift flows reached the ocean in 3 hours, crossing Hwy 11; historical flows have repeatedly threatened Hilo, Kona, and Saddle Road.",
+      },
+      gas: {
+        level: "high",
+        note: "Sustained SO₂ emissions during eruptions create vog that drifts across the whole island and causes respiratory illness downwind.",
+      },
+      collapse: {
+        level: "moderate",
+        note: "The massive flanks occasionally shed large submarine landslides on geologic timescales; historical flank adjustment produced M7.9 in 1868.",
+      },
+      ballistic: {
+        level: "low",
+        note: "Fire-fountaining can throw spatter near vents but ballistic blocks are rare — eruptions are not explosive.",
+      },
+      ashfall: {
+        level: "low",
+        note: "Local tephra only — Mauna Loa does not sustain tall eruption columns.",
+      },
+      pyroclastic: {
+        level: "low",
+        note: "Hawaiian-style effusive eruptions almost never produce pyroclastic density currents.",
+      },
+      tsunami: {
+        level: "low",
+        note: "Flank-failure tsunami is possible on geologic timescales; the 1868 M7.9 did generate a local tsunami.",
+      },
+    },
     quakeBaseline:
       "Normal background: 10–30 small M<2 quakes per day, mostly <10 km depth. Sustained swarms or deep long-period events signal magma ascent.",
     deformationBaseline:
@@ -230,6 +260,28 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "Uninhabited island. Main risk is ash clouds drifting into the North Pacific aviation corridor.",
+    hazardRisks: {
+      ashfall: {
+        level: "high",
+        note: "Ash from dome-collapse explosions drifts into the North Pacific aviation corridor; a significant hazard to trans-Pacific flights.",
+      },
+      pyroclastic: {
+        level: "moderate",
+        note: "Summit dome collapses can generate small pyroclastic flows on the upper flanks.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Explosive dome failures throw blocks across the summit crater.",
+      },
+      gas: {
+        level: "moderate",
+        note: "Persistent SO₂ emissions from the active dome.",
+      },
+      lahar: {
+        level: "low",
+        note: "Limited glacier cover; lahar potential is small compared to Cook Inlet volcanoes.",
+      },
+    },
     quakeBaseline:
       "Normal background: a few small quakes per day near the summit. Current eruption has kept activity elevated for years.",
     deformationBaseline:
@@ -252,6 +304,24 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "low",
     dangerExplanation:
       "Uninhabited remote island. Main risk is short-lived ash clouds affecting North Pacific flights.",
+    hazardRisks: {
+      ashfall: {
+        level: "moderate",
+        note: "Small ash columns from Mount Cerberus can drift into Aleutian flight corridors; short-lived but hazardous to aviation.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Summit explosions throw blocks around the Cerberus cone.",
+      },
+      gas: {
+        level: "moderate",
+        note: "Persistent SO₂ and H₂S emissions from active vents.",
+      },
+      pyroclastic: {
+        level: "low",
+        note: "No substantial dome or vent geometry for sustained pyroclastic flows.",
+      },
+    },
     quakeBaseline:
       "Normal background: very few quakes. Monitoring is sparse — most detection is satellite-based.",
     deformationBaseline:
@@ -278,6 +348,36 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "Uninhabited flanks. Main risks are aviation ash clouds and lahars down the flanks from ice melt during eruptions.",
+    hazardRisks: {
+      ashfall: {
+        level: "extreme",
+        note: "Tall (15+ km) ash columns routinely cross the North Pacific air corridor; 1999 and 2023 eruptions prompted multi-day aviation code Red advisories.",
+      },
+      lahar: {
+        level: "high",
+        note: "Glacier ice on the summit cone melts rapidly during eruption, sending lahars down several flank valleys.",
+      },
+      ballistic: {
+        level: "high",
+        note: "Summit fire-fountaining launches bombs and blocks across the upper edifice.",
+      },
+      pyroclastic: {
+        level: "moderate",
+        note: "Hot avalanches from the vent have been documented in recent eruptions.",
+      },
+      lava: {
+        level: "moderate",
+        note: "Small summit lava flows occur, but do not reach inhabited areas.",
+      },
+      gas: {
+        level: "moderate",
+        note: "Persistent SO₂ emissions during eruptive episodes.",
+      },
+      collapse: {
+        level: "moderate",
+        note: "The steep symmetric cone is hydrothermally altered at the summit and could shed large rockfalls.",
+      },
+    },
     quakeBaseline:
       "Normal background: a handful of small quakes per day. Shishaldin's eruptions are usually preceded by sustained seismic tremor for hours to days.",
     deformationBaseline:
@@ -318,6 +418,32 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
         signs: "Glacier ice on the flanks means any strong eruption will generate lahars reaching the shoreline. Cold Bay is downwind but not in the direct path.",
       },
     ],
+    hazardRisks: {
+      ashfall: {
+        level: "extreme",
+        note: "Pavlof ash clouds routinely reach 8–15 km and drift across the Pacific air corridor; Cold Bay and other Alaska Peninsula villages get direct fallout.",
+      },
+      ballistic: {
+        level: "high",
+        note: "Sudden-onset fire fountaining flings hot bombs and lapilli across the upper edifice.",
+      },
+      lahar: {
+        level: "high",
+        note: "Summit ice and snow melt during eruption generate lahars that can reach the coastline in under an hour.",
+      },
+      lava: {
+        level: "moderate",
+        note: "Short lava flows and spatter-fed flows from the summit vent during eruptive episodes.",
+      },
+      pyroclastic: {
+        level: "moderate",
+        note: "Hot block-and-ash avalanches can accompany column collapse.",
+      },
+      gas: {
+        level: "moderate",
+        note: "Heavy SO₂ plume during eruptions; negligible between episodes.",
+      },
+    },
     quakeBaseline:
       "Normal background: a few small quakes per day. Eruptions often begin with little to no clear seismic warning — minutes to hours of tremor before ash reaches the sky.",
     deformationBaseline:
@@ -454,6 +580,28 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
         signs: "Active magmatic CO₂ emission. Dead tree zones around Horseshoe Lake. Enclosed spaces can be lethal. This is a present hazard, not a future one.",
       },
     ],
+    hazardRisks: {
+      gas: {
+        level: "high",
+        note: "Magmatic CO₂ vents around Mammoth Mountain kill trees in known zones (Horseshoe Lake) and have killed ski patrollers in enclosed huts; this is a present hazard.",
+      },
+      lava: {
+        level: "moderate",
+        note: "Rhyolitic domes and obsidian flows could cut Hwy 395 and bury parts of the Mammoth Lakes area during a new vent opening.",
+      },
+      pyroclastic: {
+        level: "moderate",
+        note: "Explosive rhyolite eruptions would generate pyroclastic density currents across the caldera floor; unlikely on human timescales but physically possible.",
+      },
+      ashfall: {
+        level: "moderate",
+        note: "Historical rhyolite eruptions deposited tephra across the Eastern Sierra; a VEI 7 (Bishop Tuff-scale) would blanket much of the western US.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Hydrothermal explosions around Hot Creek and Casa Diablo can throw rocks short distances.",
+      },
+    },
     quakeBaseline:
       "Normal background: tens of small quakes per day. Swarms of hundreds to thousands of quakes have occurred multiple times since 1980 without eruption.",
     deformationBaseline:
@@ -476,6 +624,32 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "high",
     dangerExplanation:
       "Lahars are the primary threat to populated valleys — the Sandy and Hood Rivers drain toward the Columbia River, past Sandy and Hood River cities.",
+    hazardRisks: {
+      lahar: {
+        level: "extreme",
+        note: "Glacier melt during eruption sends lahars down the Sandy and Hood Rivers; reaches Sandy and the I-84 corridor on the Columbia in under a few hours.",
+      },
+      pyroclastic: {
+        level: "high",
+        note: "Crater Rock dome (1781) collapsed repeatedly, generating pyroclastic flows on the upper south flank.",
+      },
+      ashfall: {
+        level: "high",
+        note: "Portland (~80 km west) would receive ash depending on wind; historical layers are found across eastern Oregon.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Summit dome explosions launch blocks across the upper flanks and the climbing routes.",
+      },
+      gas: {
+        level: "moderate",
+        note: "Active fumaroles near Crater Rock emit SO₂ and H₂S; downwind impact would expand during eruption.",
+      },
+      lava: {
+        level: "moderate",
+        note: "Dome-building eruptions produce short, slow lava lobes near the summit rather than far-reaching flows.",
+      },
+    },
     quakeBaseline:
       "Normal background: occasional small quakes, mostly <M2, tens per year. Swarms near the summit are rare and notable.",
     deformationBaseline:
@@ -524,6 +698,40 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
         signs: "Small glacial outbursts occur from time to time without eruption. Seasonal risk — watch during heavy snowmelt or intense rainfall.",
       },
     ],
+    hazardRisks: {
+      lahar: {
+        level: "extreme",
+        note: "150,000+ people live in inundation zones; the Osceola Mudflow (~5,500 years ago) reached Auburn, Kent, and south Tacoma. Can happen WITHOUT an eruption.",
+      },
+      pyroclastic: {
+        level: "high",
+        note: "Dome-collapse pyroclastic flows occur during explosive eruptions and feed directly into the lahar-generating snow/ice cover.",
+      },
+      collapse: {
+        level: "high",
+        note: "35+ glaciers sit on hydrothermally weakened rock; a flank collapse is the trigger most likely to generate an Osceola-scale lahar.",
+      },
+      ashfall: {
+        level: "high",
+        note: "Puget Sound region downwind; Tacoma and Seattle would receive ash depending on wind direction during eruption.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Summit explosions would throw blocks across the upper flanks; limited population at altitude.",
+      },
+      gas: {
+        level: "moderate",
+        note: "Summit fumaroles emit SO₂/H₂S; impact would expand during unrest.",
+      },
+      flood: {
+        level: "moderate",
+        note: "Glacial outburst floods from Nisqually and Kautz glaciers happen episodically without eruption.",
+      },
+      lava: {
+        level: "low",
+        note: "Far-travelled lava flows are not characteristic of Rainier.",
+      },
+    },
     quakeBaseline:
       "Normal background: ~20 quakes per month, mostly <M2, mostly in a shallow swarm zone beneath the summit. Unusual swarms or deep long-period events warrant attention.",
     deformationBaseline:
@@ -544,6 +752,32 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "Most at-risk areas are inside Lassen Volcanic National Park. A few nearby towns could receive ashfall.",
+    hazardRisks: {
+      pyroclastic: {
+        level: "moderate",
+        note: "1915 produced a lateral blast and pyroclastic flows that swept the Devastated Area on the northeast flank — a smaller preview of St. Helens 1980.",
+      },
+      ballistic: {
+        level: "high",
+        note: "Active hydrothermal system at Bumpass Hell and Sulphur Works — sudden steam explosions can throw rocks across boardwalks used by Park visitors.",
+      },
+      ashfall: {
+        level: "moderate",
+        note: "1915 dropped ash as far as Winnemucca, Nevada (~300 km). Renewed activity would affect Redding and the northern Sacramento Valley.",
+      },
+      lahar: {
+        level: "moderate",
+        note: "Snow-melt lahars from the 1915 blast reached Hat Creek and Lost Creek.",
+      },
+      gas: {
+        level: "moderate",
+        note: "CO₂ and H₂S emissions from thermal areas; enclosed spaces are the main risk to visitors.",
+      },
+      lava: {
+        level: "low",
+        note: "Dome-style lava effusion is characteristic but not far-travelled.",
+      },
+    },
     quakeBaseline:
       "Normal background: a handful of quakes per month under the Lassen volcanic center, related to the active hydrothermal system.",
     deformationBaseline:
@@ -565,6 +799,28 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "Proximal tephra and lava flow hazards around the Newberry caldera. Low population nearby.",
+    hazardRisks: {
+      lava: {
+        level: "high",
+        note: "The Big Obsidian Flow (~1,300 years ago) is the most recent — a thick glassy flow that buried caldera-floor terrain; a renewal could close parts of Hwy 97 and affect La Pine.",
+      },
+      pyroclastic: {
+        level: "moderate",
+        note: "Rhyolitic dome collapses produce short pyroclastic density currents around the vent.",
+      },
+      ashfall: {
+        level: "moderate",
+        note: "Past eruptions deposited pumice across Central Oregon; renewed activity would affect Bend and La Pine.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Explosive opening phases launch blocks across the caldera floor.",
+      },
+      gas: {
+        level: "moderate",
+        note: "Caldera fumaroles and thermal springs emit CO₂; enclosed-space risk near the East Lake vents.",
+      },
+    },
     quakeBaseline:
       "Normal background: very few quakes. Sparse monitoring network.",
     deformationBaseline:
@@ -585,6 +841,24 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "low",
     dangerExplanation:
       "No eruption expected on human timescales. Proximal hazards would be limited to the caldera rim.",
+    hazardRisks: {
+      gas: {
+        level: "low",
+        note: "Thermal features in the caldera release minor amounts of CO₂ and H₂S; not a public health concern.",
+      },
+      flood: {
+        level: "moderate",
+        note: "A future eruption beneath the caldera lake could generate steam-driven surges and overtop the outlet in extreme scenarios.",
+      },
+      pyroclastic: {
+        level: "low",
+        note: "Possible in a renewal of caldera-floor dome activity; not expected on human timescales.",
+      },
+      lava: {
+        level: "low",
+        note: "Wizard Island-style lava flows are the most likely future activity but are inside the caldera walls.",
+      },
+    },
     quakeBaseline:
       "Normal background: very few quakes. Sparse monitoring.",
     deformationBaseline:
@@ -606,6 +880,32 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "high",
     dangerExplanation:
       "Lahars down the Nooksack and Baker River valleys would threaten the town of Concrete and downstream communities.",
+    hazardRisks: {
+      lahar: {
+        level: "extreme",
+        note: "Heavy ice cover on hydrothermally altered rock — Nooksack and Baker River valleys would carry lahars through Concrete and downstream communities within hours.",
+      },
+      gas: {
+        level: "high",
+        note: "Sherman Crater fumaroles have shown sustained elevated SO₂ and heat flux since 1975; visitors in the crater have been exposed to dangerous levels.",
+      },
+      pyroclastic: {
+        level: "moderate",
+        note: "Phreatic and dome explosions can generate small flows onto the upper flanks.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Sherman Crater steam explosions have launched rocks across the summit area.",
+      },
+      ashfall: {
+        level: "moderate",
+        note: "Bellingham (~50 km west) and the North Cascades region would receive ash from explosive phases.",
+      },
+      lava: {
+        level: "low",
+        note: "Baker's historical activity is dominated by phreatic and dome processes, not lava flows.",
+      },
+    },
     quakeBaseline:
       "Normal background: a handful of quakes per month. Sherman Crater gas emissions are monitored.",
     deformationBaseline:
@@ -626,6 +926,32 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "high",
     dangerExplanation:
       "Remote but its past eruptions have deposited ash across the Pacific Northwest. Large lahars would travel the Sauk and Skagit rivers.",
+    hazardRisks: {
+      ashfall: {
+        level: "extreme",
+        note: "Past Plinian eruptions deposited ash across the Pacific Northwest and into the Great Plains; a repeat would shut down air traffic across western North America.",
+      },
+      pyroclastic: {
+        level: "extreme",
+        note: "Glacier Peak's eruptions are characteristically large and explosive — much bigger than St. Helens 1980 — with far-travelled pyroclastic density currents.",
+      },
+      lahar: {
+        level: "high",
+        note: "Heavy ice cover feeds large lahars down the Sauk and Skagit rivers; Darrington and downstream communities are in the hazard zone.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Explosive phases would launch blocks across the upper edifice.",
+      },
+      gas: {
+        level: "moderate",
+        note: "Remote location limits current exposure, but heavy SO₂ during eruption would affect downwind air quality.",
+      },
+      lava: {
+        level: "low",
+        note: "Short dome lobes only; Glacier Peak is characterized by explosive, not effusive, behavior.",
+      },
+    },
     quakeBaseline:
       "Normal background: very few quakes. Sparse monitoring because of remoteness.",
     deformationBaseline:
@@ -675,6 +1001,36 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
         signs: "Sediment retention structures downstream mitigate chronic lahar risk. Eruption would overwhelm them.",
       },
     ],
+    hazardRisks: {
+      pyroclastic: {
+        level: "extreme",
+        note: "1980's lateral blast flattened 600 km² of forest in minutes and killed most of the 57 victims; a repeat would cover a similar area.",
+      },
+      collapse: {
+        level: "extreme",
+        note: "May 18, 1980 began with a 2.5 km³ debris avalanche — the largest in recorded history. The regrown dome has not rebuilt that capacity, but the mode is possible in future large eruptions.",
+      },
+      ashfall: {
+        level: "extreme",
+        note: "1980 dropped ash across eastern Washington, Idaho, and Montana; Yakima and Spokane were in the dark by mid-afternoon.",
+      },
+      lahar: {
+        level: "high",
+        note: "The Toutle and Cowlitz Rivers carried 1980 lahars to the Columbia; sediment-retention structures exist but could be overwhelmed.",
+      },
+      ballistic: {
+        level: "high",
+        note: "Crater dome explosions and 1980-style blasts launch blocks across the upper edifice.",
+      },
+      gas: {
+        level: "high",
+        note: "Heavy SO₂ and HCl during explosive phases affect downwind air quality across the Columbia Plateau.",
+      },
+      lava: {
+        level: "moderate",
+        note: "Crater-floor dome growth produces short lava lobes; no far-travelled flows.",
+      },
+    },
     quakeBaseline:
       "Normal background: a few quakes per month. Dense monitoring network. Any sustained swarm is taken seriously.",
     deformationBaseline:
@@ -695,6 +1051,36 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "Lahar hazard along the White Salmon and Klickitat rivers.",
+    hazardRisks: {
+      lahar: {
+        level: "high",
+        note: "Heavy glacier cover and weak hydrothermally altered rock make Mt. Adams one of the higher lahar risks in the Cascades even without an eruption — the 1997 Salt Creek debris flow happened with no volcanic activity at all.",
+      },
+      lava: {
+        level: "moderate",
+        note: "Flank vents produce basaltic andesite flows that travel a few kilometers. Slow, not a life threat on their own.",
+      },
+      ashfall: {
+        level: "moderate",
+        note: "Past eruptions were small (VEI 2). Any future tephra would be local.",
+      },
+      pyroclastic: {
+        level: "low",
+        note: "No recent record of pyroclastic-forming eruptions. Edifice collapse is the bigger explosive-style worry.",
+      },
+      collapse: {
+        level: "moderate",
+        note: "Large portions of the upper cone are hydrothermally altered and weak — a sector collapse could send a debris avalanche down the Trout Lake or White Salmon valleys.",
+      },
+      gas: {
+        level: "low",
+        note: "Quiet fumarolic output. No significant SO₂ plume.",
+      },
+      ballistic: {
+        level: "low",
+        note: "Limited to the immediate vent area in past eruptions.",
+      },
+    },
     quakeBaseline:
       "Normal background: very few quakes. Sparse monitoring.",
     deformationBaseline:
@@ -715,6 +1101,32 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "Lahars in headwater tributaries. Low population nearby.",
+    hazardRisks: {
+      ashfall: {
+        level: "high",
+        note: "Past Plinian eruptions (~16,000 years ago) deposited ash hundreds of kilometers downwind — a repeat would dust Portland and Bend.",
+      },
+      pyroclastic: {
+        level: "high",
+        note: "The Pinnacle Peak eruption produced pyroclastic flows reaching valley floors. Dome collapse during a future event would do the same.",
+      },
+      lahar: {
+        level: "high",
+        note: "Glacier-mantled summit feeds the Metolius, Whitewater, and Warm Springs drainages — towns on the Warm Springs Reservation are downslope.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Explosive phases would throw blocks several kilometers from the vent.",
+      },
+      gas: {
+        level: "low",
+        note: "No current fumarolic output of note.",
+      },
+      lava: {
+        level: "low",
+        note: "Dacitic lava tends to pile as domes rather than travel far.",
+      },
+    },
     quakeBaseline:
       "Normal background: very few quakes.",
     deformationBaseline:
@@ -735,6 +1147,32 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "A slow ground uplift west of South Sister has been ongoing since 1997. It's small and has been decelerating — it does NOT mean eruption is imminent, but it's monitored closely.",
+    hazardRisks: {
+      pyroclastic: {
+        level: "high",
+        note: "South Sister's youngest eruptions (~2,000 years ago, Rock Mesa and Devils Hill chain) began with pyroclastic density currents before building the domes.",
+      },
+      ashfall: {
+        level: "high",
+        note: "An explosive phase would dust Bend and Sisters within an hour and reach central Oregon farmland.",
+      },
+      lava: {
+        level: "moderate",
+        note: "Rhyolitic domes and obsidian flows like Rock Mesa move slowly but destroy everything in their path; new vents could open anywhere along the chain.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Opening-phase explosions would throw blocks a few kilometers — a risk to PCT hikers and forest workers.",
+      },
+      lahar: {
+        level: "moderate",
+        note: "Glaciers on South Sister and Middle Sister feed the McKenzie and Whychus drainages.",
+      },
+      gas: {
+        level: "low",
+        note: "No significant current emissions.",
+      },
+    },
     quakeBaseline:
       "Normal background: a few small quakes per month. A 2004 swarm was notable but did not lead to eruption.",
     deformationBaseline:
@@ -756,6 +1194,36 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "high",
     dangerExplanation:
       "Lahars and debris avalanches could reach McCloud, Mount Shasta City, and Weed — towns within ~15 km of the summit.",
+    hazardRisks: {
+      lahar: {
+        level: "extreme",
+        note: "Seven major glaciers plus steep valleys pointed straight at Mount Shasta City, Weed, and McCloud. Even a small eruption under ice would generate fast-moving debris flows that could reach these towns in under an hour.",
+      },
+      collapse: {
+        level: "extreme",
+        note: "The ~300,000-year-old Shastina debris avalanche (~45 km³) is one of the largest known on Earth. Hydrothermal alteration in the modern edifice means another sector failure is the headline concern.",
+      },
+      pyroclastic: {
+        level: "high",
+        note: "Past dome-forming eruptions produced pyroclastic flows that reached valley floors. A future dome collapse would do the same.",
+      },
+      ashfall: {
+        level: "high",
+        note: "Plinian eruptions like those ~2,300 years ago would dust I-5 and northern California; downwind communities should plan for days of ash cleanup.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Explosive phases throw blocks several kilometers from the summit.",
+      },
+      lava: {
+        level: "moderate",
+        note: "Dacitic domes and short lava flows; slow but destructive on the upper edifice.",
+      },
+      gas: {
+        level: "low",
+        note: "Small summit fumarole field. Not a wider air-quality threat.",
+      },
+    },
     quakeBaseline:
       "Normal background: a few small quakes per month near the edifice.",
     deformationBaseline:
@@ -776,6 +1244,28 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "Proximal lava flow and tephra hazards. The caldera has been subsiding for decades (not a threat).",
+    hazardRisks: {
+      lava: {
+        level: "moderate",
+        note: "The shield produces both slow basalt flows and thick obsidian flows like Glass Mountain (~950 years ago). Proximal hazard only — there's no town in the immediate flow path.",
+      },
+      ashfall: {
+        level: "moderate",
+        note: "Rhyolitic phases throw tephra locally; a larger explosive event could dust Klamath Falls and Tulelake.",
+      },
+      pyroclastic: {
+        level: "moderate",
+        note: "Thick silicic eruptions like Glass Mountain can go pyroclastic at the vent.",
+      },
+      ballistic: {
+        level: "low",
+        note: "Local to the vent in past eruptions.",
+      },
+      gas: {
+        level: "low",
+        note: "Minor fumarolic activity in the caldera.",
+      },
+    },
     quakeBaseline:
       "Normal background: very few quakes.",
     deformationBaseline:
@@ -796,6 +1286,28 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "low",
     dangerExplanation:
       "Main risks are hydrothermal (CO₂ gas, boiling springs) in Lake County, not volcanic eruption.",
+    hazardRisks: {
+      gas: {
+        level: "high",
+        note: "CO₂ seeps and H₂S from hydrothermal vents have killed livestock and caused injuries in Lake County. This is the dominant ongoing hazard, not eruption.",
+      },
+      flood: {
+        level: "moderate",
+        note: "Hydrothermal explosions (maar-forming events) have occurred within the last few thousand years and would send steam and ejecta across small patches near the lake.",
+      },
+      pyroclastic: {
+        level: "low",
+        note: "Past magmatic eruptions were small; no recent pyroclastic-forming activity.",
+      },
+      ashfall: {
+        level: "low",
+        note: "Any tephra from a future eruption would be local.",
+      },
+      lava: {
+        level: "low",
+        note: "Past silicic domes are small and slow.",
+      },
+    },
     quakeBaseline:
       "Normal background: LOTS of small quakes from The Geysers geothermal production — up to dozens per day. This is industrial activity, not volcanic unrest.",
     deformationBaseline:
@@ -817,6 +1329,28 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "Hwy 395 and the Mammoth Lakes area cross the active chain. A new eruption would likely close the highway and force evacuations.",
+    hazardRisks: {
+      pyroclastic: {
+        level: "high",
+        note: "Opening explosions along the chain (like those ~650 years ago) produced small pyroclastic density currents around new vents — anyone on US-395 near the vent would be in the path.",
+      },
+      ashfall: {
+        level: "high",
+        note: "A new Inyo-style eruption would dust Mammoth Lakes, June Lake, and the Owens Valley; prevailing winds would carry ash into Nevada.",
+      },
+      lava: {
+        level: "high",
+        note: "Thick rhyolite domes and obsidian flows destroy everything beneath them as they slowly advance; Mammoth's ski area and subdivisions sit close to the chain.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Vent-opening explosions throw blocks several kilometers.",
+      },
+      gas: {
+        level: "moderate",
+        note: "CO₂ seeps near Horseshoe Lake have killed trees and occasionally injured people; a new eruption would sharply increase gas output locally.",
+      },
+    },
     quakeBaseline:
       "Normal background: overlaps with Long Valley monitoring — tens of quakes per day is normal. Deep long-period events are notable.",
     deformationBaseline:
@@ -838,6 +1372,28 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "A SW Rift eruption could impact Kīhei, Mākena, and upcountry Maui with lava flows.",
+    hazardRisks: {
+      lava: {
+        level: "high",
+        note: "A SW Rift eruption like the 1790 La Pérouse flow would threaten Kīhei, Mākena, and upcountry subdivisions now built across the historical flow path.",
+      },
+      gas: {
+        level: "moderate",
+        note: "An eruption would put SO₂/vog across leeward Maui, where tens of thousands now live.",
+      },
+      ballistic: {
+        level: "low",
+        note: "Haleakalā is effusive — ballistic risk is limited to the immediate vent.",
+      },
+      ashfall: {
+        level: "low",
+        note: "Local tephra only; no sustained eruption columns expected.",
+      },
+      pyroclastic: {
+        level: "low",
+        note: "Hawaiian-style flows do not generate pyroclastic density currents.",
+      },
+    },
     quakeBaseline:
       "Normal background: a few small quakes per week. Minimal in-situ monitoring network.",
     deformationBaseline:
@@ -858,6 +1414,20 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "low",
     dangerExplanation:
       "Low near-term risk. A hypothetical eruption could threaten Saddle Road or the observatory complex.",
+    hazardRisks: {
+      lava: {
+        level: "low",
+        note: "Post-shield eruptions every ~4,500 years. A renewal could threaten Saddle Road and the summit observatories.",
+      },
+      ashfall: {
+        level: "low",
+        note: "Mauna Kea has produced small phreatomagmatic tephra layers in the past; impacts would be local.",
+      },
+      ballistic: {
+        level: "low",
+        note: "Very rare; only possible during the initial explosive phase of an eruption.",
+      },
+    },
     quakeBaseline:
       "Normal background: very few quakes.",
     deformationBaseline:
@@ -879,6 +1449,28 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "high",
     dangerExplanation:
       "Kailua-Kona, the Kona International Airport, and Hwy 11 all sit in Hualālai's lava flow hazard zones. A 1929 earthquake swarm may have been failed unrest.",
+    hazardRisks: {
+      lava: {
+        level: "extreme",
+        note: "1801 flows reached the Kona coast in hours; the same flow path today would bury Kailua-Kona, the airport, and Hwy 11.",
+      },
+      gas: {
+        level: "high",
+        note: "An eruption would blanket Kona-side populated areas with SO₂ and vog.",
+      },
+      ballistic: {
+        level: "low",
+        note: "Hualālai is effusive — ballistic risk is limited to the vent.",
+      },
+      ashfall: {
+        level: "low",
+        note: "Historical eruptions have produced only minor local tephra.",
+      },
+      pyroclastic: {
+        level: "low",
+        note: "Not a Hawaiian-style hazard here.",
+      },
+    },
     quakeBaseline:
       "Normal background: a few quakes per week.",
     deformationBaseline:
@@ -903,6 +1495,28 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "Uninhabited island. Main risk is ash clouds to North Pacific aviation.",
+    hazardRisks: {
+      ashfall: {
+        level: "high",
+        note: "Vulcanian blasts send ash to 6–8 km; short-lived but in a very busy North Pacific flight corridor.",
+      },
+      ballistic: {
+        level: "high",
+        note: "Summit dome collapses are explosive and launch blocks across the crater and upper cone.",
+      },
+      pyroclastic: {
+        level: "moderate",
+        note: "Small pyroclastic flows accompany dome collapses and drop onto the upper flanks.",
+      },
+      gas: {
+        level: "moderate",
+        note: "Persistent SO₂ and H₂S emissions from the active summit system.",
+      },
+      lava: {
+        level: "low",
+        note: "Short lava flows are rare; most activity is explosive.",
+      },
+    },
     quakeBaseline:
       "Normal background: minimal in-situ seismic network — mostly satellite thermal detection.",
     deformationBaseline:
@@ -927,6 +1541,32 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "moderate",
     dangerExplanation:
       "Ashfall in the village of Perryville (~35 km away). Aviation ash hazards.",
+    hazardRisks: {
+      ashfall: {
+        level: "high",
+        note: "Perryville (~35 km downwind) has received repeated ashfall from intracaldera eruptions; cross-Pacific aviation is also affected.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Strombolian explosions throw bombs and spatter across the intracaldera cone.",
+      },
+      lava: {
+        level: "moderate",
+        note: "Small lava flows from the intracaldera cone are common during eruptive episodes.",
+      },
+      lahar: {
+        level: "moderate",
+        note: "Summit ice cap provides water for lahars during larger eruptions.",
+      },
+      gas: {
+        level: "moderate",
+        note: "SO₂ emissions during eruption, mostly transported away from populated areas.",
+      },
+      pyroclastic: {
+        level: "low",
+        note: "Strombolian eruptions rarely generate pyroclastic density currents.",
+      },
+    },
     quakeBaseline:
       "Normal background: moderate seismicity from the active system.",
     deformationBaseline:
@@ -949,6 +1589,36 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "high",
     dangerExplanation:
       "2009 eruption dropped ash across Anchorage and forced the closure of oil facilities at the Drift River terminal. Alaska's largest populated area is directly downwind.",
+    hazardRisks: {
+      ashfall: {
+        level: "extreme",
+        note: "2009 ash cleared power transformers and grounded flights across Anchorage and the Mat-Su; tall plumes are the defining hazard.",
+      },
+      lahar: {
+        level: "extreme",
+        note: "Pyroclastic flows melt the summit ice cap and have repeatedly sent large lahars down the Drift River valley to the Cook Inlet coast.",
+      },
+      pyroclastic: {
+        level: "high",
+        note: "Column collapse and dome failures send pyroclastic flows onto the upper flanks in every major eruption.",
+      },
+      ballistic: {
+        level: "high",
+        note: "Summit blasts launch bombs across the crater and upper cone.",
+      },
+      collapse: {
+        level: "moderate",
+        note: "The steep hydrothermally weakened summit has shed significant rock and ice avalanches during eruptive phases.",
+      },
+      gas: {
+        level: "moderate",
+        note: "Heavy SO₂ plume during eruptions disperses downwind across the Kenai.",
+      },
+      lava: {
+        level: "moderate",
+        note: "Dome growth produces short lava effusions but no far-travelled flows.",
+      },
+    },
     quakeBaseline:
       "Normal background: a few small quakes per day. Dense AVO seismic network. Precursory swarms typically arrive days to weeks before eruption.",
     deformationBaseline:
@@ -973,6 +1643,32 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
     danger: "high",
     dangerExplanation:
       "Tsunami risk from flank collapse into Cook Inlet is the most unusual hazard — could affect Homer and Kenai Peninsula communities.",
+    hazardRisks: {
+      pyroclastic: {
+        level: "extreme",
+        note: "Dome-collapse pyroclastic flows swept the island's flanks during the 2006, 1986, and 1976 eruptions.",
+      },
+      tsunami: {
+        level: "high",
+        note: "The 1883 flank collapse sent a debris avalanche into Cook Inlet and generated a tsunami observed at English Bay; Homer and Kenai communities are in the hazard zone.",
+      },
+      collapse: {
+        level: "extreme",
+        note: "Repeated sector collapses are the defining behavior of Augustine; new dome growth continuously rebuilds the cone between failures.",
+      },
+      ashfall: {
+        level: "high",
+        note: "Eruption plumes drop ash across Cook Inlet communities depending on wind direction.",
+      },
+      ballistic: {
+        level: "moderate",
+        note: "Dome collapses are explosive and launch blocks across the summit and upper flanks.",
+      },
+      gas: {
+        level: "moderate",
+        note: "Persistent SO₂ and HCl during eruption.",
+      },
+    },
     quakeBaseline:
       "Normal background: a few quakes per day. Dense AVO network. Precursory swarms are the main warning.",
     deformationBaseline:
@@ -1033,6 +1729,36 @@ export const VOLCANO_HISTORY: Record<string, VolcanoHistory> = {
         signs: "Pisciarelli has had small steam blasts and scalding mud flows in recent years. Solfatara CO₂ flux is at a multi-decade high. Localised hazard to visitors and nearby residents; not a wider evacuation trigger.",
       },
     ],
+    hazardRisks: {
+      pyroclastic: {
+        level: "extreme",
+        note: "Around 500,000 people live inside the Italian Civil Protection Red Zone — the pyroclastic-flow evacuation area. Even a small Monte Nuovo-style eruption would produce density currents sweeping across parts of Pozzuoli and Bagnoli.",
+      },
+      ashfall: {
+        level: "extreme",
+        note: "~1.5 million more live in the Yellow Zone (ashfall evacuation area) across metro Naples. A repeat of the Neapolitan Yellow Tuff eruption would bury the city.",
+      },
+      gas: {
+        level: "high",
+        note: "Solfatara and Pisciarelli fumaroles already put out high CO₂ and H₂S; a fatal CO₂ incident killed a family at Solfatara in 2017. Concentrations have been climbing.",
+      },
+      ballistic: {
+        level: "high",
+        note: "Opening-phase phreatomagmatic explosions would throw blocks several kilometers across the densely populated caldera.",
+      },
+      tsunami: {
+        level: "moderate",
+        note: "A submarine vent inside the Bay of Pozzuoli could generate local tsunami waves — modelling suggests meter-scale impacts on nearby shorelines.",
+      },
+      flood: {
+        level: "moderate",
+        note: "Pisciarelli has hosted scalding hydrothermal mud flows in recent years; access is restricted but residents live just uphill.",
+      },
+      lava: {
+        level: "low",
+        note: "Campi Flegrei eruptions are short and explosive rather than lava-dominated; sustained flows are not the main concern.",
+      },
+    },
     quakeBaseline:
       "Bradyseismic crisis: hundreds to thousands of small quakes per month (M0–3), with occasional M4 events. The ongoing uplift means this is NOT background — it's elevated, and has been rising since 2005. INGV publishes the full catalog at ov.ingv.it.",
     deformationBaseline:

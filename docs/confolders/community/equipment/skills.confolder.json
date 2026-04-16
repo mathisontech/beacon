@@ -1,0 +1,73 @@
+{
+  "module_id": "community.equipment.skills",
+  "module_name": "Skills Registry (Professional & Practical)",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "placeholder",
+    "return_note": "Verification workflow needed (self-reported vs credential-verified). Liability policy on skills accuracy.",
+    "priority": 3
+  },
+  "M": {
+    "M1_beacon_versions": ["V1+"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Equipment > Skills",
+    "M4_parent": "community.equipment",
+    "M5_children": [],
+    "M6_owner_history": [{ "who": "claude-agent", "role": "framework-builder", "from": "2026-04-04T00:00:00Z", "to": "current" }]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      { "name": "skill_entry", "source": "User adds skill (retired EMS, CPR, ham radio, etc)", "format": "JSON", "schema_ref": "{ skill_type, verification_level: 'self'|'credential'|'verified' }", "frequency": "on-demand", "dependencies": [] }
+    ],
+    "IO2_direct_outputs": [
+      { "name": "skill_list", "consumers": ["resource matching", "help system"], "format": "JSON", "schema_ref": "[{ skill_id, type, verification_level, owner_id }]", "frequency": "on-demand", "dependencies": [] }
+    ],
+    "IO3_transformations": [
+      { "operation": "Store skill with verification level", "algorithm": "INSERT skills table. Mark as self-reported or verified.", "latency_sla": "<200ms", "accuracy_target": "100% correct storage" }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      { "step": 1, "module_id": "user_profile", "description": "User account exists", "data_format": "user_id", "dependencies": ["community.identity.account-creation"] }
+    ],
+    "DW2_downstream_pipeline": [
+      { "step": 2, "module_id": "skill_matching", "description": "Skills matched to help requests", "data_format": "matched_skill_id", "dependencies": ["community.equipment.resource-matching"] }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Skill verification (if implemented). Skill matching queries.",
+    "P2_defensibility": "Self-reported with liability disclaimer. Verification levels transparent (user knows if self-reported vs verified).",
+    "P3_confidence_level": "Straightforward CRUD.",
+    "P4_failure_modes": [
+      "False skill claim → person not actually trained (mitigate: disclaimer, liability waiver, matching shows verification level)"
+    ],
+    "P5_backup_plan": "Show verification level clearly. Match with high-confidence skills first.",
+    "P6_backup_plan_test": "Test verification level display. Test matching preference for verified skills.",
+    "P7_testing_strategy": "Unit tests for skill CRUD. Integration tests for matching with verification filters.",
+    "P8_benchmarks": "Skill entry: <200ms. Skill matching: <1s for 50 nearby users with matching skills."
+  },
+  "CH": {
+    "CH1_change_log": [
+      { "date": "2026-04-04T00:00:00Z", "who": "claude-agent", "description": "Initial CONFolder for skills registry (placeholder)", "version": "1.0" }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Self-reported skills create liability if person lacks actual skill. Mitigation: clear liability waiver, verification levels, matching shows disclaimer.",
+    "L2_regulatory_frameworks": ["Professional licensing (EMS, nurses, etc have real licenses)", "Liability waivers"],
+    "L3_consent_requirements": "User accepts liability waiver when adding skill.",
+    "L4_liability_notes": "User responsible for accuracy of skills. Beacon not liable for injuries from unskilled person. Verified skills (with credentials) lower liability."
+  },
+  "F": { "F1_cost_considerations": "Skills storage: negligible. Credential verification (future): cost TBD.", "F2_accounting_considerations": "Operational cost.", "F3_revenue_impact": "Skills sharing increases community resilience (retention driver)." },
+  "S": { "S1_cybersecurity": "NR", "S2_data_privacy": "Skill list visible to matched users only.", "S3_encryption_requirements": "NR", "S4_access_control": "User controls own skill list. Matched users see skills during help matching.", "S5_audit_requirements": "Log skill additions." },
+  "X": {
+    "X1_notes": "Skills registry enables mutual aid with expertise. MVP: self-reported, verification level shown. Future: credential verification, liability insurance.",
+    "X2_open_questions": [
+      "Credential verification: require document upload? (future enhancement, liability reduction)",
+      "Skill re-verification: annual checks? (maintain accuracy)",
+      "Liability cap: Beacon waives liability if user self-reported? (legal review needed)"
+    ],
+    "X3_related_research": "Professional credential verification. Mutual aid networks. Liability in volunteer-run services. Skills-based matching algorithms."
+  }
+}

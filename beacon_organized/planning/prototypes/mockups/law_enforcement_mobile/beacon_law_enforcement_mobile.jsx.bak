@@ -1,0 +1,1133 @@
+import React, { useState } from 'react';
+
+const C = {
+  bg: '#F5F5F7',
+  card: '#FFFFFF',
+  text: '#1A1A1A',
+  sub: '#6B7280',
+  muted: '#9CA3AF',
+  orange: '#EA7928',
+  purple: '#B829FC',
+  blue: '#3881B8',
+  deepPurple: '#50386A',
+  green: '#2D8B4E',
+  yellow: '#E8B84E',
+  red: '#C0392B',
+  border: '#E5E7EB',
+  feedBg: '#F0F0F2',
+};
+
+export default function BeaconLawEnforcementMobile() {
+  const [activeTab, setActiveTab] = useState('evac');
+  const [selectedZone, setSelectedZone] = useState('zone3');
+  const [expandedRefusal, setExpandedRefusal] = useState(null);
+
+  // Sample Data
+  const zones = {
+    zone1: {
+      name: 'Zone 1',
+      bounds: 'Maple to Cedar, Main to 6th',
+      evacuated: 94,
+      unconfirmed: 4,
+      needsAssistance: 1,
+      refusals: 1,
+      assignedDeputies: ['Deputy Chen', 'Deputy Martinez'],
+      color: C.green,
+      buildings: [
+        { addr: '1200 Maple St', status: 'clear', elderly: false },
+        { addr: '1205 Maple St', status: 'clear', elderly: false },
+        { addr: '1210 Maple St', status: 'clear', elderly: false },
+        { addr: '1215 Maple St', status: 'clear', elderly: true },
+      ],
+    },
+    zone2: {
+      name: 'Zone 2',
+      bounds: 'Cedar to Pine, Main to 4th',
+      evacuated: 67,
+      unconfirmed: 18,
+      needsAssistance: 3,
+      refusals: 1,
+      assignedDeputies: ['Deputy Williams', 'Deputy Johnson'],
+      color: C.yellow,
+      buildings: [
+        { addr: '2100 Cedar Ave', status: 'clear', elderly: false },
+        { addr: '2105 Cedar Ave', status: 'unconfirmed', elderly: false },
+        { addr: '2110 Cedar Ave', status: 'assist', elderly: true },
+        { addr: '2115 Oak St', status: 'unconfirmed', elderly: false },
+        { addr: '2120 Oak St', status: 'clear', elderly: false },
+        { addr: '2125 Oak St', status: 'unknown', elderly: false },
+      ],
+    },
+    zone3: {
+      name: 'Zone 3',
+      bounds: 'Pine to Spruce, Main to 8th',
+      evacuated: 82,
+      unconfirmed: 12,
+      needsAssistance: 4,
+      refusals: 2,
+      assignedDeputies: ['Deputy Torres', 'Deputy Ramirez', 'Deputy Kim'],
+      color: C.green,
+      buildings: [
+        { addr: '3200 Pine Ln', status: 'clear', elderly: false },
+        { addr: '3205 Pine Ln', status: 'clear', elderly: false },
+        { addr: '3210 Elm St', status: 'unconfirmed', elderly: true },
+        { addr: '3215 Elm St', status: 'assist', elderly: true },
+        { addr: '3220 Birch Ave', status: 'clear', elderly: false },
+        { addr: '3225 Birch Ave', status: 'unconfirmed', elderly: false },
+      ],
+    },
+  };
+
+  const refusals = [
+    {
+      id: 'ref1',
+      addr: '3247 Elm St',
+      resident: 'Robert Martinez',
+      lastContact: '9:15 AM',
+      reason: 'Protecting property',
+      zone: 'zone3',
+    },
+    {
+      id: 'ref2',
+      addr: '3380 Pine Ln',
+      resident: 'Unknown',
+      lastContact: '8:52 AM',
+      reason: 'No answer at door',
+      zone: 'zone3',
+    },
+  ];
+
+  const checkpoints = [
+    {
+      name: 'Highway 91 South',
+      deputy: 'Deputy Smith',
+      passed: 287,
+      wait: '2-3 min',
+    },
+    {
+      name: 'Main St & 2nd Ave',
+      deputy: 'Deputy Brooks',
+      passed: 145,
+      wait: '<1 min',
+    },
+    {
+      name: 'Spruce Ln & 8th',
+      deputy: 'Deputy Adams',
+      passed: 89,
+      wait: '1-2 min',
+    },
+  ];
+
+  const closures = [
+    { road: 'Highway 91 & Oak St', reason: 'Fire perimeter', authorized: 'Sheriff Davis' },
+    { road: 'Main St & 2nd Ave', reason: 'Evacuation route', authorized: 'Dispatch' },
+  ];
+
+  const personnel = [
+    { name: 'Deputy Torres', role: 'Zone 3 Lead', status: 'on-scene', assignment: 'Evac Supervisor' },
+    { name: 'Deputy Chen', role: 'Zone 1', status: 'on-scene', assignment: 'Door-to-door' },
+    { name: 'Deputy Williams', role: 'Zone 2', status: 'on-scene', assignment: 'Door-to-door' },
+    { name: 'Frank Moretti', role: 'Retired PD', status: 'on-scene', assignment: 'Traffic Control' },
+  ];
+
+  const pendingArrivals = [
+    { name: 'Deputy Ochoa (Mutual Aid)', eta: '9:28 AM', unit: 'County Unit 42' },
+  ];
+
+  const eventCode = 'NE-HILLS-001';
+
+  // Helper function to get status icon
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'clear':
+        return '✓';
+      case 'unconfirmed':
+        return '◐';
+      case 'assist':
+        return '!';
+      case 'unknown':
+        return '?';
+      default:
+        return '?';
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'clear':
+        return C.green;
+      case 'unconfirmed':
+        return C.yellow;
+      case 'assist':
+        return C.red;
+      case 'unknown':
+        return C.muted;
+      default:
+        return C.muted;
+    }
+  };
+
+  const currentZone = zones[selectedZone];
+  const zoneProgress = Math.round((currentZone.evacuated / (currentZone.evacuated + currentZone.unconfirmed + currentZone.needsAssistance + currentZone.refusals)) * 100);
+
+  // ==================== TAB 1: EVAC ====================
+  const TabEvac = () => (
+    <div style={{ paddingBottom: '100px' }}>
+      {/* Zone Selection */}
+      <div style={{ padding: '16px', display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px' }}>
+        {Object.entries(zones).map(([key, zone]) => (
+          <button
+            key={key}
+            onClick={() => setSelectedZone(key)}
+            style={{
+              padding: '10px 16px',
+              borderRadius: '8px',
+              border: selectedZone === key ? `2px solid ${C.deepPurple}` : `1px solid ${C.border}`,
+              background: selectedZone === key ? C.deepPurple : C.card,
+              color: selectedZone === key ? C.card : C.text,
+              fontFamily: 'Poppins, -apple-system, sans-serif',
+              fontSize: '12px',
+              fontWeight: selectedZone === key ? '600' : '500',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {zone.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Current Zone Card */}
+      <div style={{ padding: '0 16px 16px' }}>
+        <div
+          style={{
+            background: C.card,
+            borderRadius: '14px',
+            padding: '16px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            border: `2px solid ${currentZone.color}`,
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+            <div>
+              <h3 style={{ margin: '0 0 4px', fontSize: '16px', fontWeight: '700', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                {currentZone.name}
+              </h3>
+              <p style={{ margin: '0', fontSize: '12px', color: C.sub, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                {currentZone.bounds}
+              </p>
+            </div>
+            <div
+              style={{
+                background: currentZone.color,
+                color: C.card,
+                borderRadius: '8px',
+                padding: '6px 12px',
+                fontSize: '14px',
+                fontWeight: '700',
+                fontFamily: 'Poppins, -apple-system, sans-serif',
+              }}
+            >
+              {zoneProgress}%
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div style={{ marginBottom: '12px' }}>
+            <div
+              style={{
+                width: '100%',
+                height: '6px',
+                background: C.feedBg,
+                borderRadius: '3px',
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  width: `${zoneProgress}%`,
+                  height: '100%',
+                  background: currentZone.color,
+                  transition: 'width 0.3s ease',
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+            <div style={{ background: C.feedBg, padding: '10px', borderRadius: '8px' }}>
+              <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.sub, fontFamily: 'Poppins, -apple-system, sans-serif' }}>Evacuated</p>
+              <p style={{ margin: '0', fontSize: '18px', fontWeight: '700', color: C.green, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                {currentZone.evacuated}
+              </p>
+            </div>
+            <div style={{ background: C.feedBg, padding: '10px', borderRadius: '8px' }}>
+              <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.sub, fontFamily: 'Poppins, -apple-system, sans-serif' }}>Unconfirmed</p>
+              <p style={{ margin: '0', fontSize: '18px', fontWeight: '700', color: C.yellow, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                {currentZone.unconfirmed}
+              </p>
+            </div>
+            <div style={{ background: C.feedBg, padding: '10px', borderRadius: '8px' }}>
+              <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.sub, fontFamily: 'Poppins, -apple-system, sans-serif' }}>Assistance</p>
+              <p style={{ margin: '0', fontSize: '18px', fontWeight: '700', color: C.red, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                {currentZone.needsAssistance}
+              </p>
+            </div>
+            <div style={{ background: C.feedBg, padding: '10px', borderRadius: '8px' }}>
+              <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.sub, fontFamily: 'Poppins, -apple-system, sans-serif' }}>Refusals</p>
+              <p style={{ margin: '0', fontSize: '18px', fontWeight: '700', color: C.red, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                {currentZone.refusals}
+              </p>
+            </div>
+          </div>
+
+          {/* Assigned Deputies */}
+          <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: '12px' }}>
+            <p style={{ margin: '0 0 8px', fontSize: '11px', color: C.sub, fontWeight: '600', fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+              ASSIGNED DEPUTIES
+            </p>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {currentZone.assignedDeputies.map((deputy, i) => (
+                <span
+                  key={i}
+                  style={{
+                    background: C.deepPurple,
+                    color: C.card,
+                    padding: '6px 10px',
+                    borderRadius: '6px',
+                    fontSize: '11px',
+                    fontWeight: '500',
+                    fontFamily: 'Poppins, -apple-system, sans-serif',
+                  }}
+                >
+                  {deputy}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Building List */}
+      <div style={{ padding: '0 16px 16px' }}>
+        <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+          BUILDINGS
+        </h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {currentZone.buildings.map((building, i) => (
+            <div
+              key={i}
+              style={{
+                background: C.card,
+                border: `1px solid ${C.border}`,
+                borderRadius: '10px',
+                padding: '12px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              <div>
+                <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: '600', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                  {building.addr}
+                </p>
+                {building.elderly && (
+                  <p style={{ margin: '0', fontSize: '11px', color: C.red, fontWeight: '500', fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                    ⚠ Elderly/Disabled
+                  </p>
+                )}
+              </div>
+              <div
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: getStatusColor(building.status),
+                  color: C.card,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  fontFamily: 'Poppins, -apple-system, sans-serif',
+                }}
+              >
+                {getStatusIcon(building.status)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Active Refusals */}
+      {refusals.length > 0 && (
+        <div style={{ padding: '0 16px 16px' }}>
+          <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700', color: C.red, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+            ⚠ ACTIVE REFUSALS
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {refusals.map((refusal) => (
+              <div
+                key={refusal.id}
+                onClick={() => setExpandedRefusal(expandedRefusal === refusal.id ? null : refusal.id)}
+                style={{
+                  background: C.card,
+                  border: `2px solid ${C.red}`,
+                  borderRadius: '10px',
+                  padding: '12px',
+                  cursor: 'pointer',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div>
+                    <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: '600', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                      {refusal.addr}
+                    </p>
+                    <p style={{ margin: '0 0 4px', fontSize: '12px', color: C.sub, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                      {refusal.resident}
+                    </p>
+                    <p style={{ margin: '0', fontSize: '11px', color: C.muted, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                      Last contact: {refusal.lastContact}
+                    </p>
+                  </div>
+                  <span style={{ fontSize: '18px' }}>{expandedRefusal === refusal.id ? '▼' : '▶'}</span>
+                </div>
+                {expandedRefusal === refusal.id && (
+                  <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: `1px solid ${C.border}` }}>
+                    <p style={{ margin: '0 0 8px', fontSize: '12px', color: C.sub, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                      <strong>Reason:</strong> {refusal.reason}
+                    </p>
+                    <button
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        background: C.deepPurple,
+                        color: C.card,
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        fontFamily: 'Poppins, -apple-system, sans-serif',
+                      }}
+                    >
+                      Follow Up
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // ==================== TAB 2: ROADS ====================
+  const TabRoads = () => (
+    <div style={{ paddingBottom: '100px' }}>
+      {/* Simplified Road Map */}
+      <div
+        style={{
+          margin: '16px',
+          height: '180px',
+          background: C.feedBg,
+          borderRadius: '12px',
+          border: `2px solid ${C.border}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '12px',
+          color: C.sub,
+          fontFamily: 'Poppins, -apple-system, sans-serif',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '32px', marginBottom: '8px' }}>🗺️</div>
+          <p style={{ margin: '0', fontSize: '12px' }}>Map View</p>
+          <p style={{ margin: '4px 0 0', fontSize: '11px', color: C.muted }}>Closures: Red ✕ | Routes: Green →</p>
+        </div>
+        {/* Visual indicators */}
+        <div style={{ position: 'absolute', top: '20px', right: '20px', width: '16px', height: '16px', background: C.red, borderRadius: '2px' }} />
+        <div style={{ position: 'absolute', bottom: '20px', left: '20px', width: '16px', height: '6px', background: C.green }} />
+      </div>
+
+      {/* Checkpoint List */}
+      <div style={{ padding: '0 16px 16px' }}>
+        <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+          CHECKPOINTS
+        </h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {checkpoints.map((checkpoint, i) => (
+            <div
+              key={i}
+              style={{
+                background: C.card,
+                border: `1px solid ${C.border}`,
+                borderRadius: '10px',
+                padding: '12px',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                <div>
+                  <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                    {checkpoint.name}
+                  </p>
+                  <p style={{ margin: '0', fontSize: '11px', color: C.sub, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                    {checkpoint.deputy}
+                  </p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ margin: '0 0 2px', fontSize: '12px', fontWeight: '700', color: C.green, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                    {checkpoint.passed}
+                  </p>
+                  <p style={{ margin: '0', fontSize: '10px', color: C.muted, fontFamily: 'Poppins, -apple-system, sans-serif' }}>passed</p>
+                </div>
+              </div>
+              <div
+                style={{
+                  background: C.feedBg,
+                  padding: '6px 8px',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  color: C.sub,
+                  fontFamily: 'Poppins, -apple-system, sans-serif',
+                }}
+              >
+                ⏱ Wait time: {checkpoint.wait}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Active Closures */}
+      <div style={{ padding: '0 16px 16px' }}>
+        <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+          ROAD CLOSURES
+        </h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {closures.map((closure, i) => (
+            <div
+              key={i}
+              style={{
+                background: C.card,
+                border: `2px solid ${C.red}`,
+                borderRadius: '10px',
+                padding: '12px',
+              }}
+            >
+              <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: '600', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                {closure.road}
+              </p>
+              <p style={{ margin: '0 0 6px', fontSize: '11px', color: C.sub, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                {closure.reason}
+              </p>
+              <p style={{ margin: '0', fontSize: '10px', color: C.muted, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                Authorized by: {closure.authorized}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div style={{ padding: '0 16px 16px' }}>
+        <button
+          style={{
+            width: '100%',
+            padding: '12px',
+            background: C.deepPurple,
+            color: C.card,
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            marginBottom: '8px',
+            fontFamily: 'Poppins, -apple-system, sans-serif',
+          }}
+        >
+          + Add Road Closure
+        </button>
+        <button
+          style={{
+            width: '100%',
+            padding: '12px',
+            background: C.yellow,
+            color: C.text,
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            fontFamily: 'Poppins, -apple-system, sans-serif',
+          }}
+        >
+          ⚠ Report Bottleneck
+        </button>
+      </div>
+    </div>
+  );
+
+  // ==================== TAB 3: MAP ====================
+  const TabMap = () => (
+    <div style={{ paddingBottom: '100px' }}>
+      <div
+        style={{
+          margin: '16px',
+          height: '500px',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '14px',
+          color: '#E0E0E0',
+          fontFamily: 'Poppins, -apple-system, sans-serif',
+          flexDirection: 'column',
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Terrain base — desert/chaparral foothills */}
+        <div style={{position:"absolute",inset:0,background:"linear-gradient(175deg, #8B7D5E 0%, #9A8C6C 15%, #A69878 30%, #8B7D5E 45%, #7A6D50 55%, #8B7D5E 70%, #9A8C6C 85%, #A69878 100%)"}}>
+          {/* Hill contours */}
+          <div style={{position:"absolute",bottom:0,left:0,width:"70%",height:"30%",background:"radial-gradient(ellipse at 40% 90%, #6B5F45 0%, #7A6D50 30%, transparent 70%)",opacity:0.5}} />
+          <div style={{position:"absolute",top:"10%",left:"-5%",width:"30%",height:"50%",background:"radial-gradient(ellipse at 70% 50%, #6B5F45 0%, transparent 60%)",opacity:0.3}} />
+          <div style={{position:"absolute",top:"5%",right:0,width:"25%",height:"40%",background:"radial-gradient(ellipse at 30% 50%, #7A6D50 0%, transparent 60%)",opacity:0.25}} />
+          {/* Scattered brush */}
+          {[{t:"70%",l:"15%",s:18},{t:"60%",l:"45%",s:14},{t:"40%",l:"10%",s:16},{t:"25%",l:"70%",s:15},{t:"55%",l:"75%",s:13},{t:"80%",l:"60%",s:17},{t:"15%",l:"35%",s:12},{t:"35%",l:"55%",s:14}].map((b,i) => (
+            <div key={"brush"+i} style={{position:"absolute",top:b.t,left:b.l,width:b.s,height:b.s,background:"radial-gradient(circle, #6B7A52 0%, transparent 70%)",borderRadius:"50%",opacity:0.3}} />
+          ))}
+        </div>
+
+        {/* Legend (overlay on dark background) */}
+        <div
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            background: 'rgba(0,0,0,0.7)',
+            borderRadius: '8px',
+            padding: '10px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+            fontSize: '11px',
+            fontWeight: '500',
+            color: '#E0E0E0',
+            backdropFilter: 'blur(4px)',
+            border: '1px solid rgba(255,255,255,0.1)',
+          }}
+        >
+          <div style={{ marginBottom: '6px' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', background: C.green, borderRadius: '2px', marginRight: '4px' }} />
+            Evacuated
+          </div>
+          <div style={{ marginBottom: '6px' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', background: C.yellow, borderRadius: '2px', marginRight: '4px' }} />
+            In Progress
+          </div>
+          <div style={{ marginBottom: '6px' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', background: C.red, borderRadius: '2px', marginRight: '4px' }} />
+            Needs Help
+          </div>
+          <div>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', background: C.deepPurple, borderRadius: '50%', marginRight: '4px' }} />
+            Deputy
+          </div>
+        </div>
+
+        {/* SVG Road Network & Fire Perimeter */}
+        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 5 }}>
+          <defs>
+            <linearGradient id="fireGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#FF6B35" stopOpacity="0.7" />
+              <stop offset="50%" stopColor="#FF9F43" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#FFB347" stopOpacity="0.3" />
+            </linearGradient>
+            <filter id="roadGlow">
+              <feGaussianBlur stdDeviation="1.5" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          {/* Fire Line/Perimeter (south/southwest) */}
+          <path d="M 10 350 Q 80 320 150 340 T 280 360 Q 320 370 350 360" stroke="url(#fireGradient)" strokeWidth="12" fill="none" opacity="0.8" />
+          <path d="M 15 360 Q 85 330 155 350 T 285 370 Q 320 375 345 370" stroke="#FF4500" strokeWidth="2" fill="none" opacity="0.6" />
+
+          {/* SR-89 (North-South main road) */}
+          <line x1="280" y1="20" x2="270" y2="480" stroke="#FFF59D" strokeWidth="8" filter="url(#roadGlow)" opacity="0.8" />
+          <line x1="280" y1="20" x2="270" y2="480" stroke="#FFEB3B" strokeWidth="4" opacity="0.7" strokeDasharray="20,10" />
+
+          {/* Shrine Rd (East) */}
+          <path d="M 270 200 L 450 180" stroke="#FFF59D" strokeWidth="6" filter="url(#roadGlow)" opacity="0.7" />
+          <path d="M 270 200 L 450 180" stroke="#FFEB3B" strokeWidth="3" opacity="0.6" strokeDasharray="15,8" />
+
+          {/* Model Creek Rd (West) */}
+          <path d="M 270 300 L 80 290" stroke="#FFF59D" strokeWidth="6" filter="url(#roadGlow)" opacity="0.7" />
+          <path d="M 270 300 L 80 290" stroke="#FFEB3B" strokeWidth="3" opacity="0.6" strokeDasharray="15,8" />
+
+          {/* Building Markers - Evacuation Zones */}
+          <g id="buildings">
+            {/* Zone 1 Buildings (North area) */}
+            <rect x="240" y="100" width="16" height="16" fill="#66BB6A" opacity="0.8" rx="2" />
+            <rect x="260" y="110" width="14" height="14" fill="#66BB6A" opacity="0.8" rx="2" />
+            <rect x="280" y="105" width="12" height="12" fill="#66BB6A" opacity="0.8" rx="2" />
+
+            {/* Zone 2 Buildings (Center area) */}
+            <rect x="320" y="220" width="16" height="16" fill="#FDD835" opacity="0.8" rx="2" />
+            <rect x="340" y="210" width="14" height="14" fill="#FDD835" opacity="0.8" rx="2" />
+            <rect x="300" y="240" width="12" height="12" fill="#FDD835" opacity="0.8" rx="2" />
+
+            {/* Zone 3 Buildings (South area - higher risk) */}
+            <rect x="260" y="350" width="16" height="16" fill="#EF5350" opacity="0.8" rx="2" />
+            <rect x="285" y="360" width="14" height="14" fill="#EF5350" opacity="0.8" rx="2" />
+            <rect x="310" y="340" width="12" height="12" fill="#FF7043" opacity="0.85" rx="2" />
+          </g>
+        </svg>
+
+        {/* Map Overlay Information */}
+        <div style={{ textAlign: 'center', zIndex: 10, background: 'rgba(0,0,0,0.5)', padding: '16px', borderRadius: '8px' }}>
+          <p style={{ margin: '0 0 8px', fontSize: '14px', fontWeight: 'bold', color: '#E0E0E0' }}>Yarnell, AZ — Zone 3 Evacuation</p>
+          <p style={{ margin: '0 0 12px', fontSize: '10px', color: '#B0B0B0' }}>SR-89 | Shrine Rd | Model Creek Rd</p>
+          <div style={{ fontSize: '9px', color: '#C0C0C0', lineHeight: '1.6' }}>
+            <div style={{ marginBottom: '4px' }}>🔥 Fire Perimeter (South)</div>
+            <div style={{ marginBottom: '4px' }}>🟩 Evacuated | 🟨 In Progress | 🟥 Needs Help</div>
+          </div>
+        </div>
+
+        {/* Simulated elements (markers, indicators) */}
+        <div style={{ position: 'absolute', bottom: '40px', left: '30px', width: '12px', height: '12px', background: C.green, borderRadius: '2px', zIndex: 20 }} />
+        <div style={{ position: 'absolute', top: '80px', right: '40px', width: '12px', height: '12px', background: C.yellow, borderRadius: '2px', zIndex: 20 }} />
+        <div style={{ position: 'absolute', bottom: '100px', right: '80px', width: '10px', height: '10px', background: C.deepPurple, borderRadius: '50%', zIndex: 20 }} />
+      </div>
+
+      {/* Map Info */}
+      <div style={{ padding: '0 16px' }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: '10px', padding: '12px', marginBottom: '16px' }}>
+          <p style={{ margin: '0 0 8px', fontSize: '12px', color: C.sub, fontFamily: 'Poppins, -apple-system, sans-serif' }}>CURRENT VIEW</p>
+          <p style={{ margin: '0', fontSize: '13px', fontWeight: '600', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+            All Zones | 3 Deputies On Scene | 2 Road Closures
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ==================== TAB 4: COMMS ====================
+  const TabComms = () => (
+    <div style={{ paddingBottom: '100px' }}>
+      {/* Channel Selector */}
+      <div style={{ padding: '16px 16px 8px' }}>
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px' }}>
+          {['Sheriff Dispatch', 'Evac Coord', 'Fire IC Bridge'].map((chan) => (
+            <button
+              key={chan}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '6px',
+                border: chan === 'Sheriff Dispatch' ? `2px solid ${C.deepPurple}` : `1px solid ${C.border}`,
+                background: chan === 'Sheriff Dispatch' ? C.deepPurple : C.card,
+                color: chan === 'Sheriff Dispatch' ? C.card : C.text,
+                fontSize: '11px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                fontFamily: 'Poppins, -apple-system, sans-serif',
+              }}
+            >
+              {chan}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Message Log */}
+      <div style={{ padding: '0 16px 16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div
+            style={{
+              background: C.feedBg,
+              borderRadius: '10px',
+              padding: '10px',
+              borderLeft: `3px solid ${C.blue}`,
+            }}
+          >
+            <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.muted, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+              9:35 AM
+            </p>
+            <p style={{ margin: '0', fontSize: '12px', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+              <strong>Fire IC:</strong> Advancing from northeast, expect 30-min evacuation window
+            </p>
+          </div>
+
+          <div
+            style={{
+              background: C.card,
+              borderRadius: '10px',
+              padding: '10px',
+              borderLeft: `3px solid ${C.deepPurple}`,
+              marginLeft: 'auto',
+              maxWidth: '85%',
+            }}
+          >
+            <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.muted, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+              9:33 AM
+            </p>
+            <p style={{ margin: '0', fontSize: '12px', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+              <strong>You:</strong> Zone 3 at 82%, two refusals, continuing...
+            </p>
+          </div>
+
+          <div
+            style={{
+              background: C.feedBg,
+              borderRadius: '10px',
+              padding: '10px',
+              borderLeft: `3px solid ${C.blue}`,
+            }}
+          >
+            <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.muted, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+              9:28 AM
+            </p>
+            <p style={{ margin: '0', fontSize: '12px', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+              <strong>Dispatch:</strong> Copy. Mutual aid ETA 9:28, Unit 42 inbound
+            </p>
+          </div>
+
+          <div
+            style={{
+              background: C.card,
+              borderRadius: '10px',
+              padding: '10px',
+              borderLeft: `3px solid ${C.deepPurple}`,
+              marginLeft: 'auto',
+              maxWidth: '85%',
+            }}
+          >
+            <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.muted, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+              9:22 AM
+            </p>
+            <p style={{ margin: '0', fontSize: '12px', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+              <strong>You:</strong> Request mutual aid for Zone 2
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Responses */}
+      <div style={{ padding: '0 16px 16px' }}>
+        <p style={{ margin: '0 0 8px', fontSize: '11px', color: C.sub, fontWeight: '600', fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+          QUICK RESPONSE
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+          {['Copy', '10-4', 'En route', 'On scene'].map((resp) => (
+            <button
+              key={resp}
+              style={{
+                padding: '10px',
+                background: C.deepPurple,
+                color: C.card,
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                fontFamily: 'Poppins, -apple-system, sans-serif',
+              }}
+            >
+              {resp}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Civilian Contact Log */}
+      <div style={{ padding: '0 16px' }}>
+        <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+          CIVILIAN CONTACTS
+        </h4>
+        <button
+          style={{
+            width: '100%',
+            padding: '12px',
+            background: C.deepPurple,
+            color: C.card,
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            fontFamily: 'Poppins, -apple-system, sans-serif',
+          }}
+        >
+          + Log New Contact
+        </button>
+      </div>
+    </div>
+  );
+
+  // ==================== TAB 5: ACCESS ====================
+  const TabAccess = () => (
+    <div style={{ paddingBottom: '100px' }}>
+      {/* Event Code */}
+      <div style={{ padding: '16px' }}>
+        <div
+          style={{
+            background: C.deepPurple,
+            color: C.card,
+            borderRadius: '12px',
+            padding: '16px',
+            textAlign: 'center',
+            marginBottom: '16px',
+          }}
+        >
+          <p style={{ margin: '0 0 6px', fontSize: '11px', color: 'rgba(255,255,255,0.7)', fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+            EVENT ACCESS CODE
+          </p>
+          <p style={{ margin: '0', fontSize: '20px', fontWeight: '700', letterSpacing: '2px', fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+            {eventCode}
+          </p>
+          <p style={{ margin: '8px 0 0', fontSize: '10px', color: 'rgba(255,255,255,0.6)', fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+            Share with arriving backup
+          </p>
+        </div>
+      </div>
+
+      {/* Personnel on Scene */}
+      <div style={{ padding: '0 16px 16px' }}>
+        <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+          ON SCENE
+        </h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {personnel.map((person, i) => (
+            <div
+              key={i}
+              style={{
+                background: C.card,
+                border: `1px solid ${C.border}`,
+                borderRadius: '10px',
+                padding: '12px',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '600', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                    {person.name}
+                  </p>
+                  <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.sub, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                    {person.role}
+                  </p>
+                  <p style={{ margin: '0', fontSize: '10px', color: C.muted, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                    {person.assignment}
+                  </p>
+                </div>
+                <div
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    background: C.green,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: C.card,
+                    fontSize: '12px',
+                  }}
+                >
+                  ✓
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Pending Arrivals */}
+      <div style={{ padding: '0 16px 16px' }}>
+        <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+          PENDING ARRIVALS
+        </h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {pendingArrivals.map((arrival, i) => (
+            <div
+              key={i}
+              style={{
+                background: C.feedBg,
+                border: `1px solid ${C.border}`,
+                borderRadius: '10px',
+                padding: '12px',
+              }}
+            >
+              <p style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: '600', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                {arrival.name}
+              </p>
+              <p style={{ margin: '0 0 4px', fontSize: '11px', color: C.sub, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                {arrival.unit}
+              </p>
+              <p style={{ margin: '0', fontSize: '12px', fontWeight: '600', color: C.blue, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+                ETA: {arrival.eta}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Volunteer Check-In */}
+      <div style={{ padding: '0 16px 16px' }}>
+        <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+          VOLUNTEER CHECK-IN
+        </h4>
+        <button
+          style={{
+            width: '100%',
+            padding: '12px',
+            background: C.deepPurple,
+            color: C.card,
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            fontFamily: 'Poppins, -apple-system, sans-serif',
+          }}
+        >
+          + Check In Volunteer
+        </button>
+      </div>
+
+      {/* Perimeter Log */}
+      <div style={{ padding: '0 16px' }}>
+        <h4 style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700', color: C.text, fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+          PERIMETER LOG
+        </h4>
+        <button
+          style={{
+            width: '100%',
+            padding: '12px',
+            background: C.card,
+            color: C.deepPurple,
+            border: `2px solid ${C.deepPurple}`,
+            borderRadius: '8px',
+            fontWeight: '600',
+            cursor: 'pointer',
+            fontFamily: 'Poppins, -apple-system, sans-serif',
+          }}
+        >
+          + Log Entry / Exit
+        </button>
+      </div>
+    </div>
+  );
+
+  // ==================== RENDER ====================
+  return (
+    <div style={{ fontFamily: 'Poppins, -apple-system, sans-serif' }}>
+      {/* Phone Frame */}
+      <div
+        style={{
+          width: '375px',
+          height: '812px',
+          margin: '20px auto',
+          background: C.bg,
+          borderRadius: '40px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.1)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Status Bar */}
+        <div
+          style={{
+            height: '44px',
+            background: C.card,
+            borderBottom: `1px solid ${C.border}`,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingLeft: '16px',
+            paddingRight: '16px',
+            boxSizing: 'border-box',
+          }}
+        >
+          <span style={{ fontSize: '14px', fontWeight: '600', color: C.text }}>9:41</span>
+          <div
+            style={{
+              background: C.deepPurple,
+              color: C.card,
+              borderRadius: '4px',
+              padding: '4px 8px',
+              fontSize: '10px',
+              fontWeight: '700',
+            }}
+          >
+            ON DUTY
+          </div>
+          <span style={{ fontSize: '14px', color: C.text }}>🔋</span>
+        </div>
+
+        {/* Content */}
+        <div style={{ flex: 1, overflowY: 'auto', background: C.bg }}>
+          {activeTab === 'evac' && <TabEvac />}
+          {activeTab === 'roads' && <TabRoads />}
+          {activeTab === 'map' && <TabMap />}
+          {activeTab === 'comms' && <TabComms />}
+          {activeTab === 'access' && <TabAccess />}
+        </div>
+
+        {/* Tab Bar */}
+        <div
+          style={{
+            height: '68px',
+            background: C.card,
+            borderTop: `1px solid ${C.border}`,
+            display: 'flex',
+            justifyContent: 'space-around',
+            alignItems: 'center',
+            paddingBottom: '8px',
+          }}
+        >
+          {[
+            { id: 'evac', label: 'Evac', icon: '📍' },
+            { id: 'roads', label: 'Roads', icon: '🛣️' },
+            { id: 'map', label: 'Map', icon: '🗺️' },
+            { id: 'comms', label: 'Comms', icon: '📡' },
+            { id: 'access', label: 'Access', icon: '🔐' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                flex: 1,
+                background: 'none',
+                border: 'none',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+                cursor: 'pointer',
+                opacity: activeTab === tab.id ? 1 : 0.5,
+                transition: 'opacity 0.2s',
+              }}
+            >
+              <span style={{ fontSize: '20px' }}>{tab.icon}</span>
+              <span
+                style={{
+                  fontSize: '10px',
+                  fontWeight: activeTab === tab.id ? '700' : '500',
+                  color: activeTab === tab.id ? C.deepPurple : C.muted,
+                }}
+              >
+                {tab.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

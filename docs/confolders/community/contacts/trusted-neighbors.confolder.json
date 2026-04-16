@@ -1,0 +1,216 @@
+{
+  "module_id": "community.contacts.trusted-neighbors",
+  "module_name": "Trusted Neighbors",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting definition of 'nearby' proximity (10 mi radius?). Trust level granularity needs refinement.",
+    "priority": 2
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Contacts > Trusted Neighbors",
+    "M4_parent": "community.contacts",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "discovery_request",
+        "source": "User opens nearby neighbors feature",
+        "format": "JSON",
+        "schema_ref": "{ user_id, location_lat, location_lng, search_radius_miles }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "trust_request",
+        "source": "User requests to trust a nearby neighbor",
+        "format": "JSON",
+        "schema_ref": "{ from_user_id, to_user_id, message? }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "trust_acceptance",
+        "source": "User accepts or rejects trust request",
+        "format": "JSON",
+        "schema_ref": "{ request_id, action: 'accept'|'reject' }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "nearby_users_list",
+        "consumers": ["discovery UI"],
+        "format": "JSON",
+        "schema_ref": "[{ user_id, name, verified_badge, distance_miles, shared_groups? }]",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "trust_request_notification",
+        "consumers": ["notification system", "trust request inbox"],
+        "format": "JSON",
+        "schema_ref": "{ from_user_id, from_user_name, message?, timestamp }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "trusted_neighbor_relationship",
+        "consumers": ["location sharing", "group suggestions", "help matching"],
+        "format": "JSON",
+        "schema_ref": "{ neighbor_id, status: 'trusted', trust_level, location_sharing_enabled }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Find nearby users",
+        "algorithm": "Query location_events table within radius. Filter verified users. Sort by distance + mutual groups.",
+        "latency_sla": "<1s for 50-mile radius",
+        "accuracy_target": "All users within radius returned, correct distance calc"
+      },
+      {
+        "operation": "Create trust request",
+        "algorithm": "Insert into trusted_neighbors table with status='pending'",
+        "latency_sla": "<200ms",
+        "accuracy_target": "100% request creation"
+      },
+      {
+        "operation": "Accept trust request",
+        "algorithm": "Update status to 'trusted'. Bidirectional relationship. Enable location sharing (optional).",
+        "latency_sla": "<200ms",
+        "accuracy_target": "Relationship established, both users see each other as trusted"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity.account-creation",
+        "description": "Users must be registered and verified",
+        "data_format": "user_id, verified_badge",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "community.contacts.location-sharing",
+        "description": "Location data available (users have shared location)",
+        "data_format": "location_lat, location_lng, granularity",
+        "dependencies": []
+      },
+      {
+        "step": 3,
+        "module_id": "user_action",
+        "description": "User initiates discovery or sends trust request",
+        "data_format": "action, recipient_user_id",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 4,
+        "module_id": "nearby_search",
+        "description": "Query location_events within radius",
+        "data_format": "list of user_ids with distance",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "trust_request_creation",
+        "description": "Insert request into trusted_neighbors table",
+        "data_format": "request_id, status='pending'",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "notification",
+        "description": "Recipient notified of trust request",
+        "data_format": "push notification or in-app notification",
+        "dependencies": []
+      },
+      {
+        "step": 7,
+        "module_id": "acceptance",
+        "description": "When accepted: status='trusted', enable optional location sharing",
+        "data_format": "UPDATE trusted_neighbors status",
+        "dependencies": []
+      },
+      {
+        "step": 8,
+        "module_id": "downstream_features",
+        "description": "Trusted neighbor relationship used by location sharing, group suggestions, help matching",
+        "data_format": "trusted relationship data",
+        "dependencies": ["community.contacts.location-sharing", "community.groups.types", "community.equipment.resource-matching"]
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Nearby user search (spatial query on location_events table with millions of records). Distance calculation (math-intensive). Privacy concerns (user visibility during discovery). Trust request notification delivery (real-time).",
+    "P2_defensibility": "Location-based discovery is opt-in (user initiates). Verified badge builds trust. Bidirectional acceptance ensures both parties consent. Privacy-by-default (user must opt-in to location sharing with trusted neighbor).",
+    "P3_confidence_level": "Very high confidence in proximity-based matching (standard spatial queries). High confidence in trust request workflow (simple state machine). Medium confidence on privacy guarantees (requires careful location data handling).",
+    "P4_failure_modes": [
+      "Nearby search returns wrong users or misses nearby users (mitigate: spatial index on location_events, periodic index rebuild)",
+      "Trust request notification fails → user doesn't see request (mitigate: in-app inbox also shows pending requests)",
+      "Distance calculation incorrect (mitigate: use haversine formula, unit test with known coordinates)",
+      "User can see location of untrustworthy neighbor (mitigate: strict location granularity controls, neighbor can opt-out of discovery)"
+    ],
+    "P5_backup_plan": "If nearby search unavailable: show 'try again later'. If notification fails: pending request visible in app. If distance calc wrong: show approximate distance. If privacy concern: user can hide from discovery (opt-out).",
+    "P6_backup_plan_test": "Simulate location search failure (mock spatial query). Test distance calculation (known coordinates, expected distance). Test notification failure (mock FCM). Test privacy: verify unverified users can't see locations.",
+    "P7_testing_strategy": "Unit tests for distance calculation (haversine). Integration tests for nearby search (mock location_events). Load tests for large location dataset (10M+ records). End-to-end tests for full trust workflow (discover → request → accept). Privacy audit (verify location data handling).",
+    "P8_benchmarks": "Nearby search: <1s for 50-mile radius (100k users). Distance calc: <1ms per pair. Trust request creation: <200ms. Notification delivery: >95% within 10s. False positive (same person twice): <1%."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for trusted neighbors module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Location-based discovery may create privacy expectations (users may feel tracked). Transparent consent required. Trust relationships enable sharing sensitive data (mutual consent). Unverified users should not be discoverable (safety consideration).",
+    "L2_regulatory_frameworks": ["GDPR (location data, consent)", "CCPA (opt-out right)", "State privacy laws"],
+    "L3_consent_requirements": "Separate consent for: (1) location sharing for neighbor discovery, (2) enabling neighbor discovery (opt-in), (3) location sharing with specific trusted neighbor. All opt-in (no defaults).",
+    "L4_liability_notes": "Trust relationships may be misused for stalking or harassment. Mitigation: unverified users not discoverable, user can hide from discovery, block feature. Bidirectional acceptance ensures both parties consent."
+  },
+  "F": {
+    "F1_cost_considerations": "Location data storage: ~200B per location event. Spatial index on location_events: ~10% storage overhead. Nearby search queries: negligible compute (indexed). At 10k users with 10 location events/day, ~20MB/day = ~7GB/year storage.",
+    "F2_accounting_considerations": "Storage cost grows with user base. Spatial index maintenance is operational cost. Consider tiered location data retention (older events deleted).",
+    "F3_revenue_impact": "Trust relationships increase engagement and retention. May enable P2P services (helping economy). Positive impact."
+  },
+  "S": {
+    "S1_cybersecurity": "Location queries require authentication (user_id). Spatial index prevents leaking location of unverified users. Hashed location (geohash) for discovery prevents pinpoint accuracy. Rate limiting on discovery (prevent automated scanning).",
+    "S2_data_privacy": "Location data encrypted at rest. Nearby search uses geohash bucketing (user cannot pinpoint other users). User can opt-out of discovery (hide location from search). Location sharing with trusted neighbor is separate consent.",
+    "S3_encryption_requirements": "Location events encrypted at rest (AES-256). Geohashing lossy (intentional privacy reduction). Transiting TLS.",
+    "S4_access_control": "Users can only see nearby verified users. Unverified users hidden from discovery. User can opt-out of discovery entirely. Trusted neighbor relationship only visible to both parties.",
+    "S5_audit_requirements": "Audit log of nearby searches (for suspicious pattern detection). Audit log of trust relationship changes. Audit trail retention: 1 year."
+  },
+  "X": {
+    "X1_notes": "Trusted neighbors are cornerstone of mutual aid and community resilience. Requires careful privacy handling (location is sensitive). Verified badge essential (prevents discovery by bad actors). Bidirectional trust ensures both parties consent. Integration with help matching and group suggestions multiplies value.",
+    "X2_open_questions": [
+      "Proximity radius? (10 miles, 5 miles, 1 mile?)",
+      "Trust level granularity? (simple trusted, or levels like 'recognized', 'trusted', 'emergency-trusted'?)",
+      "Should location refresh in discovery? (every time user opens, or cached?)",
+      "Can admins force trust relationships? (probably not - consent is essential)"
+    ],
+    "X3_related_research": "Spatial databases and GIS. Geohashing. Privacy-preserving location sharing. Haversine formula. Trust graph analysis. Social networks based on proximity."
+  }
+}

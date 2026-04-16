@@ -1,0 +1,147 @@
+{
+  "module_id": "help.neighbors.verified",
+  "module_name": "Verified Neighbor Badge for Help",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "updated_by": "claude-opus-4",
+  "bookmark": {
+    "status": "Adds legitimacy to geofenced help responses",
+    "return_note": "placeholder",
+    "priority": [
+      "Visual design to distinguish from trusted neighbor badge"
+    ]
+  },
+  "M": {
+    "M1_beacon_versions": [
+      "MVP"
+    ],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Help > Neighbors > Verified Badge",
+    "M4_parent": "help.neighbors",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-opus-4",
+        "role": "architect",
+        "from": "2026-04-04T14:58:58Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "user_verified_status",
+        "source": "community.identity.verified-badge",
+        "format": "boolean",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": [
+          "community.identity.verified-badge"
+        ]
+      },
+      {
+        "name": "user_location",
+        "source": "community.contacts.location-sharing",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "real-time",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "verified_neighbor_badge",
+        "consumers": [
+          "help.feed",
+          "help.requests"
+        ],
+        "format": "boolean",
+        "schema_ref": null,
+        "frequency": "per-request",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Check if responder is ID-verified AND within geofenced area. If both true, show verified neighbor badge.",
+        "algorithm": "Verified status + geofence containment check",
+        "latency_sla": "<50ms",
+        "accuracy_target": null
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity.verified-badge",
+        "description": "ID verification status",
+        "data_format": "boolean",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "community.contacts.location-sharing",
+        "description": "User within request geofence",
+        "data_format": "boolean",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.feed",
+        "description": "Badge shown on responder in feed",
+        "data_format": "UI badge",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Minimal. Two lookups per responder.",
+    "P2_defensibility": "Adds trust to geofenced requests without requiring pre-existing relationship.",
+    "P3_confidence_level": "NR",
+    "P4_failure_modes": [
+      "Verified user moves out of area between check and response",
+      "Badge confusion with trusted neighbor"
+    ],
+    "P5_backup_plan": "Re-check location at claim time. Visual distinction between verified and trusted badges.",
+    "P6_backup_plan_test": "Simulate failure scenario in staging with mock data",
+    "P7_testing_strategy": "Test badge display. Test location boundary edge cases.",
+    "P8_benchmarks": "Badge check <50ms."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T14:58:58Z",
+        "who": "claude-opus-4",
+        "description": "Initial CONFolder creation",
+        "version": "0.1"
+      }
+    ],
+    "CH2_current_version": "0.1"
+  },
+  "L": {
+    "L1_legal_considerations": "NR",
+    "L2_regulatory_frameworks": "NR",
+    "L3_consent_requirements": "NR",
+    "L4_liability_notes": "NR"
+  },
+  "F": {
+    "F1_cost_considerations": "Negligible.",
+    "F2_accounting_considerations": "Allocated to help module operational budget",
+    "F3_revenue_impact": "NR"
+  },
+  "S": {
+    "S1_cybersecurity": "Verification status is binary. No additional PII exposed.",
+    "S2_data_privacy": "Badge shows verification, not specific ID details.",
+    "S3_encryption_requirements": "NR",
+    "S4_access_control": "Computed at request time, not stored.",
+    "S5_audit_requirements": "NR"
+  },
+  "X": {
+    "X1_notes": 3,
+    "X2_open_questions": null,
+    "X3_related_research": "NR"
+  }
+}

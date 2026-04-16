@@ -1,0 +1,170 @@
+{
+  "module_id": "help.routing.capability",
+  "module_name": "Capability-Based Routing",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "updated_by": "claude-opus-4",
+  "bookmark": {
+    "status": "Matches help requests to capable nearby users",
+    "return_note": "placeholder",
+    "priority": [
+      "Category-to-capability mapping table",
+      "Fallback behavior when registries empty"
+    ]
+  },
+  "M": {
+    "M1_beacon_versions": [
+      "Beta"
+    ],
+    "M2_module_type": "service",
+    "M3_hierarchy_path": "Product Manager > Help > Routing > Capability",
+    "M4_parent": "help.routing",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-opus-4",
+        "role": "architect",
+        "from": "2026-04-04T14:58:58Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "request_category",
+        "source": "help.requests",
+        "format": "string",
+        "schema_ref": null,
+        "frequency": "per-request",
+        "dependencies": [
+          "help.requests"
+        ]
+      },
+      {
+        "name": "equipment_registry",
+        "source": "community.equipment.registry",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": [
+          "community.equipment.registry"
+        ]
+      },
+      {
+        "name": "skills_registry",
+        "source": "community.equipment.skills",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": [
+          "community.equipment.skills"
+        ]
+      },
+      {
+        "name": "vehicles_registry",
+        "source": "community.equipment.vehicles",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": [
+          "community.equipment.vehicles"
+        ]
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "matched_helpers",
+        "consumers": [
+          "help.routing.notifications"
+        ],
+        "format": "JSON array",
+        "schema_ref": null,
+        "frequency": "per-request",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Match request category to helper capabilities, rank by distance + relevance + verification",
+        "algorithm": "Category-to-capability mapping + weighted scoring",
+        "latency_sla": "<200ms",
+        "accuracy_target": null
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.equipment",
+        "description": "Equipment/skills/vehicles loaded",
+        "data_format": "JSON",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "help.routing.proximity",
+        "description": "Nearby radius determined",
+        "data_format": "number",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.routing.notifications",
+        "description": "Matched helpers notified",
+        "data_format": "JSON",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Query across 3 registries within geofence. Index quality critical.",
+    "P2_defensibility": "Capability matching increases help quality vs random nearby notification.",
+    "P3_confidence_level": "NR",
+    "P4_failure_modes": [
+      "No capable helpers in radius",
+      "Stale availability data",
+      "Category mismatch"
+    ],
+    "P5_backup_plan": "Fall back to all verified users in radius if no capability match.",
+    "P6_backup_plan_test": "Simulate failure scenario in staging with mock data",
+    "P7_testing_strategy": "Unit test category-to-capability mapping. Integration test with populated registries. Load test matching at scale.",
+    "P8_benchmarks": "Match query <200ms. Fallback activation <1% of requests in populated areas."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T14:58:58Z",
+        "who": "claude-opus-4",
+        "description": "Initial CONFolder creation",
+        "version": "0.1"
+      }
+    ],
+    "CH2_current_version": "0.1"
+  },
+  "L": {
+    "L1_legal_considerations": "NR",
+    "L2_regulatory_frameworks": "NR",
+    "L3_consent_requirements": "NR",
+    "L4_liability_notes": "NR"
+  },
+  "F": {
+    "F1_cost_considerations": "Geospatial + registry queries. Negligible per-request cost.",
+    "F2_accounting_considerations": "Allocated to help module operational budget",
+    "F3_revenue_impact": "NR"
+  },
+  "S": {
+    "S1_cybersecurity": "Helper capabilities are self-reported. Not shared beyond matching context.",
+    "S2_data_privacy": "Capabilities visible to system only, not to requester (requester sees 'someone with a vehicle responded').",
+    "S3_encryption_requirements": "NR",
+    "S4_access_control": "Authenticated internal service only.",
+    "S5_audit_requirements": "NR"
+  },
+  "X": {
+    "X1_notes": 2,
+    "X2_open_questions": "Build category-to-capability mapping after equipment registry is built",
+    "X3_related_research": "NR"
+  }
+}

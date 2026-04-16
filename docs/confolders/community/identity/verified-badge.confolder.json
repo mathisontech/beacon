@@ -1,0 +1,163 @@
+{
+  "module_id": "community.identity.verified-badge",
+  "module_name": "Verified Badge Logic",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting definition of verification levels (fully verified, partially verified, unverified). Badge expiry policy needed.",
+    "priority": 2
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Identity > Verified Badge",
+    "M4_parent": "community.identity",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "verification_results",
+        "source": "All identity verification modules",
+        "format": "JSON",
+        "schema_ref": "{ selfie_liveness: bool, face_match: 0.0-1.0, address_match: bool, background_check: 'clear'|'flag'|'unknown' }",
+        "frequency": "on-demand",
+        "dependencies": ["community.identity.selfie-capture", "community.identity.face-match", "community.identity.address-validation", "community.identity.background-check"]
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "verified_badge",
+        "consumers": ["user profile display", "group directory", "trust scoring"],
+        "format": "JSON",
+        "schema_ref": "{ level: 'unverified'|'partial'|'verified', checked_at, expires_at }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "badge_display",
+        "consumers": ["UI (checkmark icon + hover text)"],
+        "format": "JSON",
+        "schema_ref": "{ icon, color, tooltip: 'fully verified'|'partial verification'|'not verified' }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Compute verification level",
+        "algorithm": "selfie_liveness AND face_match>0.95 AND address_match AND background_check='clear' → verified. Partial if 2-3 passed. Otherwise unverified.",
+        "latency_sla": "<100ms",
+        "accuracy_target": "100% correct level assignment"
+      },
+      {
+        "operation": "Determine badge expiry",
+        "algorithm": "Verified: 1 year. Partial: 6 months (require re-verification). Address change triggers re-verification.",
+        "latency_sla": "<50ms",
+        "accuracy_target": "100% correct expiry calc"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "verification_workflow",
+        "description": "All identity verification steps completed (or failed)",
+        "data_format": "verification results for each step",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 2,
+        "module_id": "badge_computation",
+        "description": "Verification level computed from all results",
+        "data_format": "verified_badge",
+        "dependencies": []
+      },
+      {
+        "step": 3,
+        "module_id": "badge_display",
+        "description": "Badge displayed on profile, group directory, etc",
+        "data_format": "UI rendering",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "trust_scoring",
+        "description": "Badge influences trust score (used by group suggestions, help matching)",
+        "data_format": "trust_score multiplier",
+        "dependencies": ["community.contacts.trusted-neighbors", "community.equipment.resource-matching"]
+      },
+      {
+        "step": 5,
+        "module_id": "expiry_monitoring",
+        "description": "Background job checks for expired badges. Trigger re-verification.",
+        "data_format": "expired_badge notifications",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Badge computation is trivial (logic only). Expiry checking is background job. Badge display cached (no runtime cost).",
+    "P2_defensibility": "Clear logic (pass all = verified, pass some = partial, fail all = unverified). Expiry prevents stale badges. Address change triggers re-verification.",
+    "P3_confidence_level": "Very high confidence. Simple deterministic logic.",
+    "P4_failure_modes": [
+      "Badge computation wrong → user sees wrong badge (mitigate: test logic with all combination inputs)",
+      "Badge expiry not enforced → verified badge persists beyond expiry (mitigate: background job checks daily)",
+      "Address change not detected → badge not re-verified (mitigate: trigger re-verification on profile update)"
+    ],
+    "P5_backup_plan": "If badge computation fails: default to unverified (fail-closed). If expiry check fails: manual admin review.",
+    "P6_backup_plan_test": "Test all input combinations (16 combinations of 4 boolean inputs). Test expiry logic (set to past, verify rejected). Test address change trigger.",
+    "P7_testing_strategy": "Unit tests for badge computation (all input combinations). Integration tests for expiry checking. End-to-end tests for full verification workflow. Badge display accuracy tests.",
+    "P8_benchmarks": "Badge computation: <100ms. Expiry check: background job, completes within 1 hour. Badge display: real-time (no latency). Accuracy: 100% (simple logic)."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for verified badge module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Badge accurately represents verification status (no false claims). Users rely on badge for trust decisions. Misinformation could enable fraud. Clear definitions required (what 'verified' means).",
+    "L2_regulatory_frameworks": ["FTC Act (false/misleading claims)", "State consumer protection laws"],
+    "L3_consent_requirements": "User implicitly consents to badge display by completing verification.",
+    "L4_liability_notes": "False positive (unverified user shows verified badge): fraud risk. Mitigation: strict logic, regular audits. False negative (verified user shows unverified badge): harm to user. Mitigation: clear badge definitions, appeals process."
+  },
+  "F": {
+    "F1_cost_considerations": "Badge computation and storage: negligible cost.",
+    "F2_accounting_considerations": "Operational cost, no special accounting.",
+    "F3_revenue_impact": "Verified badge increases user trust and retention (positive impact)."
+  },
+  "S": {
+    "S1_cybersecurity": "Badge is public (displayed on profile). No security risk. Badge tampering prevented by database constraints.",
+    "S2_data_privacy": "Badge reveals verification status (semi-public). No PII in badge.",
+    "S3_encryption_requirements": "NR - badge is plaintext status",
+    "S4_access_control": "Badge visible to all users. Computation only by verification modules.",
+    "S5_audit_requirements": "Log badge creation, expiry, re-verification. Audit trail retention: 1 year."
+  },
+  "X": {
+    "X1_notes": "Verified badge is trust signal that users rely on. Clear definitions essential (fully verified = all checks passed, partial = some checks passed). Expiry policy important (keeps data current without constant re-verification). Badge influences trust scoring used by groups and help matching.",
+    "X2_open_questions": [
+      "Partial verification: show badge or not? (partial may confuse users, safer to hide)",
+      "Grace period before expiry? (30 days notice before badge expires)",
+      "Can admins override badge? (probably not - integrity is critical)"
+    ],
+    "X3_related_research": "Trust signals in online communities. Badge design and user perception. Fraud in identity-verified systems."
+  }
+}

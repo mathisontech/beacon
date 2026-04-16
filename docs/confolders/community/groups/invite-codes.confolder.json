@@ -1,0 +1,208 @@
+{
+  "module_id": "community.groups.invite-codes",
+  "module_name": "Invite Codes & QR",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting decision on single-use vs multi-use codes. QR code expiry default needs specification.",
+    "priority": 2
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Groups > Invite Codes",
+    "M4_parent": "community.groups",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "code_generation_request",
+        "source": "Admin/founder requests new invite code",
+        "format": "JSON",
+        "schema_ref": "{ group_id, expiry_hours?: 24, single_use?: true, max_uses?: 1 }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "code_redemption",
+        "source": "User enters code or scans QR to join group",
+        "format": "JSON",
+        "schema_ref": "{ user_id, code }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "code_revocation",
+        "source": "Admin revokes code",
+        "format": "JSON",
+        "schema_ref": "{ group_id, code }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "invite_code",
+        "consumers": ["code display, QR code generator, share link"],
+        "format": "JSON",
+        "schema_ref": "{ code: string, qr_url, deep_link, created_at, expires_at, used_count }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "join_confirmation",
+        "consumers": ["group members list, notification system"],
+        "format": "JSON",
+        "schema_ref": "{ user_id, group_id, joined_at, invited_by_code }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Generate 6-character alphanumeric code",
+        "algorithm": "Random alphanumeric (base36). Collision check. Retry if collision.",
+        "latency_sla": "<100ms",
+        "accuracy_target": "Zero collisions, cryptographically random"
+      },
+      {
+        "operation": "Validate code on redemption",
+        "algorithm": "Query group_invites. Check expiry time. Check single-use constraint. Check use count.",
+        "latency_sla": "<200ms",
+        "accuracy_target": "100% correct validation"
+      },
+      {
+        "operation": "Generate QR code",
+        "algorithm": "QR encode deep link (beacon://join?code=XXXX&group_id=Y). SVG output.",
+        "latency_sla": "<100ms",
+        "accuracy_target": "Scannable QR, correct data encoded"
+      },
+      {
+        "operation": "Track code usage",
+        "algorithm": "On redemption: INSERT into group_invites.used_by (code, user_id, timestamp). Increment used_count.",
+        "latency_sla": "<200ms",
+        "accuracy_target": "100% usage tracking, no double-counting"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.groups.roles",
+        "description": "User must be founder/admin to generate codes",
+        "data_format": "user_id, group_id, permission_check",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "code_generation_request",
+        "description": "Admin requests code (optionally specifying expiry, single-use, max-uses)",
+        "data_format": "request with parameters",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 3,
+        "module_id": "code_generation",
+        "description": "Random 6-char alphanumeric code generated",
+        "data_format": "code string",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "qr_generation",
+        "description": "QR code generated and stored (or generated on-demand)",
+        "data_format": "QR SVG image",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "persistence",
+        "description": "Code stored in group_invites table with metadata (created_at, expires_at, single_use flag, created_by)",
+        "data_format": "INSERT group_invites",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "code_display",
+        "description": "Code displayed to admin (with copy, share, QR scan options)",
+        "data_format": "UI display",
+        "dependencies": []
+      },
+      {
+        "step": 7,
+        "module_id": "code_redemption_path",
+        "description": "User enters code (or scans QR) → deep link to app → join group",
+        "data_format": "user_id, group_id, joined_at",
+        "dependencies": ["community.groups.types"]
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Code generation uniqueness (collision detection with millions of codes). QR code generation latency (should be <100ms). Code validation at redemption (database query). Code expiry enforcement (background job to clean expired codes).",
+    "P2_defensibility": "6-character codes have 36^6 = 2.2B combinations (low collision risk even with millions issued). Single-use flag prevents code reuse (controls growth). Expiry prevents stale codes. Deep links enable seamless join (scan and auto-open app).",
+    "P3_confidence_level": "Very high confidence. Code generation is standard technique. QR encoding is well-established. No novel complexity.",
+    "P4_failure_modes": [
+      "Code collision → two codes identical (mitigate: collision detection on generation, refresh on collision)",
+      "QR scan fails → QR unreadable (mitigate: also display text code, test QR generation)",
+      "Code expiry not enforced → expired code still valid (mitigate: explicit expiry check on redemption)",
+      "Single-use not enforced → code reused (mitigate: database constraint or explicit check)",
+      "Deep link doesn't open app → user manual enters code (mitigate: test deep link on both iOS/Android)"
+    ],
+    "P5_backup_plan": "If code collision: regenerate. If QR fails: show text code. If expiry check fails: reject code, let user manually request new one. If deep link fails: user can manually enter code.",
+    "P6_backup_plan_test": "Simulate collision (mock collision check). Test QR generation. Test expiry enforcement (set code to expire in past, verify rejected). Test single-use (redeem twice, second should fail). Test deep link (iOS and Android).",
+    "P7_testing_strategy": "Unit tests for code generation (collision test with 1M codes generated). Unit tests for QR encoding (test vectors). Integration tests for code redemption flow. Load tests for concurrent code generation (100 codes/s). End-to-end tests for QR scan → join workflow. Deep link tests on real devices.",
+    "P8_benchmarks": "Code generation: <100ms, zero collisions in 10M codes. QR generation: <100ms. Code validation: <200ms. Code redemption: <500ms total (validation + join group). Expiry enforcement: 100% (no expired codes accepted). Single-use enforcement: 100% (no reuse)."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for invite codes module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Invite codes enable access control (only those with code can join). Single-use codes prevent unauthorized bulk joining. Expiry prevents stale access (security). Deep links must not leak sensitive data (QR safe: code is access token, not user data).",
+    "L2_regulatory_frameworks": ["GDPR (access control)", "CDA Section 230 (group control)"],
+    "L3_consent_requirements": "Implicit consent to code usage by redeeming code.",
+    "L4_liability_notes": "Leaked code could enable unwanted joins. Mitigation: single-use flag, expiry, ability to revoke. Deep link should not expose sensitive data (only group_id and code, both intended to be shared)."
+  },
+  "F": {
+    "F1_cost_considerations": "Code storage: ~100B per code. QR generation: negligible. Code cleanup (expired): minimal background job cost. At 100k groups generating 1 code/week, ~5M codes/year * 100B = 500GB storage (acceptable).",
+    "F2_accounting_considerations": "Operational cost, no special accounting. Consider tiered code limits (free: 5 codes/day, premium: unlimited) if implemented.",
+    "F3_revenue_impact": "Invite codes are retention feature (easy group joining). Moderate positive impact."
+  },
+  "S": {
+    "S1_cybersecurity": "Codes are access tokens (single-use or time-limited). Cryptographically random generation (not predictable). Deep links do not expose sensitive data (code is intended-to-share, group_id is public). Rate limiting on code redemption (prevent brute-force).",
+    "S2_data_privacy": "Codes are semi-secret (should not be shared publicly, but QR can be scanned by anyone nearby). Code usage logged (for auditing leaks).",
+    "S3_encryption_requirements": "Deep links use TLS. Code transport over HTTPS only. QR encodes deep link (no plaintext transmission needed).",
+    "S4_access_control": "Only founder/admin can generate codes. Anyone with code can join (intended behavior). Code creator can revoke code.",
+    "S5_audit_requirements": "Log code generation (who, when, parameters). Log code redemption (user, time, success/failure). Log code revocation. Audit trail retention: 1 year."
+  },
+  "X": {
+    "X1_notes": "Invite codes are critical for group discovery and on-boarding. QR codes enable offline sharing (print, share photo). Single-use codes prevent unauthorized bulk joining. Expiry limits stale access. Deep links provide seamless UX (scan and join). Integration with group roles enables admin-controlled growth.",
+    "X2_open_questions": [
+      "Single-use or multi-use? (single-use safer but generates many codes)",
+      "Default expiry? (24h, 7 days, 30 days, never?)",
+      "Max uses per code? (1, 5, unlimited?)",
+      "Tracking code source? (which code led to join?) - useful for analytics"
+    ],
+    "X3_related_research": "QR code standards (ISO/IEC 18004). Deep linking (iOS, Android). Access token best practices. Code generation algorithms. Invitation flow patterns in social networks."
+  }
+}

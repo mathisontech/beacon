@@ -52,37 +52,27 @@ import {
 import { baseLayerCategories } from '@/data/baseLayerCategories';
 import { baseMapSubmodules } from '@/data/baseMapSubmodules';
 import { integrations } from '@/data/integrations';
+import { VolcanoNav } from './viz/hazards/volcanoes/nav/volcano-nav';
+import { VOLCANOES_HREF } from './viz/hazards/volcanoes/nav/volcano-nav-tree';
 import './dashboard.css';
 
-// Visualization Manager groups — Base Map / Hazards / Live
+// Module Manager groups — Base Map / Hazards
 const vizGroups = [
   {
-    label: 'Base Map',
+    label: 'A. Base Map',
     docsHref: '/admin/dashboard/modules/base-map/docs',
     items: [
-      { label: '2D', href: '/admin/dashboard/modules/base-map/views/flat', icon: Map },
-      { label: '2D Satellite', href: '/admin/dashboard/modules/base-map/views/satellite', icon: Map },
-      { label: '3D Clay', href: '/admin/dashboard/modules/base-map/views/clay', icon: Layers },
-      { label: '3D Google Tiles', href: '/admin/dashboard/modules/base-map/views/google-3d', icon: Layers },
+      { label: '1. 2D', href: '/admin/dashboard/modules/base-map/views/flat', icon: Map },
+      { label: '2. 2D Satellite', href: '/admin/dashboard/modules/base-map/views/satellite', icon: Map },
+      { label: '3. 3D Clay', href: '/admin/dashboard/modules/base-map/views/clay', icon: Layers },
+      { label: '4. 3D Google Tiles', href: '/admin/dashboard/modules/base-map/views/google-3d', icon: Layers },
     ],
   },
   {
-    label: 'Hazards',
+    label: 'B. Hazards',
     docsHref: '/admin/dashboard/modules/hazards/docs',
     items: [
-      { label: 'Volcanoes', href: '/admin/dashboard/viz/hazards/volcanoes', icon: Flame },
-      { label: 'Risk Layers', href: '/admin/dashboard/viz/hazards/risk-layers', icon: AlertTriangle },
-      { label: 'Hazard Perimeters', href: '/admin/dashboard/viz/hazards/perimeters', icon: TriangleAlert },
-      { label: 'Building Status Overlays', href: '/admin/dashboard/viz/hazards/building-status', icon: Layers },
-    ],
-  },
-  {
-    label: 'Live',
-    docsHref: '/admin/dashboard/modules/live/docs',
-    items: [
-      { label: 'Vehicles', href: '/admin/dashboard/viz/live/vehicles', icon: Navigation },
-      { label: 'Animals', href: '/admin/dashboard/viz/live/animals', icon: PawPrint },
-      { label: 'Sensors & Cameras', href: '/admin/dashboard/viz/live/sensors', icon: Radar },
+      { label: '1. Volcanoes', href: '/admin/dashboard/viz/hazards/volcanoes', icon: Flame },
     ],
   },
 ];
@@ -90,138 +80,130 @@ const vizGroups = [
 // Module Manager groups (remaining modules)
 const moduleGroups = [
   {
-    label: 'Base Map',
+    label: 'B. Base Map',
     docsHref: '/admin/dashboard/modules/base-map/docs',
     items: [
-      { label: 'Periodic Regional Layers', href: '/admin/dashboard/modules/base-map/layers', icon: Map, hasLayerDropdown: true },
-      { label: 'Event-Triggered Updates', href: '/admin/dashboard/modules/base-map/event-updates', icon: RefreshCw },
-      { label: 'User Map Adjustments', href: '/admin/dashboard/modules/base-map/user-adjustments', icon: PenTool },
-      { label: 'User-Created Layers', href: '/admin/dashboard/modules/base-map/user-layers', icon: Layers },
-      { label: 'Sensor-Driven Attributes', href: '/admin/dashboard/modules/base-map/sensor-attributes', icon: Radar },
+      { label: '1. Periodic Regional Layers', href: '/admin/dashboard/modules/base-map/layers', icon: Map, hasLayerDropdown: true },
+      { label: '2. Event-Triggered Updates', href: '/admin/dashboard/modules/base-map/event-updates', icon: RefreshCw },
+      { label: '3. User Map Adjustments', href: '/admin/dashboard/modules/base-map/user-adjustments', icon: PenTool },
+      { label: '4. User-Created Layers', href: '/admin/dashboard/modules/base-map/user-layers', icon: Layers },
+      { label: '5. Sensor-Driven Attributes', href: '/admin/dashboard/modules/base-map/sensor-attributes', icon: Radar },
     ],
   },
   {
-    label: 'Condition Monitoring',
+    label: 'C. Condition Monitoring',
     docsHref: '/admin/dashboard/modules/condition-monitoring/docs',
     items: [
-      { label: 'Official Situation Data', href: '/admin/dashboard/modules/condition-monitoring/situation-data', icon: Radio },
+      { label: '1. Official Situation Data', href: '/admin/dashboard/modules/condition-monitoring/situation-data', icon: Radio },
     ],
   },
   {
-    label: 'Risk Monitoring',
+    label: 'D. Risk Monitoring',
     docsHref: '/admin/dashboard/modules/risk-monitoring/docs',
     items: [
-      { label: 'Official Conditions', href: '/admin/dashboard/modules/risk-monitoring/conditions', icon: AlertTriangle },
+      { label: '1. Official Conditions', href: '/admin/dashboard/modules/risk-monitoring/conditions', icon: AlertTriangle },
     ],
   },
   {
-    label: 'Event Triggers',
+    label: 'E. Event Triggers',
     docsHref: '/admin/dashboard/modules/event-triggers/docs',
     items: [
-      { label: 'Sensor-Based Detection', href: '/admin/dashboard/modules/event-triggers/sensor-detection', icon: Zap },
-      { label: 'Device-Driven Triggers', href: '/admin/dashboard/modules/event-triggers/device-triggers', icon: Radar },
-      { label: 'User Sighting Triggers', href: '/admin/dashboard/modules/event-triggers/sighting-triggers', icon: Eye },
-      { label: 'EMS Declaration', href: '/admin/dashboard/modules/event-triggers/ems-declaration', icon: Siren },
-      { label: 'Official Source Events', href: '/admin/dashboard/modules/event-triggers/official-events', icon: Radio },
+      { label: '1. Sensor-Based Detection', href: '/admin/dashboard/modules/event-triggers/sensor-detection', icon: Zap },
+      { label: '2. Device-Driven Triggers', href: '/admin/dashboard/modules/event-triggers/device-triggers', icon: Radar },
+      { label: '3. User Sighting Triggers', href: '/admin/dashboard/modules/event-triggers/sighting-triggers', icon: Eye },
+      { label: '4. EMS Declaration', href: '/admin/dashboard/modules/event-triggers/ems-declaration', icon: Siren },
+      { label: '5. Official Source Events', href: '/admin/dashboard/modules/event-triggers/official-events', icon: Radio },
     ],
   },
   {
-    label: 'Hazard Onset Response',
+    label: 'F. Hazard Onset Response',
     docsHref: '/admin/dashboard/modules/hazard-onset/docs',
     items: [
-      { label: 'Onset Response Manager', href: '/admin/dashboard/modules/hazard-onset/response-manager', icon: Siren },
-      { label: 'Data & Polling Protocols', href: '/admin/dashboard/modules/hazard-onset/data-protocols', icon: Clock },
-      { label: 'User Status & Requests', href: '/admin/dashboard/modules/hazard-onset/user-status', icon: Users },
-      { label: 'Cache & Guidance Protocols', href: '/admin/dashboard/modules/hazard-onset/cache-guidance', icon: Navigation },
+      { label: '1. Onset Response Manager', href: '/admin/dashboard/modules/hazard-onset/response-manager', icon: Siren },
+      { label: '2. Data & Polling Protocols', href: '/admin/dashboard/modules/hazard-onset/data-protocols', icon: Clock },
+      { label: '3. User Status & Requests', href: '/admin/dashboard/modules/hazard-onset/user-status', icon: Users },
+      { label: '4. Cache & Guidance Protocols', href: '/admin/dashboard/modules/hazard-onset/cache-guidance', icon: Navigation },
     ],
   },
   {
-    label: 'Event Management',
+    label: 'G. Event Management',
     docsHref: '/admin/dashboard/modules/event-management/docs',
     items: [
-      { label: 'Event Manager', href: '/admin/dashboard/modules/event-management/event-manager', icon: CalendarClock },
-      { label: 'User Sighting Reports', href: '/admin/dashboard/modules/event-management/sighting-reports', icon: Eye },
-      { label: 'Hazard Models', href: '/admin/dashboard/modules/event-management/hazard-models', icon: Brain },
-      { label: 'User Danger', href: '/admin/dashboard/modules/event-management/user-danger', icon: TriangleAlert },
-      { label: 'User Location', href: '/admin/dashboard/modules/event-management/user-location', icon: MapPin },
+      { label: '1. Event Manager', href: '/admin/dashboard/modules/event-management/event-manager', icon: CalendarClock },
+      { label: '2. User Sighting Reports', href: '/admin/dashboard/modules/event-management/sighting-reports', icon: Eye },
+      { label: '3. Hazard Models', href: '/admin/dashboard/modules/event-management/hazard-models', icon: Brain },
+      { label: '4. User Danger', href: '/admin/dashboard/modules/event-management/user-danger', icon: TriangleAlert },
+      { label: '5. User Location', href: '/admin/dashboard/modules/event-management/user-location', icon: MapPin },
     ],
   },
   {
-    label: 'Navigation & Terrain',
+    label: 'H. Navigation & Terrain',
     docsHref: '/admin/dashboard/modules/navigation/docs',
     items: [
-      { label: 'Passable Terrain', href: '/admin/dashboard/modules/navigation/passable-terrain', icon: Route },
-      { label: 'Evacuation Manager', href: '/admin/dashboard/modules/navigation/evacuation', icon: Navigation },
+      { label: '1. Passable Terrain', href: '/admin/dashboard/modules/navigation/passable-terrain', icon: Route },
+      { label: '2. Evacuation Manager', href: '/admin/dashboard/modules/navigation/evacuation', icon: Navigation },
     ],
   },
   {
-    label: 'Event Operations',
+    label: 'I. Event Operations',
     docsHref: '/admin/dashboard/modules/operations/docs',
     items: [
-      { label: 'Teams Manager', href: '/admin/dashboard/modules/operations/teams', icon: UsersRound },
-      { label: 'Resource & Dispatch', href: '/admin/dashboard/modules/operations/resource-dispatch', icon: Crosshair },
+      { label: '1. Teams Manager', href: '/admin/dashboard/modules/operations/teams', icon: UsersRound },
+      { label: '2. Resource & Dispatch', href: '/admin/dashboard/modules/operations/resource-dispatch', icon: Crosshair },
     ],
   },
   {
-    label: 'People & Community',
+    label: 'J. People & Community',
     docsHref: '/admin/dashboard/modules/people/docs',
     items: [
-      { label: 'Public User Accounts', href: '/admin/dashboard/modules/people/accounts', icon: Users },
-      { label: 'Groups Manager', href: '/admin/dashboard/modules/people/groups', icon: FolderKanban },
-      { label: 'People Helping People', href: '/admin/dashboard/modules/people/helping', icon: Heart },
-      { label: 'Animal Rescue', href: '/admin/dashboard/modules/people/animal-rescue', icon: PawPrint },
+      { label: '1. Public User Accounts', href: '/admin/dashboard/modules/people/accounts', icon: Users },
+      { label: '2. Groups Manager', href: '/admin/dashboard/modules/people/groups', icon: FolderKanban },
+      { label: '3. People Helping People', href: '/admin/dashboard/modules/people/helping', icon: Heart },
+      { label: '4. Animal Rescue', href: '/admin/dashboard/modules/people/animal-rescue', icon: PawPrint },
     ],
   },
   {
-    label: 'Communications & Alerts',
+    label: 'K. Communications & Alerts',
     docsHref: '/admin/dashboard/modules/comms/docs',
     items: [
-      { label: 'Notifications & Alerts', href: '/admin/dashboard/modules/comms/notifications', icon: Bell },
-      { label: 'Mesh Network', href: '/admin/dashboard/modules/comms/mesh-network', icon: Wifi },
+      { label: '1. Notifications & Alerts', href: '/admin/dashboard/modules/comms/notifications', icon: Bell },
+      { label: '2. Mesh Network', href: '/admin/dashboard/modules/comms/mesh-network', icon: Wifi },
     ],
   },
   {
-    label: 'Post-Operations',
+    label: 'L. Post-Operations',
     docsHref: '/admin/dashboard/modules/post-ops/docs',
     items: [
-      { label: 'Post-Event Manager', href: '/admin/dashboard/modules/post-ops/post-event', icon: FileSearch },
+      { label: '1. Post-Event Manager', href: '/admin/dashboard/modules/post-ops/post-event', icon: FileSearch },
     ],
   },
 ];
 
 // Top-level pages that aren't part of the module manager
 const topNavItems = [
-  { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard, exact: true },
-  { label: 'Clients', href: '/admin/dashboard/clients', icon: UserCog },
-  { label: 'Employees', href: '/admin/dashboard/employees', icon: Users },
-  { label: 'Partnerships', href: '/admin/dashboard/partnerships', icon: Handshake },
+  { label: '2. Dashboard', href: '/admin/dashboard', icon: LayoutDashboard, exact: true },
+  { label: '3. Clients', href: '/admin/dashboard/clients', icon: UserCog },
+  { label: '4. Employees', href: '/admin/dashboard/employees', icon: Users },
+  { label: '5. Partnerships', href: '/admin/dashboard/partnerships', icon: Handshake },
 ];
 
 // Product Manager - top-level section, one subtab per public app page
 const productPages = [
-  { label: 'Live Test Account', href: '/admin/dashboard/live-map', icon: Globe },
+  { label: '1. Live Test Account', href: '/admin/dashboard/live-map', icon: Globe },
 ];
 
 // Community > Project Manager (feature planning, CONFolders, specs)
 const communityProjectTabs = [
-  { label: 'Feature Overview', href: '/admin/dashboard/product/community/project/overview', icon: FolderKanban },
-  { label: 'CONFolders', href: '/admin/dashboard/product/community/project/confolders', icon: FileSearch },
-  { label: 'Notification Manager', href: '/admin/dashboard/product/community/notifications', icon: Bell },
+  { label: '1. Feature Overview', href: '/admin/dashboard/product/community/project/overview', icon: FolderKanban },
+  { label: '2. CONFolders', href: '/admin/dashboard/product/community/project/confolders', icon: FileSearch },
+  { label: '3. Notification Manager', href: '/admin/dashboard/product/community/notifications', icon: Bell },
 ];
 
 // Community > DEV (module hierarchy, build, test)
 const communityDevTabs = [
-  { label: 'Module Hierarchy', href: '/admin/dashboard/product/community/dev/modules', icon: Network },
-  { label: 'Standalone UI', href: '/admin/dashboard/product/community/dev/ui', icon: Smartphone },
-  { label: 'Dev Monitor', href: '/admin/dashboard/product/community/dev-monitor', icon: Activity },
-];
-
-// Volcanoes > subtabs in the sidebar
-const VOLCANOES_HREF = '/admin/dashboard/viz/hazards/volcanoes';
-const VOLCANO_DM_HREF = `${VOLCANOES_HREF}/data-manager`;
-const volcanoDmTabs = [
-  { label: 'Data Source Manager', href: `${VOLCANO_DM_HREF}/sources`, icon: Globe },
-  { label: 'Nations', href: `${VOLCANO_DM_HREF}/nations`, icon: Flame },
+  { label: '1. Module Hierarchy', href: '/admin/dashboard/product/community/dev/modules', icon: Network },
+  { label: '2. Standalone UI', href: '/admin/dashboard/product/community/dev/ui', icon: Smartphone },
+  { label: '3. Dev Monitor', href: '/admin/dashboard/product/community/dev-monitor', icon: Activity },
 ];
 
 export default function DashboardLayout({
@@ -244,8 +226,6 @@ export default function DashboardLayout({
   const [productOpenTabs, setProductOpenTabs] = useState<Record<string, boolean>>({});
   const [communityProjectOpen, setCommunityProjectOpen] = useState(false);
   const [communityDevOpen, setCommunityDevOpen] = useState(false);
-  const [volcanoesNavOpen, setVolcanoesNavOpen] = useState(false);
-  const [volcanoDmNavOpen, setVolcanoDmNavOpen] = useState(false);
 
   const employee = session?.user;
 
@@ -290,13 +270,6 @@ export default function DashboardLayout({
         if (pathname.startsWith(catPrefix)) {
           setOpenCategories(prev => ({ ...prev, [cat.slug]: true }));
         }
-      }
-    }
-    // Auto-open Volcanoes subtree when on any volcano route
-    if (pathname?.startsWith(VOLCANOES_HREF)) {
-      setVolcanoesNavOpen(true);
-      if (pathname.startsWith(VOLCANO_DM_HREF)) {
-        setVolcanoDmNavOpen(true);
       }
     }
     // Auto-open submodule tabs
@@ -376,7 +349,7 @@ export default function DashboardLayout({
             onClick={() => setProductMgmtOpen(!productMgmtOpen)}
           >
             {productMgmtOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-            <span>Product Manager</span>
+            <span>1. Product Manager</span>
           </button>
 
           {productMgmtOpen && (
@@ -396,13 +369,13 @@ export default function DashboardLayout({
                 );
               })}
 
-              {/* Visualization Manager */}
+              {/* Module Manager (formerly Visualization Manager) */}
               <button
                 className={`nav-section-toggle ${vizManagerOpen ? 'open' : ''}`}
                 onClick={() => setVizManagerOpen(!vizManagerOpen)}
               >
                 {vizManagerOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                <span>Visualization Manager</span>
+                <span>1a. Module Manager</span>
               </button>
               {vizManagerOpen && (
                 <div className="module-manager-content">
@@ -425,61 +398,9 @@ export default function DashboardLayout({
                               const ItemIcon = item.icon;
                               const itemActive = pathname?.startsWith(item.href);
 
-                              // Volcanoes item gets nested subtabs in the sidebar.
+                              // Volcanoes item gets its own nested subtree component.
                               if (item.href === VOLCANOES_HREF) {
-                                const mapActive = pathname === VOLCANOES_HREF;
-                                const dmActive = pathname?.startsWith(VOLCANO_DM_HREF);
-                                return (
-                                  <div key={item.href} className="nav-group">
-                                    <button
-                                      className={`nav-item nav-item-nested nav-submodule-toggle ${itemActive ? 'active' : ''}`}
-                                      onClick={() => setVolcanoesNavOpen(p => !p)}
-                                    >
-                                      {volcanoesNavOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
-                                      <ItemIcon className="nav-icon" size={15} />
-                                      <span className="nav-text">{item.label}</span>
-                                    </button>
-                                    {volcanoesNavOpen && (
-                                      <div className="nav-group-items">
-                                        <Link
-                                          href={VOLCANOES_HREF}
-                                          className={`nav-item nav-item-nested ${mapActive ? 'active' : ''}`}
-                                          style={{ paddingLeft: 44 }}
-                                        >
-                                          <Map className="nav-icon" size={13} />
-                                          <span className="nav-text">Map</span>
-                                        </Link>
-                                        <button
-                                          className={`nav-group-toggle ${dmActive ? 'has-active' : ''}`}
-                                          onClick={() => setVolcanoDmNavOpen(p => !p)}
-                                          style={{ paddingLeft: 44 }}
-                                        >
-                                          {volcanoDmNavOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                                          <span>Volcano Data Manager</span>
-                                        </button>
-                                        {volcanoDmNavOpen && (
-                                          <div className="nav-group-items">
-                                            {volcanoDmTabs.map((tab) => {
-                                              const TabIcon = tab.icon;
-                                              const tabActive = pathname?.startsWith(tab.href);
-                                              return (
-                                                <Link
-                                                  key={tab.href}
-                                                  href={tab.href}
-                                                  className={`nav-item nav-item-nested ${tabActive ? 'active' : ''}`}
-                                                  style={{ paddingLeft: 60 }}
-                                                >
-                                                  <TabIcon className="nav-icon" size={12} />
-                                                  <span className="nav-text">{tab.label}</span>
-                                                </Link>
-                                              );
-                                            })}
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                );
+                                return <VolcanoNav key={item.href} pathname={pathname} />;
                               }
 
                               return (
@@ -501,13 +422,13 @@ export default function DashboardLayout({
                 </div>
               )}
 
-              {/* Module Manager */}
+              {/* Module Manager Old */}
               <button
                 className={`nav-section-toggle ${moduleManagerOpen ? 'open' : ''}`}
                 onClick={() => setModuleManagerOpen(!moduleManagerOpen)}
               >
                 {moduleManagerOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                <span>Module Manager</span>
+                <span>1b. Module Manager Old</span>
               </button>
               {moduleManagerOpen && (
                 <div className="module-manager-content">
@@ -518,7 +439,7 @@ export default function DashboardLayout({
                       onClick={() => toggleGroup('Community')}
                     >
                       {openGroups['Community'] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                      <span>Community</span>
+                      <span>A. Community</span>
                     </button>
                     {openGroups['Community'] && (
                       <div className="nav-group-items">
@@ -530,7 +451,7 @@ export default function DashboardLayout({
                             style={{ paddingLeft: 28 }}
                           >
                             {communityProjectOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                            <span>Project Manager</span>
+                            <span>A-i. Project Manager</span>
                           </button>
                           {communityProjectOpen && (
                             <div className="nav-group-items">
@@ -555,7 +476,7 @@ export default function DashboardLayout({
                             style={{ paddingLeft: 28 }}
                           >
                             {communityDevOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                            <span>DEV</span>
+                            <span>A-ii. DEV</span>
                           </button>
                           {communityDevOpen && (
                             <div className="nav-group-items">
@@ -729,7 +650,7 @@ export default function DashboardLayout({
             onClick={() => setIntegrationsOpen(!integrationsOpen)}
           >
             {integrationsOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-            <span>Integrations</span>
+            <span>6. Integrations</span>
           </button>
 
           {integrationsOpen && (

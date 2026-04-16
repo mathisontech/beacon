@@ -1,0 +1,111 @@
+{
+  "module_id": "community.equipment.registry",
+  "module_name": "Equipment Registry",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "placeholder",
+    "return_note": "Awaiting full spec. Equipment types, verification, availability tracking, matching algorithm needed.",
+    "priority": 3
+  },
+  "M": {
+    "M1_beacon_versions": ["V1+"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Equipment > Registry",
+    "M4_parent": "community.equipment",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "equipment_entry",
+        "source": "User adds equipment (generator, chainsaw, boat, pump, plow, tractor, medical kit, ham radio, satellite phone)",
+        "format": "JSON",
+        "schema_ref": "{ type, description, specifications?, available: bool }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "equipment_list",
+        "consumers": ["resource matching", "help system"],
+        "format": "JSON",
+        "schema_ref": "[{ equipment_id, type, owner_id, available, location }]",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Store equipment with availability status",
+        "algorithm": "INSERT equipment table. Track available/not_available toggle.",
+        "latency_sla": "<200ms",
+        "accuracy_target": "100% correct storage"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "user_profile",
+        "description": "User account exists",
+        "data_format": "user_id",
+        "dependencies": ["community.identity.account-creation"]
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 2,
+        "module_id": "matching",
+        "description": "Equipment matched to help requests",
+        "data_format": "matched_equipment_id",
+        "dependencies": ["community.equipment.resource-matching"]
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Availability status updates (frequent toggles). Resource matching queries (find nearby available equipment).",
+    "P2_defensibility": "User-reported (no verification needed for MVP). Availability toggle prevents over-matching.",
+    "P3_confidence_level": "Straightforward CRUD with availability flag.",
+    "P4_failure_modes": [
+      "Availability status stale → equipment unavailable but shown as available (mitigate: periodic refresh, user notification)"
+    ],
+    "P5_backup_plan": "If unavailable check fails: show equipment with 'status unknown' warning.",
+    "P6_backup_plan_test": "Test availability toggle. Test matching with unavailable equipment.",
+    "P7_testing_strategy": "Unit tests for equipment CRUD. Integration tests for matching.",
+    "P8_benchmarks": "Equipment entry: <200ms. Availability toggle: <100ms. Matching query: <1s for 50 nearby equipment."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for equipment registry (placeholder)",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": { "L1_legal_considerations": "User-reported equipment is self-certified (liability on owner). No verification required MVP.", "L2_regulatory_frameworks": [], "L3_consent_requirements": "NR", "L4_liability_notes": "Owner responsible for equipment condition. Beacon not liable for equipment failure during use." },
+  "F": { "F1_cost_considerations": "Equipment storage: negligible.", "F2_accounting_considerations": "Operational cost.", "F3_revenue_impact": "Equipment sharing enables mutual aid (retention driver)." },
+  "S": { "S1_cybersecurity": "NR", "S2_data_privacy": "Equipment list visible to matched users only (during help matching).", "S3_encryption_requirements": "NR", "S4_access_control": "Owner controls availability. Matched users see equipment during event.", "S5_audit_requirements": "Log equipment availability changes." },
+  "X": {
+    "X1_notes": "Equipment registry is simple but enables powerful resource sharing. MVP: user-entered equipment, self-reported availability. Future: verification, loan tracking, insurance integration.",
+    "X2_open_questions": [
+      "Verification: require photos, certifications? (future enhancement)",
+      "Loan tracking: track who borrowed what? (liability concern, future feature)",
+      "Insurance: integration with insurance companies? (future monetization)"
+    ],
+    "X3_related_research": "Tool sharing platforms (ToolLibrary). Equipment matching algorithms. Liability in sharing economy."
+  }
+}

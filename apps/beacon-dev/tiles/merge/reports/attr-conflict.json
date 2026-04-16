@@ -1,0 +1,24 @@
+{
+  "world_states_us": 62,
+  "us_states": 56,
+  "only_in_ne": [
+    "Baker Island",
+    "Howland Island",
+    "Jarvis Island",
+    "Johnston Atoll",
+    "Midway Islands",
+    "Navassa Island",
+    "Palmyra Atoll",
+    "Saint Croix",
+    "Saint John",
+    "Saint Thomas",
+    "Wake Atoll"
+  ],
+  "only_in_tiger": [
+    "American Samoa",
+    "Commonwealth of the Northern Mariana Islands",
+    "Guam",
+    "Puerto Rico",
+    "United States Virgin Islands"
+  ]
+}

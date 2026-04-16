@@ -12,15 +12,17 @@ interface Props {
     position: { lat: number; lng: number; alt: number };
   }) => void;
   onViewerReady?: (viewer: unknown) => void;
+  onMapReady?: (map: unknown) => void;
 }
 
 export default function ViewSwitcher({
   activeView,
   onMapClick,
   onViewerReady,
+  onMapReady,
 }: Props) {
   if (activeView === "lowdata") {
-    return <MapLibre2D onMapClick={onMapClick} />;
+    return <MapLibre2D onMapClick={onMapClick} onMapReady={onMapReady} />;
   }
   return (
     <CesiumGlobe

@@ -1,0 +1,158 @@
+{
+  "module_id": "community.legal.sensor-consent",
+  "module_name": "Sensor Consent (GPS, Barometer, Camera, Microphone)",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting per-sensor consent details. Emergency override scope needs legal review.",
+    "priority": 2
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Legal > Sensor Consent",
+    "M4_parent": "community.legal",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "sensor_access_request",
+        "source": "Feature needs sensor access (GPS, barometer, camera, microphone, Bluetooth)",
+        "format": "JSON",
+        "schema_ref": "{ sensor: 'gps'|'barometer'|'camera'|'microphone'|'bluetooth', feature }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "user_sensor_choice",
+        "source": "User grants or denies sensor access in settings",
+        "format": "JSON",
+        "schema_ref": "{ sensor, enabled: bool }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "sensor_permission_check",
+        "consumers": ["feature requiring sensor"],
+        "format": "JSON",
+        "schema_ref": "{ sensor, user_allowed: bool, os_allowed: bool }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "sensor_settings_page",
+        "consumers": ["privacy settings UI"],
+        "format": "JSON",
+        "schema_ref": "[{ sensor, enabled, explanation, legal_reference }]",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Check sensor permissions",
+        "algorithm": "Query sensor_consents table. Check both user consent and OS permission. Both required.",
+        "latency_sla": "<100ms",
+        "accuracy_target": "100% correct permission state"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "feature_requiring_sensor",
+        "description": "Feature (location sharing, emergency barometer) requires sensor access",
+        "data_format": "sensor_id, feature_id",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "user_preference",
+        "description": "User has enabled or disabled sensor in settings",
+        "data_format": "sensor_consents record",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 3,
+        "module_id": "permission_check",
+        "description": "Check user and OS permissions",
+        "data_format": "user_allowed AND os_allowed",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "feature_execution_or_denial",
+        "description": "If both permissions: feature executes. If denied: show error with link to settings.",
+        "data_format": "feature_result or error",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "OS permission check latency (varies by OS). Sensor access bottleneck is real-time data collection (not consent logic).",
+    "P2_defensibility": "Per-sensor consent gives granular control. User can see current permissions. OS and app both must allow (defense in depth).",
+    "P3_confidence_level": "Very high confidence. Standard permission pattern.",
+    "P4_failure_modes": [
+      "OS permission denied → feature blocked (expected, explain to user)",
+      "User consent revoked → sensor stops (immediate, verified by audit)",
+      "Emergency override scope unclear → wrong data shared (mitigate: clear policy, legal review)"
+    ],
+    "P5_backup_plan": "If sensor unavailable: degrade gracefully (e.g., use cell location if GPS unavailable).",
+    "P6_backup_plan_test": "Test each sensor individually (enable/disable). Test OS permission denial (simulate by revoking in OS settings). Test emergency override (if implemented).",
+    "P7_testing_strategy": "Unit tests for permission logic. Integration tests for each sensor (GPS, barometer, camera, microphone). End-to-end tests for settings page. Emergency override tests (if applicable).",
+    "P8_benchmarks": "Permission check: <100ms. Sensor access denial: immediate. User setting change: <500ms to take effect."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for sensor consent module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "GDPR: location and camera data require explicit consent. CCPA: user control over sensor data. COPPA: parental consent if children. Android: permission scopes (coarse vs fine location). iOS: similar scope model.",
+    "L2_regulatory_frameworks": ["GDPR (location, camera, microphone)", "CCPA (sensor data)", "COPPA (children)", "Android permission model", "iOS privacy labels"],
+    "L3_consent_requirements": "Per-sensor explicit consent required. User must understand what each sensor is used for. Ability to revoke without penalty.",
+    "L4_liability_notes": "Over-sharing: sensors enabled without user consent (privacy violation). Mitigation: explicit per-sensor toggles. Under-sharing: features disabled due to missing consent (poor UX). Mitigation: clear explanations, minimum necessary sensors."
+  },
+  "F": {
+    "F1_cost_considerations": "Sensor consent tracking: negligible cost.",
+    "F2_accounting_considerations": "Operational cost, no special accounting.",
+    "F3_revenue_impact": "Sensor access enables key features (location, emergency detection). Positive impact on retention."
+  },
+  "S": {
+    "S1_cybersecurity": "Sensor consent is gate before access (cannot bypass). OS enforces second gate (cannot revoke app permission at app level if OS denies).",
+    "S2_data_privacy": "User controls each sensor independently. Revocation is immediate.",
+    "S3_encryption_requirements": "Sensor data encrypted in transit and at rest (handled by downstream modules).",
+    "S4_access_control": "User controls own sensor permissions. Admin cannot override (unless emergency declared).",
+    "S5_audit_requirements": "Log sensor permission changes. Log sensor access attempts (succeed/fail). Audit trail retention: 1 year."
+  },
+  "X": {
+    "X1_notes": "Sensor consent is critical for privacy compliance. Per-sensor toggles give user control. Both user and OS permission required (defense in depth). Emergency override may be needed (EMS accessing location during event).",
+    "X2_open_questions": [
+      "Emergency override: should EMS override user consent? (legal/policy question, requires authorization doc)",
+      "Fine vs coarse location: require both permissions? (fine = exact, coarse = approximate)",
+      "Barometer: does it require consent? (not PII, but still sensor data)"
+    ],
+    "X3_related_research": "GDPR location processing requirements. CCPA sensor data control. iOS privacy labels. Android permission model. Emergency legal authorities."
+  }
+}

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSM Grid Extraction Progress - Standalone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .alert {
+            background: #fff3cd;
+            color: #856404;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #ffc107;
+        }
+
+        .alert h3 {
+            margin-bottom: 10px;
+        }
+
+        .instructions {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .instructions h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .step {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step h4 {
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .code {
+            background: #f1f3f4;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+            font-weight: bold;
+        }
+
+        .url {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1.1em;
+            text-align: center;
+            margin: 15px 0;
+            border: 2px solid #2196f3;
+        }
+
+        .troubleshooting {
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .troubleshooting h3 {
+            color: #c53030;
+            margin-bottom: 15px;
+        }
+
+        .fix {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #f56565;
+        }
+
+        .success {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            color: #22543d;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-check {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        #serverStatus {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .offline {
+            color: #dc3545;
+        }
+
+        .online {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗺️ OSM Grid Extraction Dashboard</h1>
+            <p>Standalone Setup & Troubleshooting Guide</p>
+        </div>
+
+        <div class="alert">
+            <h3>⚠️ Server Connection Required</h3>
+            <p>This dashboard needs a Python server to display live data. Follow the instructions below to get it running.</p>
+        </div>
+
+        <div class="status-check">
+            <h3>🔍 Server Status Check</h3>
+            <p id="serverStatus" class="offline">Checking server...</p>
+            <button class="button" onclick="checkServerStatus()">🔄 Check Again</button>
+        </div>
+
+        <div class="instructions">
+            <h2>🚀 Quick Start Instructions</h2>
+
+            <div class="step">
+                <h4>1. 📁 Navigate to Project Directory</h4>
+                <p>Open Terminal and navigate to your project folder:</p>
+                <div class="code">cd /Users/kristinmullaney/Documents/Mathison/projects/mathison_hive/applications/beacon_module/funcs/gps_mngr/map_tile_extraction</div>
+            </div>
+
+            <div class="step">
+                <h4>2. 🖥️ Start the Server</h4>
+                <p>Run one of these commands:</p>
+                <div class="code">python3 test_server.py</div>
+                <p style="margin-top: 10px;">OR</p>
+                <div class="code">python3 open_dashboard.py</div>
+            </div>
+
+            <div class="step">
+                <h4>3. 🌐 Open Dashboard</h4>
+                <p>Once the server starts, open this URL in your browser:</p>
+                <div class="url">http://localhost:8080</div>
+                <a href="http://localhost:8080" class="button" target="_blank">🔗 Open Dashboard</a>
+            </div>
+        </div>
+
+        <div class="troubleshooting">
+            <h3>🔧 Troubleshooting Connection Issues</h3>
+
+            <div class="fix">
+                <h4>🔒 macOS Network Permissions</h4>
+                <p><strong>If you see "Local Network" permission errors:</strong></p>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>Go to <strong>System Preferences → Security & Privacy → Privacy</strong></li>
+                    <li>Select <strong>"Local Network"</strong> in the left sidebar</li>
+                    <li>Make sure your browser (Firefox/Chrome/Safari) is checked ✅</li>
+                    <li>Restart your browser and try again</li>
+                </ol>
+            </div>
+
+            <div class="fix">
+                <h4>🔥 Firewall Issues</h4>
+                <p><strong>If the connection is blocked:</strong></p>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>Go to <strong>System Preferences → Security & Privacy → Firewall</strong></li>
+                    <li>Click <strong>"Firewall Options"</strong></li>
+                    <li>Make sure Python is allowed or add it to exceptions</li>
+                    <li>Or temporarily disable firewall for testing</li>
+                </ol>
+            </div>
+
+            <div class="fix">
+                <h4>🌐 Try Different Browsers</h4>
+                <p><strong>Test with multiple browsers:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Safari:</strong> Usually has fewer permission issues</li>
+                    <li><strong>Chrome:</strong> May need permission grants</li>
+                    <li><strong>Firefox:</strong> Check network settings</li>
+                </ul>
+            </div>
+
+            <div class="fix">
+                <h4>🔄 Alternative: Use Different Port</h4>
+                <p><strong>If port 8080 is blocked:</strong></p>
+                <div class="code">python3 test_server.py --port 8888</div>
+                <p style="margin-top: 10px;">Then try: <a href="http://localhost:8888" target="_blank">http://localhost:8888</a></p>
+            </div>
+        </div>
+
+        <div class="success">
+            <h3>✅ When It Works</h3>
+            <p>You should see a beautiful dashboard with:</p>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>📊 Real-time grid extraction statistics</li>
+                <li>🗺️ Interactive map with color-coded progress</li>
+                <li>⚡ Live updates every 30 seconds</li>
+                <li>🌍 Regional focus views (California, Texas, etc.)</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; color: white;">
+            <p>Need help? Check the Terminal output for error messages.</p>
+        </div>
+    </div>
+
+    <script>
+        function checkServerStatus() {
+            const statusElement = document.getElementById('serverStatus');
+            statusElement.textContent = 'Checking...';
+            statusElement.className = '';
+
+            fetch('http://localhost:8080/api/grid-data')
+                .then(response => {
+                    if (response.ok) {
+                        statusElement.textContent = '✅ Server is running! Click "Open Dashboard" above.';
+                        statusElement.className = 'online';
+                    } else {
+                        throw new Error('Server responded with error');
+                    }
+                })
+                .catch(error => {
+                    statusElement.textContent = '❌ Server is not running. Follow the start instructions above.';
+                    statusElement.className = 'offline';
+                });
+        }
+
+        // Check server status on page load
+        window.addEventListener('load', function() {
+            setTimeout(checkServerStatus, 1000);
+        });
+
+        // Auto-check every 10 seconds
+        setInterval(checkServerStatus, 10000);
+    </script>
+</body>
+</html>

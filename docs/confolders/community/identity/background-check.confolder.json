@@ -1,0 +1,181 @@
+{
+  "module_id": "community.identity.background-check",
+  "module_name": "Background Check (NSOPW, Criminal)",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "blocked",
+    "return_note": "Awaiting vendor decision: Checkr, GoodHire, or direct NSOPW API. Frequency of re-check (annual, never) needs policy. FCRA compliance legal review.",
+    "priority": 1
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Identity > Background Check",
+    "M4_parent": "community.identity",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "user_identity",
+        "source": "From identity verification (name, DOB, address)",
+        "format": "JSON",
+        "schema_ref": "{ name, dob, address }",
+        "frequency": "on-demand",
+        "dependencies": ["community.identity.address-validation"]
+      },
+      {
+        "name": "background_check_request",
+        "source": "Verification workflow triggers check",
+        "format": "JSON",
+        "schema_ref": "{ user_id, check_type: 'nsopw'|'criminal'|'both' }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "check_result",
+        "consumers": ["verified badge", "background check UI"],
+        "format": "JSON",
+        "schema_ref": "{ check_type, result: 'clear'|'flag'|'error', findings?: string, processed_at, expires_at }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "flag_notification",
+        "consumers": ["user notification", "admin queue"],
+        "format": "JSON",
+        "schema_ref": "{ user_id, flag_type, details, requires_manual_review: bool }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Query NSOPW sex offender registry",
+        "algorithm": "Search by name, DOB, address. Return match or no match.",
+        "latency_sla": "<30s",
+        "accuracy_target": "100% coverage (all registered offenders in NSOPW)"
+      },
+      {
+        "operation": "Query criminal background database",
+        "algorithm": "Search criminal history. Return convictions or clean.",
+        "latency_sla": "<30s",
+        "accuracy_target": "95%+ coverage of public criminal records"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity.address-validation",
+        "description": "User's identity information (name, DOB, address) validated",
+        "data_format": "validated name, dob, address",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "verification_workflow",
+        "description": "Verification workflow triggers background check",
+        "data_format": "check_request",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 3,
+        "module_id": "nsopw_query",
+        "description": "Query National Sex Offender Public Website (NSOPW)",
+        "data_format": "check_result",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "criminal_query",
+        "description": "Query criminal background database (via Checkr/GoodHire or direct API)",
+        "data_format": "check_result",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "result_determination",
+        "description": "If flag found: manual_review needed. If clear: proceed to verified badge.",
+        "data_format": "clear|flag|error",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "storage",
+        "description": "Check result stored encrypted. Not raw findings (FCRA compliant).",
+        "data_format": "encrypted check result, NOT findings detail",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "NSOPW query latency (30s typical). Criminal background query latency (30-60s typical). False positives from name matching (common names). Re-check frequency (annual? never?). Privacy concerns (storing check results).",
+    "P2_defensibility": "NSOPW is official source (legal authority). Criminal background is standard practice. Vendor (Checkr/GoodHire) handles FCRA compliance. Clear pass/fail results (no detailed findings stored).",
+    "P3_confidence_level": "Very high confidence. NSOPW is definitive. Criminal background is standard due diligence. Vendor handles compliance.",
+    "P4_failure_modes": [
+      "NSOPW API down → cannot check (mitigate: queue for later, timeout)",
+      "False positive (name match wrong person) → legitimate user flagged (mitigate: manual review, right to dispute)",
+      "Criminal record from 30 years ago → user flagged (mitigate: policy: violent crimes only, or time limit)",
+      "Re-check never done → user status stale (mitigate: annual re-check job, user-initiated update)",
+      "Check result leaked → privacy violation (mitigate: encrypt, strict access control)"
+    ],
+    "P5_backup_plan": "If check unavailable: queue for later retry. If flag: manual review required. If error: timeout and allow retry or manual review.",
+    "P6_backup_plan_test": "Simulate API failures. Test name matching edge cases (John Smith vs Jon Smith). Test criminal record filtering (old vs recent). Test re-check job. Test encryption of results.",
+    "P7_testing_strategy": "Unit tests for result interpretation (flag vs clear logic). Integration tests with NSOPW (sandbox). Integration tests with vendor (Checkr/GoodHire). Load tests for concurrent checks. Re-check job testing (daily job runs, records updated). Privacy tests (verify encryption).",
+    "P8_benchmarks": "NSOPW query: <30s. Criminal background query: <60s. Total check: <90s. False positive rate: <5% (name collisions). Clear rate: 95%+ (assuming normal population). Re-check job: runs daily, completes within 1 hour."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for background check module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Background checks are subject to Fair Credit Reporting Act (FCRA) if used to make adverse decisions. Must provide user with opportunity to dispute. Cannot use criminal records >7 years old (fair chance rules, some states). Sex offender registry is public but subject to state rules. Vendor (Checkr/GoodHire) must be FCRA-compliant.",
+    "L2_regulatory_frameworks": ["FCRA (Fair Credit Reporting Act)", "State fair chance laws (criminal record age limits)", "ECOA (no discrimination)", "State privacy laws (CCPA, GDPR)"],
+    "L3_consent_requirements": "Explicit written consent for background check (FCRA requirement). Adverse action notice if flagged. Right to dispute.",
+    "L4_liability_notes": "False positive (legitimate user flagged) could cause harm (loss of trust). Mitigation: right to dispute, manual review. False negative (criminal accepted) enables harm. Mitigation: accurate NSOPW query, vendor reputation. Discrimination risk (using old criminal records). Mitigation: fair chance policy (age limit on records), no race/gender-based decisions. Privacy breach (check results leaked). Mitigation: encryption, access control."
+  },
+  "F": {
+    "F1_cost_considerations": "Checkr/GoodHire: ~$20-50 per background check. At 10k users: $200k-500k. NSOPW is free (public API). Annual re-checks: additional cost.",
+    "F2_accounting_considerations": "Per-user cost at signup + annual re-check cost. Budget $50k/year for 10k users. Scale with growth.",
+    "F3_revenue_impact": "Background check enables trust and verified badge (retention driver). Essential for community safety (brand value)."
+  },
+  "S": {
+    "S1_cybersecurity": "Check results encrypted at rest (AES-256). API calls over TLS. Check results not logged in detail (FCRA compliance). User's identity not re-checked if no address change (reduce cost and privacy exposure).",
+    "S2_data_privacy": "Detailed findings not stored (FCRA compliance). Only pass/fail result stored. User can request deletion (GDPR, CCPA). Re-check frequency limited (annual, not per-login).",
+    "S3_encryption_requirements": "Check result encrypted at rest. Vendor API calls over TLS. Identity data encrypted before sending to vendor.",
+    "S4_access_control": "User sees own check result (pass/fail). Admin sees check result (pass/fail) but not detailed findings. Vendor sees only what's needed (name, DOB, address).",
+    "S5_audit_requirements": "Log all check requests (for FCRA compliance). Log check results (anonymized). Log re-checks. Audit trail retention: 7 years (FCRA requirement)."
+  },
+  "X": {
+    "X1_notes": "Background checks are critical for community safety and trust. NSOPW is official authoritative source. Vendor (Checkr/GoodHire) handles FCRA compliance. Fair chance rules important (don't discriminate based on old records). Annual re-checks keep status current.",
+    "X2_open_questions": [
+      "Vendor: Checkr, GoodHire, or direct NSOPW? (Checkr/GoodHire add cost but handle compliance)",
+      "Criminal record age limit: 7 years, 10 years, no limit? (fair chance policy)",
+      "Re-check frequency: annual, never, on-demand? (annual keeps current, adds cost)",
+      "What about civil infractions (DUI, drug, disorderly conduct)? (only sex offenses or broader?)"
+    ],
+    "X3_related_research": "FCRA compliance guidelines. NSOPW documentation. Checkr/GoodHire APIs. Fair chance laws. State sex offender registry rules. Criminal record expungement policies."
+  }
+}

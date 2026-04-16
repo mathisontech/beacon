@@ -1,0 +1,166 @@
+{
+  "module_id": "community.identity.face-match",
+  "module_name": "Face Matching (Selfie to ID)",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "blocked",
+    "return_note": "Awaiting vendor selection: AWS Rekognition vs on-device. Confidence threshold (95% vs 99%) needs security review.",
+    "priority": 1
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Identity > Face Match",
+    "M4_parent": "community.identity",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "selfie_hash",
+        "source": "Selfie capture module",
+        "format": "binary hash",
+        "schema_ref": "Face embedding or hash (not plaintext photo)",
+        "frequency": "on-demand",
+        "dependencies": ["community.identity.selfie-capture"]
+      },
+      {
+        "name": "id_photo",
+        "source": "ID document scan or photo",
+        "format": "encrypted image",
+        "schema_ref": "ID photo (encrypted)",
+        "frequency": "on-demand",
+        "dependencies": ["community.identity.id-document-scan"]
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "match_result",
+        "consumers": ["verification workflow", "verified badge"],
+        "format": "JSON",
+        "schema_ref": "{ match_confidence: 0.0-1.0, matched: bool, match_threshold: 0.95 }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "match_failure",
+        "consumers": ["user notification"],
+        "format": "JSON",
+        "schema_ref": "{ reason: 'poor_quality'|'no_match'|'multiple_faces', retry_allowed: bool }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Compare face embeddings",
+        "algorithm": "Compare selfie embedding to ID photo embedding. Return confidence 0.0-1.0.",
+        "latency_sla": "<2s",
+        "accuracy_target": "Match confidence accurate to ±5%"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity.selfie-capture",
+        "description": "Selfie captured and liveness confirmed",
+        "data_format": "selfie_hash (not plaintext photo)",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "community.identity.id-document-scan",
+        "description": "ID photo extracted from document scan",
+        "data_format": "id_photo (encrypted)",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 3,
+        "module_id": "face_comparison",
+        "description": "Selfie embedding compared to ID photo embedding",
+        "data_format": "match_confidence",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "match_decision",
+        "description": "If confidence > 0.95: matched. Else: no match (retry or manual review).",
+        "data_format": "matched: bool",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "next_verification_step",
+        "description": "If matched: proceed to address validation. If no match: offer retry or manual review.",
+        "data_format": "verification_status",
+        "dependencies": ["community.identity.address-validation"]
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "API latency (AWS Rekognition ~1-2s per call). Photo quality variation (affects accuracy). Age difference between selfie and ID (reduces accuracy for older IDs).",
+    "P2_defensibility": "High confidence threshold (95%+) reduces false positives. Plaintext photos never compared (work with embeddings only). Fallback to manual review for borderline cases.",
+    "P3_confidence_level": "High confidence. AWS Rekognition is proven (used by major financial institutions). Threshold tuning needed.",
+    "P4_failure_modes": [
+      "Poor selfie quality → no match even though legitimate (mitigate: require retry with better lighting)",
+      "Age difference → no match (old ID, current face different) (mitigate: use multi-factor verification, manual review)",
+      "API failure → cannot compare (mitigate: retry logic, timeout to manual review)",
+      "False positive → wrong person matched (mitigate: require very high threshold >99%, manual review)"
+    ],
+    "P5_backup_plan": "If API unavailable: queue for later retry or route to manual review. If confidence borderline: manual human review. If photo quality poor: retry with guidance.",
+    "P6_backup_plan_test": "Test with various selfie qualities (blurry, dark, side-lit). Test with age-different IDs. Test API failure handling. Test false positive edge cases.",
+    "P7_testing_strategy": "Unit tests for embedding comparison (test vectors). Integration tests with AWS Rekognition. Load tests (100 comparisons/s). Accuracy benchmarks (NIST FRVT test set). False positive rate testing. Age difference tolerance testing.",
+    "P8_benchmarks": "Comparison latency: <2s. True positive rate: >95% at 95% threshold. False positive rate: <1% at 95% threshold. No face detected: handle gracefully (retry or manual review)."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for face match module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Face matching is used to prevent fraud (identity theft). Accuracy is critical for legal defensibility. False negatives (legitimate users rejected) may create liability. False positives (fraud accepted) also create liability. Manual review option essential for borderline cases.",
+    "L2_regulatory_frameworks": ["FCRA (accuracy of verification)", "GDPR (facial recognition use)", "BIPA (biometric processing)"],
+    "L3_consent_requirements": "Explicit consent for face comparison to ID photo (separate from selfie consent).",
+    "L4_liability_notes": "False negatives: user cannot complete identity verification. Mitigation: retry option, manual review escalation, clear communication. False positives: fraudster accepted as legitimate. Mitigation: high threshold, multi-factor verification, human review for borderline."
+  },
+  "F": {
+    "F1_cost_considerations": "AWS Rekognition CompareFaces: ~$0.001 per comparison. Retry rate ~5%, so ~$0.00105 per user on average. At 10k users: ~$10.50.",
+    "F2_accounting_considerations": "Low variable cost. Budget ~$100k/year for worst-case (50M comparisons during large signup wave).",
+    "F3_revenue_impact": "Verified badge is retention feature (enables trust, high-value user interaction)."
+  },
+  "S": {
+    "S1_cybersecurity": "Face embeddings stored, not plaintext photos. Plaintext photos never compared (deleted after embedding). API calls over TLS. Rate limiting on comparisons (prevent abuse).",
+    "S2_data_privacy": "Embeddings non-reversible (cannot derive faces). Plaintext photos deleted. Comparison results encrypted in storage.",
+    "S3_encryption_requirements": "Face embedding encrypted at rest. API calls over TLS. ID photos encrypted at rest.",
+    "S4_access_control": "User's embedding and ID photo private to user's verification. Admin cannot view photos (encrypted).",
+    "S5_audit_requirements": "Log all comparison attempts (success/failure/confidence). Log manual reviews. Audit trail retention: 7 years."
+  },
+  "X": {
+    "X1_notes": "Face matching is critical for fraud prevention. High threshold (95%+) required for security. Age difference between ID and selfie needs handling (ask for updated ID or manual review). AWS Rekognition is industry standard (used by banks, government). Manual review option essential for edge cases.",
+    "X2_open_questions": [
+      "Confidence threshold: 95%, 98%, 99%? (tradeoff false positive vs false negative)",
+      "Age difference tolerance: allow 5 years, 10 years? (older IDs less accurate)",
+      "Manual review process: Beacon staff or vendor (Onfido/Veriff)? (outsource = cost, in-house = complexity)"
+    ],
+    "X3_related_research": "NIST FRVT face recognition benchmarks. AWS Rekognition documentation. Facial recognition accuracy studies. Age-invariant face matching. Threshold optimization."
+  }
+}

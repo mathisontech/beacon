@@ -1,0 +1,176 @@
+{
+  "module_id": "help.missing",
+  "module_name": "Missing People & Animals",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "updated_by": "claude-opus-4",
+  "bookmark": {
+    "status": "Reconnection system for missing people and animals during emergencies",
+    "return_note": "placeholder",
+    "priority": [
+      "Integration with NamUs/NCIC",
+      "Photo moderation for missing reports",
+      "Auto-archive timing"
+    ]
+  },
+  "M": {
+    "M1_beacon_versions": [
+      "Beta"
+    ],
+    "M2_module_type": "component",
+    "M3_hierarchy_path": "Product Manager > Help > Missing",
+    "M4_parent": "help",
+    "M5_children": [
+      "help.missing.people",
+      "help.missing.animals",
+      "help.missing.found"
+    ],
+    "M6_owner_history": [
+      {
+        "who": "claude-opus-4",
+        "role": "architect",
+        "from": "2026-04-04T14:58:58Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "missing_report",
+        "source": "public-app",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": [
+          "community.identity.verified-badge"
+        ]
+      },
+      {
+        "name": "found_report",
+        "source": "public-app",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": [
+          "community.identity"
+        ]
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "missing_feed",
+        "consumers": [
+          "help.feed"
+        ],
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "match_notification",
+        "consumers": [
+          "community.messages"
+        ],
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "event-driven",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Cross-reference found reports against active missing reports by proximity + description. Notify original reporter on match.",
+        "algorithm": "Location radius + keyword similarity matching",
+        "latency_sla": "<1s matching",
+        "accuracy_target": null
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity.verified-badge",
+        "description": "Only verified users can post missing reports",
+        "data_format": "boolean",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "community.contacts.location-sharing",
+        "description": "Last known location",
+        "data_format": "JSON",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.feed",
+        "description": "Missing reports in dedicated tab",
+        "data_format": "JSON",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "community.messages",
+        "description": "Found report triggers DM to reporter",
+        "data_format": "JSON",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Matching algorithm accuracy. False positive matches.",
+    "P2_defensibility": "Verified-only posting prevents abuse. DM-based contact exchange protects privacy.",
+    "P3_confidence_level": "NR",
+    "P4_failure_modes": [
+      "False match notifications",
+      "Malicious missing reports",
+      "Outdated reports not cleaned up"
+    ],
+    "P5_backup_plan": "Human review for ambiguous matches. Verified-only posting. 30-day auto-archive for missing reports.",
+    "P6_backup_plan_test": "Simulate failure scenario in staging with mock data",
+    "P7_testing_strategy": "Test matching with synthetic data. Test verified-only gate. Test found-report DM flow.",
+    "P8_benchmarks": "Match precision >80%. False positive rate <10%."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T14:58:58Z",
+        "who": "claude-opus-4",
+        "description": "Initial CONFolder creation",
+        "version": "0.1"
+      }
+    ],
+    "CH2_current_version": "0.1"
+  },
+  "L": {
+    "L1_legal_considerations": "Missing person data is sensitive. Verified users only. Contact exchange through Beacon DM only.",
+    "L2_regulatory_frameworks": [
+      "CCPA",
+      "GDPR",
+      "State missing persons laws"
+    ],
+    "L3_consent_requirements": "Consent for photo and description publication.",
+    "L4_liability_notes": "Beacon is platform for reconnection, not search-and-rescue authority."
+  },
+  "F": {
+    "F1_cost_considerations": "Photo storage. Matching compute.",
+    "F2_accounting_considerations": "Allocated to help module operational budget",
+    "F3_revenue_impact": "NR"
+  },
+  "S": {
+    "S1_cybersecurity": "Missing reports visible to verified users only. No phone numbers public.",
+    "S2_data_privacy": "Contact exchange only through Beacon messaging. No direct contact info shared.",
+    "S3_encryption_requirements": "NR",
+    "S4_access_control": "Verified users: post reports. All authenticated: view. Contact via DM only.",
+    "S5_audit_requirements": "Report creation, match events, resolution logging."
+  },
+  "X": {
+    "X1_notes": 2,
+    "X2_open_questions": "Research NamUs/NCIC integration feasibility",
+    "X3_related_research": "NR"
+  }
+}

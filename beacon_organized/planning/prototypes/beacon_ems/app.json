@@ -1,0 +1,67 @@
+{
+  "expo": {
+    "name": "Beacon EMS",
+    "slug": "beacon-ems",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a2e"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mathison.beacon.ems",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Beacon EMS needs your location to show your position on the operational map and coordinate emergency response.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Beacon EMS needs your location to track responder positions during active incidents.",
+        "UIBackgroundModes": [
+          "location",
+          "remote-notification"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1a1a2e"
+      },
+      "package": "com.mathison.beacon.ems",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Beacon EMS to use your location for emergency coordination."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#e94560"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "beacon-ems"
+      }
+    }
+  }
+}

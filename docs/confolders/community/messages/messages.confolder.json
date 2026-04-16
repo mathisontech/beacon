@@ -1,0 +1,255 @@
+{
+  "module_id": "community.messages",
+  "module_name": "Messages Module",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting Signal Protocol vendor selection and mesh compression ratio targets",
+    "priority": 1
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function-folder",
+    "M3_hierarchy_path": "Product Manager > Community > Messages",
+    "M4_parent": "community",
+    "M5_children": ["community.messages.encryption", "community.messages.request-mailbox", "community.messages.reactions", "community.messages.templates"],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "user_message_input",
+        "source": "UI text input, template selection, status update buttons",
+        "format": "JSON",
+        "schema_ref": "{ text: string, thread_id: string, template_key?: string, reply_to_id?: string }",
+        "frequency": "real-time",
+        "dependencies": ["community.messages.templates"]
+      },
+      {
+        "name": "mesh_relay_packets",
+        "source": "Local Bluetooth/WiFi peers relaying offline messages",
+        "format": "binary protobuf",
+        "schema_ref": "mesh packet format with hop-limit, sender, receiver, payload",
+        "frequency": "intermittent",
+        "dependencies": ["community.mesh.protocol"]
+      },
+      {
+        "name": "thread_membership_changes",
+        "source": "User joins group, user added to DM thread",
+        "format": "JSON",
+        "schema_ref": "{ thread_id, user_id, action: 'join'|'leave' }",
+        "frequency": "on-demand",
+        "dependencies": ["community.groups.channels"]
+      },
+      {
+        "name": "reaction_input",
+        "source": "User taps reaction emoji on message",
+        "format": "JSON",
+        "schema_ref": "{ message_id, user_id, emoji }",
+        "frequency": "real-time",
+        "dependencies": ["community.messages.reactions"]
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "encrypted_message",
+        "consumers": ["message thread display", "mesh relay", "notifications"],
+        "format": "JSON",
+        "schema_ref": "{ id, thread_id, author_id, encrypted_blob, timestamp, reactions[] }",
+        "frequency": "real-time",
+        "dependencies": ["community.messages.encryption"]
+      },
+      {
+        "name": "message_state_update",
+        "consumers": ["UI message list", "read receipt tracker", "search index"],
+        "format": "JSON",
+        "schema_ref": "{ message_id, status: 'sending'|'sent'|'delivered'|'read' }",
+        "frequency": "real-time",
+        "dependencies": ["community.messages.encryption"]
+      },
+      {
+        "name": "thread_metadata",
+        "consumers": ["thread list view", "unread badge counter"],
+        "format": "JSON",
+        "schema_ref": "{ thread_id, last_message_at, unread_count, member_count }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "request_mailbox_notification",
+        "consumers": ["notification system", "request inbox UI"],
+        "format": "JSON",
+        "schema_ref": "{ from_user_id, message_preview, timestamp }",
+        "frequency": "real-time",
+        "dependencies": ["community.messages.request-mailbox"]
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Message encryption",
+        "algorithm": "Signal Protocol (Double Ratchet) or AES-256-GCM with per-thread keys",
+        "latency_sla": "<200ms for encryption, <200ms for decryption",
+        "accuracy_target": "100% ciphertext integrity. Zero plaintext leakage."
+      },
+      {
+        "operation": "Mesh message compression",
+        "algorithm": "Template lookup (2-byte codes), field-level delta encoding for status updates, binary protocol for packets",
+        "latency_sla": "<100ms compression per message",
+        "accuracy_target": "80%+ compression ratio vs plaintext JSON"
+      },
+      {
+        "operation": "Offline message queue conflict resolution",
+        "algorithm": "Timestamp-ordered, deterministic tiebreaker (sender_id), deduplication by message hash",
+        "latency_sla": "<1s for queue sync on reconnection",
+        "accuracy_target": "Zero duplicate messages, correct ordering, no message loss"
+      },
+      {
+        "operation": "Request mailbox spam filtering",
+        "algorithm": "Sender verification status, message length, keyword patterns, sender rate history",
+        "latency_sla": "<500ms per incoming request message",
+        "accuracy_target": "Identify 90% of spam, <5% false positive rate on legitimate requests"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.identity.account-creation",
+        "description": "User must be registered and verified before messaging",
+        "data_format": "user_id, public_key",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "community.contacts or community.groups.channels",
+        "description": "User must be in contact list or group member before creating thread",
+        "data_format": "contact_id or group_id",
+        "dependencies": []
+      },
+      {
+        "step": 3,
+        "module_id": "community.legal.consent-manager",
+        "description": "User must have granted messaging consent",
+        "data_format": "consent_id, granted_at",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "message_input",
+        "description": "User composes and sends message",
+        "data_format": "text, optional template_key, optional reply_to_id",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 5,
+        "module_id": "community.messages.encryption",
+        "description": "Message encrypted with thread's public key",
+        "data_format": "encrypted_blob, ephemeral_key",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "database_persistence",
+        "description": "Encrypted message stored in messages table",
+        "data_format": "INSERT messages (thread_id, author_id, encrypted_blob, timestamp)",
+        "dependencies": []
+      },
+      {
+        "step": 7,
+        "module_id": "online_delivery_or_offline_queue",
+        "description": "If online: immediate delivery to thread members. If offline: queued in mesh_queue table.",
+        "data_format": "message_id, delivery_status",
+        "dependencies": ["community.mesh.offline-queue"]
+      },
+      {
+        "step": 8,
+        "module_id": "community.mesh.relay",
+        "description": "Queued messages relayed via mesh on reconnection",
+        "data_format": "encrypted mesh packets, hop_limit, seen_cache",
+        "dependencies": []
+      },
+      {
+        "step": 9,
+        "module_id": "notification_dispatch",
+        "description": "Push notification to thread members (unless muted)",
+        "data_format": "FCM/APNS payload with thread_id, sender_name, message_preview",
+        "dependencies": []
+      },
+      {
+        "step": 10,
+        "module_id": "community.history.events",
+        "description": "Message event logged to user_events table",
+        "data_format": "{ user_id, event_type: 'message_sent', details: { thread_id, message_id } }",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Encryption latency on very large threads (100+ members) with per-user encryption. Mesh relay network congestion under high message volume (many simultaneous relays). Offline queue size limits if user is disconnected for days. Search index building on large encrypted message corpus (client-side only, no server-side search).",
+    "P2_defensibility": "Signal Protocol is battle-tested for E2E encryption. Offline queue with deduplication prevents message duplication. Request mailbox prevents spam DMs. Mesh compression optimizes for intermittent connectivity (core value prop). Template system dramatically reduces mesh payload for common status messages.",
+    "P3_confidence_level": "High confidence in Signal Protocol (widely used). Medium confidence in custom mesh compression (requires validation). High confidence in offline queue (standard store-and-forward pattern). Medium confidence in request mailbox spam filtering (tuning needed).",
+    "P4_failure_modes": [
+      "Encryption key rotation during group member addition → some members cannot decrypt old messages (mitigate: re-send last N messages unencrypted or with new key)",
+      "Mesh relay flooding → battery drain on relay devices (mitigate: battery-aware relay toggle, rate limit relayed messages per device)",
+      "Offline queue grows unbounded → storage exhaustion (mitigate: max queue size, TTL on queued messages, user warning at 80%)",
+      "Request mailbox false positives → legitimate messages marked as spam (mitigate: allow user to unblock, tune spam filter)",
+      "Message search impossible on encrypted messages → poor UX (mitigate: build client-side search index, or accept search limitation in MVP)"
+    ],
+    "P5_backup_plan": "If encryption unavailable: fail-closed, reject message send. If mesh relay fails: queued messages persist locally, manual user-initiated sync on reconnection. If offline queue full: prompt user to delete old messages or upgrade storage. If request mailbox false positive: user can unblock sender and move to contacts.",
+    "P6_backup_plan_test": "Simulate encryption failures (mock Signal Protocol failure). Test mesh relay under congestion (100+ simultaneous messages, <20% battery). Test offline queue TTL with synthetic delay. Test request mailbox spam filter with known spam patterns.",
+    "P7_testing_strategy": "Unit tests for encryption (mock each operation). Integration tests for message flow (register → join group → send message → receive/decrypt). Load tests for offline queue (1000+ messages over 24h disconnection). Mesh relay tests with virtual BLE devices (Bluetooth emulator). End-to-end tests for complete message lifecycle. Security audit of encryption implementation.",
+    "P8_benchmarks": "Message send: <200ms online, queued offline. Encryption: <100ms per message. Decryption: <100ms per message. Mesh relay: >95% delivery within 5 minutes of reconnection. Offline queue: support 1000+ messages in 500MB storage. Request mailbox: <500ms spam filtering per message."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder creation for messages module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Message content confidentiality subject to warrant/legal process. E2E encryption means server cannot produce plaintext. Must have clear data retention and deletion policies. Request mailbox anti-spam compliance with CAN-SPAM. Reaction system may enable harassment (need moderation).",
+    "L2_regulatory_frameworks": ["ECPA (Electronic Communications Privacy Act)", "CAN-SPAM (anti-spam)", "GDPR (data deletion rights)"],
+    "L3_consent_requirements": "Messaging consent required. Separate consent for read receipts (can user see when I read?). Separate consent for message history retention. Sensor consent for any voice/video messaging (out of MVP scope).",
+    "L4_liability_notes": "E2E encryption prevents Beacon from fulfilling legal process without user's decryption key. Mitigation: clear policy that law enforcement must work with user or Apple/Google for device decryption. Request mailbox may be used for harassment or abuse. Mitigation: spam filtering, block feature, reporting workflow."
+  },
+  "F": {
+    "F1_cost_considerations": "Message storage: ~500B per message. At 100k active users with 50 messages/day, ~2.5GB/day = ~900GB/year storage. AWS S3: ~$20k/year. Mesh relay: no additional cost (P2P). Encryption CPU: negligible with hardware acceleration (modern phones).",
+    "F2_accounting_considerations": "Message storage is growing variable cost. Consider tiered deletion policy (delete messages >90 days old) to cap storage. Encryption processing negligible cost. Mesh relay is pure infrastructure win (no API calls).",
+    "F3_revenue_impact": "Message-based features increase retention. Mesh relay during events creates competitive moat vs centralized competitors. No direct monetization in MVP."
+  },
+  "S": {
+    "S1_cybersecurity": "Signal Protocol for end-to-end encryption. Message authentication codes prevent tampering. Thread key rotation on member changes. Mesh relay packets encrypted (relays cannot read). Rate limiting on message send per user per thread. Ratelimit on request mailbox send (prevent spam floods).",
+    "S2_data_privacy": "Message history subject to retention policy (default 90 days?). User can delete their own messages (soft delete, shown as 'deleted'). Hard delete on account deletion (cascade). Location data never included in messages (explicit policy). Read receipt metadata encrypted.",
+    "S3_encryption_requirements": "Signal Protocol end-to-end for all messages. Mesh packets encrypted with relay key (different from thread key). Thread keys derived from Diffie-Hellman or HPKE. Forward secrecy via ratcheting.",
+    "S4_access_control": "Only thread members can read messages. Author can delete/edit own messages. Admins can moderate (remove, pin) but not view plaintext. Server never has plaintext, only encrypted blobs.",
+    "S5_audit_requirements": "Audit log of message deletions (soft or hard). Audit log of message edits (if edit feature added). Audit log of moderation actions (admin remove, pin). Audit trail retention: 1 year."
+  },
+  "X": {
+    "X1_notes": "Messages module is critical path for community features. Mesh relay is key differentiator from competitors (works offline). Encryption adds complexity but essential for privacy expectations. Request mailbox prevents spam DM harassment. Templates are crucial for mesh bandwidth optimization.",
+    "X2_open_questions": [
+      "Signal Protocol (libsignal) or custom AES-256-GCM? (libsignal adds security, custom saves dependency)",
+      "Per-user encryption in groups vs single key? (per-user is more private but higher CPU cost)",
+      "Offline queue TTL? (24h, 7 days, unlimited?)",
+      "Message history deletion policy? (90 days, 1 year, never?)",
+      "Read receipts optional or always enabled? (privacy tradeoff)",
+      "Message search feature MVP or post-launch? (requires client-side index on encrypted data)"
+    ],
+    "X3_related_research": "Signal Protocol Double Ratchet specification. Mesh networking architectures (flooding vs tree vs DHT). Message queue systems (RabbitMQ, Kafka for inspiration). Encryption key rotation patterns. GDPR right-to-erasure in messaging systems."
+  }
+}

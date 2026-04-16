@@ -1,0 +1,200 @@
+{
+  "module_id": "community.household.evacuation-profile",
+  "module_name": "Household Evacuation Profile",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting integration with evacuation routing system. Multi-household evacuation logic needed.",
+    "priority": 1
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Household > Evacuation Profile",
+    "M4_parent": "community.household",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "household_data",
+        "source": "Household members, disabilities, pets, vehicles",
+        "format": "JSON",
+        "schema_ref": "members[], disabilities[], pets[], vehicles[]",
+        "frequency": "on-demand",
+        "dependencies": ["community.household.members", "community.equipment.vehicles"]
+      },
+      {
+        "name": "evacuation_zone_event",
+        "source": "Emergency event triggers evacuation",
+        "format": "JSON",
+        "schema_ref": "{ event_id, location_polygon, severity }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "evacuation_profile",
+        "consumers": ["routing engine", "help matching", "convoy assignment"],
+        "format": "JSON",
+        "schema_ref": "{ household_id, members_count, vehicle_needed: bool, vehicle_type, space_needed_sq_ft, accessibility_required, pets_total, estimated_time_hours, can_self_evacuate: bool, help_needed: 'mobility'|'transport'|'both'|'none' }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "evacuation_routing",
+        "consumers": ["maps", "routing engine"],
+        "format": "JSON",
+        "schema_ref": "{ household_id, origin_address, destination_addresses, routes, alternatives, estimated_time }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Generate evacuation profile from household",
+        "algorithm": "Count members + pets. Check mobility/accessibility needs. Estimate time. Determine help needed.",
+        "latency_sla": "<500ms",
+        "accuracy_target": "Conservative estimates (assume worst-case for safety)"
+      },
+      {
+        "operation": "Calculate space needed",
+        "algorithm": "People: 40 sq ft per adult, 20 per child. Pets: 5 sq ft each. Carrier space. Luggage: 10 sq ft per person.",
+        "latency_sla": "<100ms",
+        "accuracy_target": "±20% accuracy on space calc"
+      },
+      {
+        "operation": "Estimate evacuation time",
+        "algorithm": "Base 30 min (mobility setup). +5 min per person (mobilization). +2 min per pet (collection). +30 min drive (to safe location).",
+        "latency_sla": "<100ms",
+        "accuracy_target": "±50% accuracy (high variance based on location)"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.household.members",
+        "description": "Household members and accessibility needs defined",
+        "data_format": "household roster with disabilities",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "community.equipment.vehicles",
+        "description": "User's vehicles and capacity defined",
+        "data_format": "vehicles with dimensions and capacity",
+        "dependencies": []
+      },
+      {
+        "step": 3,
+        "module_id": "emergency_event",
+        "description": "Evacuation order issued",
+        "data_format": "event_id, evacuation zone polygon",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 4,
+        "module_id": "profile_generation",
+        "description": "Evacuation profile computed from household data",
+        "data_format": "evacuation_profile",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "routing_calculation",
+        "description": "Evacuation routes calculated (origin to safe location)",
+        "data_format": "routing instructions with alternatives",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "help_matching",
+        "description": "If help needed: matched with nearby resources/volunteers",
+        "data_format": "matched resources or help offers",
+        "dependencies": ["community.equipment.resource-matching"]
+      },
+      {
+        "step": 7,
+        "module_id": "convoy_assignment",
+        "description": "User assigned to evacuation convoy if applicable",
+        "data_format": "convoy_group_id",
+        "dependencies": ["community.groups.types"]
+      },
+      {
+        "step": 8,
+        "module_id": "notification",
+        "description": "User notified: evacuation order + routing + help status",
+        "data_format": "push notification with routing details",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Profile generation latency (should be fast, <500ms). Routing calculation (complex for large areas). Help matching coordination (many requests simultaneously). Convoy assignment (large group coordination).",
+    "P2_defensibility": "Conservative estimates (always overestimate space needed). Multiple route alternatives prevent single point of failure. Help matching enables resource sharing (maximizes capacity). Convoy assignment reduces coordination burden.",
+    "P3_confidence_level": "High confidence in profile generation (straightforward aggregation). Medium confidence in routing (complexity depends on mapping service). Medium confidence in help matching (new domain, tuning needed). Medium confidence in convoy assignment (state machine complexity).",
+    "P4_failure_modes": [
+      "Profile generation fails → household can't evacuate (mitigate: manual fallback, user can override estimated space/time)",
+      "Routing fails → user doesn't know where to go (mitigate: show emergency shelters map, pre-compute safe zones)",
+      "Help matching fails → isolated household (mitigate: show nearby contacts, enable manual resource request)",
+      "Convoy assignment fails → user not in convoy (mitigate: show option to self-evacuate or manual convoy creation)"
+    ],
+    "P5_backup_plan": "If profile fails: show error, allow manual input. If routing fails: show safe zones map. If help matching fails: show contacts list. If convoy fails: show self-evacuate option.",
+    "P6_backup_plan_test": "Simulate each failure mode. Test with incomplete household data (missing vehicles). Test with extreme household sizes (1 person, 20 people). Test with mixed accessibility needs. Test edge case: no vehicles but high space needs.",
+    "P7_testing_strategy": "Unit tests for profile generation logic (test various household combinations). Integration tests for routing (use mock mapping service). Load tests for help matching (1000 households seeking help simultaneously). End-to-end tests for full evacuation workflow. Stress test: large-scale evacuation (10k households, limited resources).",
+    "P8_benchmarks": "Profile generation: <500ms. Routing calculation: <5s (or cached). Help matching: <10s for initial match. Convoy assignment: <5s. Notification delivery: >95% within 30s. Routing accuracy: match actual evacuation distance ±20%."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for evacuation profile module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Evacuation routing and help matching are critical safety features. Misinformation or delays could cause harm (high liability). Routing must not direct users into danger zones. Help matching must not create false expectations of assistance.",
+    "L2_regulatory_frameworks": ["FEMA (emergency management)", "ADA (accessibility in evacuation)", "State emergency management", "Building codes (evacuation standards)"],
+    "L3_consent_requirements": "Implicit consent by enabling evacuation features in profile.",
+    "L4_liability_notes": "Evacuation routing accuracy is critical (wrong directions = harm). Mitigation: validate routes against official evacuation orders, pre-compute safe zones. Help matching creates expectations (volunteer shows up or doesn't). Mitigation: clear communication that help is contingent on volunteer availability. Profile accuracy depends on user's self-assessment (not medical determination)."
+  },
+  "F": {
+    "F1_cost_considerations": "Routing calculation: ~$0.01-0.05 per route (Google Maps API or similar). At 1M evacuations, ~$50k for routing. Help matching coordination: negligible compute.",
+    "F2_accounting_considerations": "Routing API cost scales with events. Budget ~$100k/year for worst-case (10M route calculations during major evacuation). Consider caching routes (pre-compute safe zones).",
+    "F3_revenue_impact": "Evacuation capability is core value prop and brand differentiator (adoption driver)."
+  },
+  "S": {
+    "S1_cybersecurity": "Evacuation routing is semi-public (user destination is sensitive, but evacuation routes could be reverse-engineered from timing). No personal data in routing (only origin/destination, both sensitive). Rate limiting on routing API calls (prevent enumeration).",
+    "S2_data_privacy": "Evacuation routes not logged (could expose destination). Safe zone pre-computation is public (no privacy concern). Help matching shows location at granularity user allows.",
+    "S3_encryption_requirements": "Routing data in transit over TLS. No storage of routes (compute on-demand).",
+    "S4_access_control": "User sees own evacuation profile and routing. Emergency contacts may see location (if consent given). Public never sees evacuation routes.",
+    "S5_audit_requirements": "Log routing API calls (for cost tracking). Log help matching requests (for resource optimization). Audit trail retention: 1 year (longer for major events)."
+  },
+  "X": {
+    "X1_notes": "Evacuation profiles are critical for safety during emergencies. Conservative estimation ensures no undersizing. Multi-vehicle households need special logic (split convoy, rendezvous point). Pre-computed safe zones enable offline functionality (no routing API needed if offline). Integration with county/state emergency systems needed.",
+    "X2_open_questions": [
+      "Routing API: Google Maps or open-source? (cost vs control tradeoff)",
+      "Safe zone definition: county shelters, schools, stadiums? (requires data partnership)",
+      "How to handle multi-destination evacuations? (some family to one location, some to another)",
+      "What if user doesn't evacuate by deadline? (system capability vs choice, legal question)"
+    ],
+    "X3_related_research": "Emergency evacuation science. Route optimization algorithms. Resource allocation during crises. FEMA evacuation procedures. Disability-inclusive emergency planning."
+  }
+}

@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beacon Org Chart</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fa; color: #1a1a2e; padding: 40px 20px; }
+  h1 { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 6px; color: #0a0a1a; }
+  .subtitle { text-align: center; font-size: 13px; color: #888; margin-bottom: 32px; }
+
+  .tree { max-width: 1100px; margin: 0 auto; }
+
+  .ceo { background: #0a0a1a; color: white; padding: 14px 28px; border-radius: 8px; text-align: center; max-width: 320px; margin: 0 auto 36px; }
+  .ceo .title { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.6; margin-bottom: 2px; }
+  .ceo .name-slot { font-size: 15px; font-weight: 600; }
+
+  /* Ring labels */
+  .ring { margin-bottom: 32px; }
+  .ring-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    display: inline-block;
+  }
+  .ring-desc { font-size: 12px; color: #888; margin-bottom: 16px; margin-top: -6px; }
+  .ring-core .ring-label { background: #0e7490; color: white; }
+  .ring-org .ring-label { background: #6b7280; color: white; }
+
+  /* Department cards */
+  .dept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+
+  .dept {
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    transition: box-shadow 0.15s;
+  }
+  .dept:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+
+  .dept-header {
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+  }
+  .dept-header:hover { background: #fafafa; }
+
+  .dept-color { width: 4px; height: 36px; border-radius: 2px; flex-shrink: 0; }
+  .dept-info { flex: 1; }
+  .dept-title { font-size: 13px; font-weight: 700; color: #111; }
+  .dept-role { font-size: 11px; color: #888; margin-top: 1px; }
+  .dept-chevron { font-size: 14px; color: #bbb; transition: transform 0.2s; }
+  .dept.open .dept-chevron { transform: rotate(90deg); }
+
+  .dept-body { display: none; padding: 0 16px 14px; }
+  .dept.open .dept-body { display: block; }
+
+  .vp { margin-bottom: 10px; }
+  .vp-header {
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    padding: 6px 0 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+  }
+  .vp-header:hover { color: #111; }
+  .vp-chevron { font-size: 10px; color: #bbb; transition: transform 0.15s; }
+  .vp.open .vp-chevron { transform: rotate(90deg); }
+
+  .vp-teams { display: none; padding-left: 14px; border-left: 2px solid #f0f0f0; margin-left: 2px; }
+  .vp.open .vp-teams { display: block; }
+
+  .team { font-size: 11.5px; color: #555; padding: 3px 0; line-height: 1.4; }
+  .team-head { color: #111; font-weight: 500; }
+  .headcount { font-size: 10px; color: #aaa; margin-left: 4px; }
+
+  /* Colors */
+  .c-eng { background: #2563eb; }
+  .c-data { background: #7c3aed; }
+  .c-sci { background: #0891b2; }
+  .c-plat { background: #1d4ed8; }
+  .c-sec { background: #991b1b; }
+  .c-prod { background: #d97706; }
+  .c-cli { background: #059669; }
+  .c-mon { background: #0d9488; }
+  .c-field { background: #16a34a; }
+  .c-hr { background: #c026d3; }
+  .c-mkt { background: #e11d48; }
+  .c-sales { background: #dc2626; }
+  .c-fin { background: #6b7280; }
+  .c-legal { background: #4338ca; }
+  .c-comms { background: #0d9488; }
+
+  .ring-divider { border: none; border-top: 2px dashed #ddd; margin: 36px 0; }
+
+  .total-bar { text-align: center; margin-top: 28px; font-size: 12px; color: #999; }
+  .total-bar strong { color: #333; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<h1>Beacon Organizational Structure</h1>
+<p class="subtitle">Emergency Disaster Management Platform</p>
+
+<div class="tree">
+  <div class="ceo">
+    <div class="title">Chief Executive Officer</div>
+    <div class="name-slot">CEO</div>
+  </div>
+
+  <div class="ring ring-core">
+    <div class="ring-label">Product Core</div>
+    <p class="ring-desc">Building, running, monitoring, and supporting the product</p>
+    <div class="dept-grid" id="coreGrid"></div>
+  </div>
+
+  <hr class="ring-divider">
+
+  <div class="ring ring-org">
+    <div class="ring-label">Organization Management</div>
+    <p class="ring-desc">Running the business around the product</p>
+    <div class="dept-grid" id="orgGrid"></div>
+  </div>
+</div>
+
+<div class="total-bar">
+  <strong id="totalCount"></strong> estimated headcount across <strong id="deptCount"></strong> departments
+</div>
+
+<script>
+const core = [
+  {
+    title: "Application Engineering",
+    abbr: "VP App Eng",
+    color: "c-eng",
+    vps: [
+      {
+        title: "EMS & Admin Interfaces",
+        teams: [
+          { name: "Admin Dashboard (Next.js)", head: "Director", hc: "6-8" },
+          { name: "EMS Client Interface", head: "Director", hc: "8-10" },
+          { name: "Public Web App", head: "Lead", hc: "5-7" },
+        ]
+      },
+      {
+        title: "Mobile Engineering",
+        teams: [
+          { name: "iOS Engineering", head: "Director", hc: "8-10" },
+          { name: "Android Engineering", head: "Director", hc: "8-10" },
+          { name: "Offline-First & Sync Engine", head: "Lead", hc: "4-6" },
+        ]
+      },
+      {
+        title: "Backend & API Services",
+        teams: [
+          { name: "API Services", head: "Director", hc: "6-8" },
+          { name: "Real-Time Messaging (NATS)", head: "Lead", hc: "4-6" },
+        ]
+      },
+      {
+        title: "Sensor & Device Engineering",
+        teams: [
+          { name: "Mesh Network Protocol", head: "Director", hc: "6-8" },
+          { name: "IoT Device Integration", head: "Lead", hc: "4-6" },
+          { name: "Firmware & Embedded Systems", head: "Lead", hc: "4-5" },
+          { name: "Hardware Partnerships", head: "Lead", hc: "2-3" },
+        ]
+      }
+    ]
+  },
+  {
+    title: "Data Operations",
+    abbr: "VP Data Ops",
+    color: "c-data",
+    vps: [
+      {
+        title: "Data Acquisition",
+        teams: [
+          { name: "Satellite & Aerial Imagery", head: "Director", hc: "4-6" },
+          { name: "LiDAR & 3DEP Integration", head: "Lead", hc: "3-5" },
+          { name: "Open Data Ingestion (OSM, Census, FEMA)", head: "Lead", hc: "4-6" },
+          { name: "County Assessor & Commercial Data", head: "Lead", hc: "3-4" },
+          { name: "Data Provider Partnerships", head: "Lead", hc: "2-3" },
+        ]
+      },
+      {
+        title: "Data Pipeline Operations",
+        teams: [
+          { name: "Alignment & Registration Processor", head: "Director", hc: "6-8" },
+          { name: "Tile Composition & Generation", head: "Lead", hc: "4-6" },
+          { name: "Version Control & Rollback", head: "Lead", hc: "3-4" },
+          { name: "Source Refresh Coordination", head: "Lead", hc: "3-4" },
+          { name: "Post-Event Update Pipeline", head: "Lead", hc: "4-5" },
+        ]
+      },
+      {
+        title: "Data Quality & Validation",
+        teams: [
+          { name: "Confidence Scoring System", head: "Lead", hc: "4-5" },
+          { name: "Quality Gates & Regression Detection", head: "Lead", hc: "3-4" },
+          { name: "Ground Truth Comparison", head: "Lead", hc: "3-4" },
+          { name: "User Report Verification", head: "Lead", hc: "3-4" },
+        ]
+      },
+      {
+        title: "Geospatial Intelligence",
+        teams: [
+          { name: "GIS Analysis & Cartography", head: "Director", hc: "5-7" },
+          { name: "Spatial Database Administration", head: "Lead", hc: "3-4" },
+          { name: "Coordinate Reference Systems", head: "Lead", hc: "2-3" },
+        ]
+      }
+    ]
+  },
+  {
+    title: "Science & Modeling",
+    abbr: "VP Science",
+    color: "c-sci",
+    vps: [
+      {
+        title: "Hazard Modeling",
+        teams: [
+          { name: "Wildfire Behavior Modeling", head: "Lead Scientist", hc: "6-8" },
+          { name: "Flood & Hydrological Modeling", head: "Lead Scientist", hc: "5-7" },
+          { name: "Seismic & Geological Modeling", head: "Lead Scientist", hc: "4-6" },
+          { name: "Tsunami & Coastal Hazards", head: "Lead Scientist", hc: "3-5" },
+          { name: "Weather & Atmospheric Hazards", head: "Lead Scientist", hc: "4-6" },
+          { name: "Multi-Hazard Integration", head: "Lead", hc: "3-4" },
+        ]
+      },
+      {
+        title: "Computer Vision & ML",
+        teams: [
+          { name: "Building Extraction & Classification", head: "Lead Researcher", hc: "6-8" },
+          { name: "Road Detection & Network Modeling", head: "Lead Researcher", hc: "5-7" },
+          { name: "Vegetation & Fuel Analysis", head: "Lead Researcher", hc: "4-6" },
+          { name: "Infrastructure Detection", head: "Lead Researcher", hc: "3-5" },
+          { name: "Population Estimation Models", head: "Lead", hc: "3-4" },
+          { name: "ML Platform & Training Infra", head: "Director", hc: "4-6" },
+        ]
+      },
+      {
+        title: "Sensor Fusion & Perception",
+        teams: [
+          { name: "Street-Level Change Detection", head: "Lead", hc: "4-5" },
+          { name: "Device Motion Inference", head: "Lead", hc: "3-4" },
+          { name: "Real-Time Sensor Aggregation", head: "Lead", hc: "3-4" },
+        ]
+      },
+      {
+        title: "Climate & Environmental Science",
+        teams: [
+          { name: "Weather Data Integration", head: "Lead Scientist", hc: "3-4" },
+          { name: "Climate Risk Projection", head: "Lead Scientist", hc: "3-4" },
+          { name: "Environmental Monitoring", head: "Lead", hc: "2-3" },
+        ]
+      }
+    ]
+  },
+  {
+    title: "Platform, Infrastructure & Databases",
+    abbr: "VP Platform",
+    color: "c-plat",
+    vps: [
+      {
+        title: "Cloud Infrastructure",
+        teams: [
+          { name: "Cloud Architecture & Compute", head: "Director", hc: "8-12" },
+          { name: "Networking & Load Balancing", head: "Lead", hc: "3-5" },
+          { name: "CDN & Tile Delivery", head: "Lead", hc: "3-5" },
+        ]
+      },
+      {
+        title: "Database Systems",
+        teams: [
+          { name: "PostgreSQL & Spatial Databases", head: "Director", hc: "5-7" },
+          { name: "Object Storage (S3 / Raster Tiles)", head: "Lead", hc: "3-4" },
+          { name: "Cache Layer (Redis)", head: "Lead", hc: "2-3" },
+          { name: "Backup, Replication & Disaster Recovery", head: "Lead", hc: "3-4" },
+        ]
+      },
+      {
+        title: "DevOps & Deployment",
+        teams: [
+          { name: "CI/CD Pipeline", head: "Director", hc: "6-8" },
+          { name: "Infrastructure as Code", head: "Lead", hc: "3-4" },
+          { name: "Staging & Environment Management", head: "Lead", hc: "2-3" },
+        ]
+      },
+      {
+        title: "Reliability & QA",
+        teams: [
+          { name: "Site Reliability Engineering", head: "Director", hc: "6-8" },
+          { name: "Test Automation", head: "Director", hc: "6-8" },
+          { name: "Performance & Load Testing", head: "Lead", hc: "3-4" },
+          { name: "Incident Response Engineering", head: "Lead", hc: "4-6" },
+        ]
+      }
+    ]
+  },
+  {
+    title: "Cybersecurity",
+    abbr: "CISO",
+    color: "c-sec",
+    vps: [
+      {
+        title: "Application Security",
+        teams: [
+          { name: "AppSec Engineering", head: "Lead", hc: "4-6" },
+          { name: "Penetration Testing", head: "Lead", hc: "3-4" },
+        ]
+      },
+      {
+        title: "Infrastructure Security",
+        teams: [
+          { name: "Network & Cloud Security", head: "Lead", hc: "4-5" },
+          { name: "Security Operations Center (SOC)", head: "Director", hc: "6-8" },
+        ]
+      },
+      {
+        title: "Compliance & Certification",
+        teams: [
+          { name: "FedRAMP Authorization", head: "Lead", hc: "3-4" },
+          { name: "SOC 2 & ISO 27001", head: "Lead", hc: "2-3" },
+          { name: "CJIS Security Compliance", head: "Lead", hc: "2-3" },
+        ]
+      }
+    ]
+  },
+  {
+    title: "Product Management & Design",
+    abbr: "VP Product",
+    color: "c-prod",
+    vps: [
+      {
+        title: "Product Management",
+        teams: [
+          { name: "Base Map & Data Products", head: "Senior PM", hc: "3-4" },
+          { name: "Hazard & Event Products", head: "Senior PM", hc: "3-4" },
+          { name: "EMS & Operations Products", head: "Senior PM", hc: "3-4" },
+          { name: "Public User Products", head: "Senior PM", hc: "2-3" },
+          { name: "Platform & API Products", head: "Senior PM", hc: "2-3" },
+        ]
+      },
+      {
+        title: "Design",
+        teams: [
+          { name: "UX Design", head: "Director", hc: "5-7" },
+          { name: "Visual & Brand Design", head: "Lead", hc: "3-4" },
+          { name: "Design System (Beacon DS)", head: "Lead", hc: "2-3" },
+          { name: "Cartographic Design", head: "Lead", hc: "2-3" },
+        ]
+      },
+      {
+        title: "User Research",
+        teams: [
+          { name: "EMS Field Research", head: "Lead Researcher", hc: "4-5" },
+          { name: "Public User Research", head: "Lead Researcher", hc: "3-4" },
+          { name: "Usability & Accessibility", head: "Lead", hc: "2-3" },
+        ]
+      }
+    ]
+  },
+  {
+    title: "Monitoring & Analytics",
+    abbr: "VP Monitoring",
+    color: "c-mon",
+    vps: [
+      {
+        title: "Product Analytics",
+        teams: [
+          { name: "Usage Metrics & Dashboards", head: "Director", hc: "4-5" },
+          { name: "Client Health Scoring", head: "Lead", hc: "3-4" },
+          { name: "Event Performance Analysis", head: "Lead", hc: "3-4" },
+        ]
+      },
+      {
+        title: "System Monitoring",
+        teams: [
+          { name: "Infrastructure Observability", head: "Lead", hc: "3-4" },
+          { name: "Pipeline Health & Alerting", head: "Lead", hc: "3-4" },
+          { name: "Uptime & SLA Tracking", head: "Lead", hc: "2-3" },
+        ]
+      },
+      {
+        title: "Data Quality Monitoring",
+        teams: [
+          { name: "Tile Accuracy Dashboards", head: "Lead", hc: "2-3" },
+          { name: "Model Drift Detection", head: "Lead", hc: "2-3" },
+          { name: "Source Freshness Tracking", head: "Lead", hc: "2-3" },
+        ]
+      }
+    ]
+  },
+  {
+    title: "Client & User Management",
+    abbr: "VP Client Ops",
+    color: "c-cli",
+    vps: [
+      {
+        title: "Client Success",
+        teams: [
+          { name: "Onboarding & Implementation", head: "Director", hc: "8-12" },
+          { name: "Account Management", head: "Director", hc: "6-10" },
+          { name: "Client Training & Certification", head: "Lead", hc: "5-7" },
+          { name: "Jurisdiction Configuration", head: "Lead", hc: "4-6" },
+        ]
+      },
+      {
+        title: "Technical Support",
+        teams: [
+          { name: "24/7 Support Center", head: "Director", hc: "12-18" },
+          { name: "Active Incident Support Desk", head: "Lead", hc: "6-10" },
+          { name: "Escalation Engineering", head: "Lead", hc: "4-6" },
+        ]
+      },
+      {
+        title: "Emergency Management Services",
+        teams: [
+          { name: "EMS Domain Experts & Liaisons", head: "Director", hc: "6-8" },
+          { name: "Exercise & Simulation Planning", head: "Lead", hc: "4-5" },
+          { name: "Incident Coordination", head: "Lead", hc: "4-6" },
+          { name: "After-Action Review", head: "Lead", hc: "3-4" },
+        ]
+      }
+    ]
+  },
+  {
+    title: "Field Operations",
+    abbr: "VP Field Ops",
+    color: "c-field",
+    vps: [
+      {
+        title: "Survey & Ground Truth",
+        teams: [
+          { name: "Post-Event Survey Teams", head: "Regional Directors", hc: "20-30" },
+          { name: "Ground Truth & Validation Crews", head: "Director", hc: "10-15" },
+          { name: "Aerial & Drone Operations", head: "Lead", hc: "4-6" },
+        ]
+      },
+      {
+        title: "Deployment & Regions",
+        teams: [
+          { name: "Sensor Deployment Teams", head: "Lead", hc: "6-8" },
+          { name: "Regional Field Offices", head: "Regional Managers", hc: "12-18" },
+        ]
+      }
+    ]
+  },
+];
+
+const orgMgmt = [
+  {
+    title: "Human Resources",
+    abbr: "VP People",
+    color: "c-hr",
+    vps: [
+      {
+        title: "Recruiting",
+        teams: [
+          { name: "Technical Recruiting (Eng, ML, GIS)", head: "Director", hc: "6-8" },
+          { name: "Field & Operations Recruiting", head: "Lead", hc: "3-4" },
+          { name: "Executive Recruiting", head: "Lead", hc: "1-2" },
+        ]
+      },
+      {
+        title: "People Operations",
+        teams: [
+          { name: "HR Business Partners", head: "Director", hc: "4-6" },
+          { name: "Compensation & Benefits", head: "Lead", hc: "2-3" },
+          { name: "Culture & DEI", head: "Lead", hc: "2-3" },
+          { name: "Internal IT & Systems", head: "Director", hc: "5-7" },
+        ]
+      },
+      {
+        title: "Learning & Development",
+        teams: [
+          { name: "Technical Training", head: "Lead", hc: "2-3" },
+          { name: "Emergency Management Certification", head: "Lead", hc: "2-3" },
+          { name: "Leadership Development", head: "Lead", hc: "1-2" },
+        ]
+      }
+    ]
+  },
+  {
+    title: "Marketing & Communications",
+    abbr: "VP Marketing",
+    color: "c-mkt",
+    vps: [
+      {
+        title: "Marketing",
+        teams: [
+          { name: "Demand Generation", head: "Director", hc: "4-6" },
+          { name: "Content & Case Studies", head: "Lead", hc: "3-4" },
+          { name: "Brand & Creative", head: "Lead", hc: "2-3" },
+          { name: "Events & Conferences", head: "Lead", hc: "2-3" },
+        ]
+      },
+      {
+        title: "Public Relations",
+        teams: [
+          { name: "Press Relations", head: "Lead", hc: "2-3" },
+          { name: "Crisis Communications", head: "Lead", hc: "3-4" },
+        ]
+      },
+      {
+        title: "Government Affairs",
+        teams: [
+          { name: "Policy & Advocacy", head: "Lead", hc: "2-3" },
+          { name: "Legislative Relations", head: "Lead", hc: "2-3" },
+        ]
+      }
+    ]
+  },
+  {
+    title: "Sales & Business Development",
+    abbr: "VP Sales",
+    color: "c-sales",
+    vps: [
+      {
+        title: "Federal Sales",
+        teams: [
+          { name: "FEMA & DHS Accounts", head: "Director", hc: "4-6" },
+          { name: "DOD & National Guard", head: "Lead", hc: "3-4" },
+          { name: "USFS & Land Management", head: "Lead", hc: "2-3" },
+          { name: "Federal Solutions Engineering", head: "Lead", hc: "3-4" },
+        ]
+      },
+      {
+        title: "State & Local Sales",
+        teams: [
+          { name: "County & Municipal Accounts", head: "Regional Directors", hc: "10-15" },
+          { name: "Fire Department & EMS Accounts", head: "Director", hc: "6-8" },
+          { name: "Utility Company Accounts", head: "Lead", hc: "3-5" },
+          { name: "Solutions Engineering", head: "Lead", hc: "4-6" },
+        ]
+      },
+      {
+        title: "International Sales",
+        teams: [
+          { name: "APAC Region", head: "Regional Director", hc: "4-6" },
+          { name: "EMEA Region", head: "Regional Director", hc: "4-6" },
+          { name: "LATAM Region", head: "Regional Director", hc: "3-4" },
+        ]
+      },
+      {
+        title: "Business Development & Partnerships",
+        teams: [
+          { name: "Data Provider Partnerships", head: "Director", hc: "3-4" },
+          { name: "Telecom & Hardware Partnerships", head: "Lead", hc: "2-3" },
+          { name: "Academic & Research Partnerships", head: "Lead", hc: "2-3" },
+          { name: "Insurance & Risk Industry", head: "Lead", hc: "2-3" },
+        ]
+      },
+      {
+        title: "Grant & Procurement",
+        teams: [
+          { name: "Government RFP Response", head: "Director", hc: "4-6" },
+          { name: "Grant Writing & FEMA HMA", head: "Lead", hc: "3-4" },
+          { name: "Contract Administration", head: "Lead", hc: "2-3" },
+        ]
+      }
+    ]
+  },
+  {
+    title: "Finance & Accounting",
+    abbr: "CFO",
+    color: "c-fin",
+    vps: [
+      {
+        title: "Financial Planning & Analysis",
+        teams: [
+          { name: "FP&A", head: "Director", hc: "4-5" },
+          { name: "Revenue Operations", head: "Lead", hc: "2-3" },
+          { name: "Budget Management", head: "Lead", hc: "2-3" },
+        ]
+      },
+      {
+        title: "Accounting & Billing",
+        teams: [
+          { name: "Accounting", head: "Controller", hc: "4-5" },
+          { name: "Client Billing & Collections", head: "Lead", hc: "3-4" },
+          { name: "Tax & Compliance", head: "Lead", hc: "2-3" },
+          { name: "Procurement", head: "Lead", hc: "2-3" },
+        ]
+      }
+    ]
+  },
+  {
+    title: "Legal",
+    abbr: "General Counsel",
+    color: "c-legal",
+    vps: [
+      {
+        title: "Government Contracts",
+        teams: [
+          { name: "Federal Contract Compliance", head: "Lead", hc: "3-4" },
+          { name: "State & Local Contract Review", head: "Lead", hc: "2-3" },
+        ]
+      },
+      {
+        title: "Data Privacy & Compliance",
+        teams: [
+          { name: "CJIS & Law Enforcement Compliance", head: "Lead", hc: "2-3" },
+          { name: "Data Privacy (Population/Location)", head: "Lead", hc: "2-3" },
+          { name: "Regulatory Affairs", head: "Lead", hc: "2-3" },
+        ]
+      },
+      {
+        title: "Risk & Liability",
+        teams: [
+          { name: "Emergency Liability & Indemnification", head: "Lead", hc: "2-3" },
+          { name: "IP & Patents", head: "Lead", hc: "2-3" },
+          { name: "Insurance & Claims", head: "Lead", hc: "1-2" },
+        ]
+      }
+    ]
+  },
+];
+
+function renderGrid(gridId, depts) {
+  const grid = document.getElementById(gridId);
+  let tMin = 0, tMax = 0;
+  depts.forEach(dept => {
+    const el = document.createElement("div");
+    el.className = "dept";
+    el.innerHTML = `
+      <div class="dept-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="dept-color ${dept.color}"></div>
+        <div class="dept-info">
+          <div class="dept-title">${dept.abbr} — ${dept.title}</div>
+          <div class="dept-role">${dept.vps.length} division${dept.vps.length > 1 ? 's' : ''}</div>
+        </div>
+        <div class="dept-chevron">&#9654;</div>
+      </div>
+      <div class="dept-body">
+        ${dept.vps.map(vp => `<div class="vp">
+          <div class="vp-header" onclick="event.stopPropagation(); this.parentElement.classList.toggle('open')">
+            <span class="vp-chevron">&#9654;</span>
+            ${vp.title} <span class="headcount">(${vp.teams.length} teams)</span>
+          </div>
+          <div class="vp-teams">
+            ${vp.teams.map(t => {
+              const [lo, hi] = t.hc.split("-").map(Number);
+              tMin += lo; tMax += hi;
+              return `<div class="team"><span class="team-head">${t.name}</span> <span class="headcount">${t.head} &middot; ${t.hc}</span></div>`;
+            }).join("")}
+          </div>
+        </div>`).join("")}
+      </div>
+    `;
+    grid.appendChild(el);
+  });
+  return { min: tMin, max: tMax, count: depts.length };
+}
+
+const c = renderGrid("coreGrid", core);
+const o = renderGrid("orgGrid", orgMgmt);
+document.getElementById("totalCount").textContent = `${c.min + o.min}\u2013${c.max + o.max}`;
+document.getElementById("deptCount").textContent = `${c.count + o.count}`;
+</script>
+</body>
+</html>

@@ -47,24 +47,24 @@ const STATUS_LABELS: Record<string, string> = {
   needsHelp: "NEEDS HELP",
 };
 
-// ── Styles (monochrome white on dark, no colored dots/badges) ───────
+// ── Styles (light gray sidebar) ─────────────────────────────────────
 const S = {
   sidebar: (open: boolean): React.CSSProperties => ({
     width: open ? 220 : 44,
     height: "100%",
-    background: "linear-gradient(180deg, #162636 0%, #1f3348 50%, #2a4560 100%)",
-    color: "white",
+    background: "linear-gradient(180deg, #e8ecf0 0%, #f0f2f5 50%, #f5f6f8 100%)",
+    color: "#1a1a1a",
     display: "flex",
     flexDirection: "column",
     flexShrink: 0,
     transition: "width 0.2s ease",
     overflow: "hidden",
     position: "relative",
-    boxShadow: "4px 0 12px rgba(0,0,0,0.25)",
+    boxShadow: "2px 0 8px rgba(0,0,0,0.08)",
   }),
   header: (open: boolean): React.CSSProperties => ({
     padding: open ? "16px 14px" : "14px 8px",
-    borderBottom: "1px solid rgba(255,255,255,0.1)",
+    borderBottom: "1px solid rgba(0,0,0,0.08)",
     display: "flex",
     alignItems: "center",
     justifyContent: open ? "flex-start" : "center",
@@ -74,15 +74,18 @@ const S = {
   }),
   logo: { width: 28, height: 16, objectFit: "contain" as const, flexShrink: 0 },
   title: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: 700,
-    letterSpacing: "3px",
-    color: "white",
+    letterSpacing: "1.5px",
+    color: "#1a2a3a",
     whiteSpace: "nowrap" as const,
+    overflow: "hidden" as const,
+    textOverflow: "ellipsis" as const,
+    textTransform: "uppercase" as const,
   },
   locationBar: {
     padding: "10px 14px",
-    borderBottom: "1px solid rgba(255,255,255,0.08)",
+    borderBottom: "1px solid rgba(0,0,0,0.06)",
     flexShrink: 0,
     cursor: "pointer",
   } as React.CSSProperties,
@@ -91,11 +94,11 @@ const S = {
     fontWeight: 700,
     letterSpacing: "0.8px",
     textTransform: "uppercase" as const,
-    color: "rgba(255,255,255,0.85)",
+    color: "#2a3a4a",
   } as React.CSSProperties,
   locationSummary: {
     fontSize: 9,
-    color: "rgba(255,255,255,0.4)",
+    color: "rgba(0,0,0,0.4)",
     marginTop: 2,
     letterSpacing: "0.3px",
   } as React.CSSProperties,
@@ -109,14 +112,14 @@ const S = {
   },
   section: {
     padding: "8px 14px",
-    borderBottom: "1px solid rgba(255,255,255,0.06)",
+    borderBottom: "1px solid rgba(0,0,0,0.05)",
   },
   sectionLabel: {
     fontSize: 9,
     fontWeight: 700,
     letterSpacing: "1.2px",
     textTransform: "uppercase" as const,
-    color: "rgba(255,255,255,0.3)",
+    color: "rgba(0,0,0,0.35)",
     marginBottom: 5,
   } as React.CSSProperties,
   row: {
@@ -125,27 +128,27 @@ const S = {
     gap: 6,
     padding: "3px 0",
     fontSize: 10,
-    color: "rgba(255,255,255,0.65)",
+    color: "rgba(0,0,0,0.6)",
   } as React.CSSProperties,
-  dim: { color: "rgba(255,255,255,0.35)", fontSize: 9 } as React.CSSProperties,
-  bright: { color: "rgba(255,255,255,0.85)", fontWeight: 600, fontSize: 10 } as React.CSSProperties,
+  dim: { color: "rgba(0,0,0,0.35)", fontSize: 9 } as React.CSSProperties,
+  bright: { color: "#1a2a3a", fontWeight: 600, fontSize: 10 } as React.CSSProperties,
   tag: {
     fontSize: 8,
     fontWeight: 500,
     letterSpacing: "0.3px",
     padding: "1px 4px",
     borderRadius: 2,
-    background: "rgba(255,255,255,0.08)",
-    color: "rgba(255,255,255,0.35)",
+    background: "rgba(0,0,0,0.06)",
+    color: "rgba(0,0,0,0.4)",
   } as React.CSSProperties,
   requestCard: {
     padding: "6px 8px",
     margin: "4px 0",
     borderRadius: 6,
-    background: "rgba(255,255,255,0.1)",
-    border: "1px solid rgba(255,255,255,0.12)",
+    background: "rgba(0,0,0,0.04)",
+    border: "1px solid rgba(0,0,0,0.08)",
     fontSize: 10,
-    color: "rgba(255,255,255,0.9)",
+    color: "#1a2a3a",
     fontWeight: 600,
   } as React.CSSProperties,
   requestActions: {
@@ -160,14 +163,14 @@ const S = {
     width: 22,
     height: 22,
     borderRadius: 4,
-    background: "rgba(255,255,255,0.08)",
-    border: "1px solid rgba(255,255,255,0.1)",
+    background: "rgba(0,0,0,0.05)",
+    border: "1px solid rgba(0,0,0,0.08)",
     cursor: "pointer",
   } as React.CSSProperties,
   count: {
     fontSize: 9,
     fontWeight: 700,
-    color: "rgba(255,255,255,0.5)",
+    color: "rgba(0,0,0,0.45)",
     marginLeft: 4,
   } as React.CSSProperties,
   vibeBtn: {
@@ -176,8 +179,8 @@ const S = {
     letterSpacing: "0.5px",
     padding: "3px 8px",
     borderRadius: 10,
-    background: "rgba(255,255,255,0.08)",
-    color: "rgba(255,255,255,0.45)",
+    background: "rgba(0,0,0,0.06)",
+    color: "rgba(0,0,0,0.45)",
     border: "none",
     cursor: "pointer",
     marginTop: 4,
@@ -187,7 +190,12 @@ const S = {
   } as React.CSSProperties,
 };
 
-export default function PublicSidebar() {
+interface SidebarProps {
+  locationName?: string;
+  savedLocationsSlot?: React.ReactNode;
+}
+
+export default function PublicSidebar({ locationName, savedLocationsSlot }: SidebarProps) {
   const [open, setOpen] = useState(true);
   const d = MOCK;
 
@@ -202,8 +210,8 @@ export default function PublicSidebar() {
           width: 40,
           height: 40,
           borderRadius: 20,
-          background: "rgba(31,51,72,0.85)",
-          border: "1px solid rgba(255,255,255,0.15)",
+          background: "rgba(240,242,245,0.92)",
+          border: "1px solid rgba(0,0,0,0.1)",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
@@ -226,8 +234,11 @@ export default function PublicSidebar() {
       {/* Header */}
       <div style={S.header(true)} onClick={() => setOpen(false)}>
         <img src="/logo.png" alt="Beacon" style={S.logo} />
-        <span style={S.title}>BEACON</span>
+        <span style={S.title}>{locationName || "BEACON"}</span>
       </div>
+
+      {/* Saved locations */}
+      {savedLocationsSlot}
 
       {/* Location overview */}
       <div style={S.locationBar}>

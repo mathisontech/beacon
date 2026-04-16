@@ -1,0 +1,216 @@
+{
+  "module_id": "community.contacts.location-sharing",
+  "module_name": "Location Sharing & Granularity",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting definition of granularity levels (exact, neighborhood-block, neighborhood, city). Emergency override legal review needed.",
+    "priority": 1
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Contacts > Location Sharing",
+    "M4_parent": "community.contacts",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "user_location",
+        "source": "GPS, cell tower, or manual entry",
+        "format": "JSON",
+        "schema_ref": "{ lat, lng, accuracy_m, timestamp, source: 'gps'|'cell'|'manual' }",
+        "frequency": "real-time",
+        "dependencies": ["community.legal.sensor-consent"]
+      },
+      {
+        "name": "granularity_setting",
+        "source": "User sets default location share granularity",
+        "format": "JSON",
+        "schema_ref": "{ granularity: 'exact'|'neighborhood-block'|'neighborhood'|'city' }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "contact_override",
+        "source": "User sets per-contact location granularity override",
+        "format": "JSON",
+        "schema_ref": "{ contact_id, granularity }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "emergency_event",
+        "source": "System detects declared emergency",
+        "format": "JSON",
+        "schema_ref": "{ event_id, event_type, location }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "shared_location",
+        "consumers": ["contacts", "groups", "help system", "EMS"],
+        "format": "JSON",
+        "schema_ref": "{ lat?, lng?, granularity_level, visible_to: [contact_ids] }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "location_audit_log",
+        "consumers": ["audit system", "user privacy review"],
+        "format": "JSON",
+        "schema_ref": "{ timestamp, accessor_user_id, accessed_user_id, granularity, context }",
+        "frequency": "real-time",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Reduce location precision to granularity level",
+        "algorithm": "exact: (lat, lng). neighborhood-block: round to ~100m block. neighborhood: round to ~0.5mi. city: round to city centroid.",
+        "latency_sla": "<50ms",
+        "accuracy_target": "100% correct granularity reduction"
+      },
+      {
+        "operation": "Apply location sharing rules",
+        "algorithm": "user_default_granularity OR contact_specific_override OR emergency_override (if active)",
+        "latency_sla": "<100ms",
+        "accuracy_target": "Correct rule precedence, no leakage"
+      },
+      {
+        "operation": "Audit location access",
+        "algorithm": "Log every location query: who accessed, when, at what granularity, context (group? EMS? contact request?)",
+        "latency_sla": "<500ms (async)",
+        "accuracy_target": "100% audit coverage"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.legal.sensor-consent",
+        "description": "User has granted GPS/location sensor consent",
+        "data_format": "consent_granted: true",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "device_location_service",
+        "description": "Device provides GPS/cell tower location",
+        "data_format": "lat, lng, accuracy, timestamp",
+        "dependencies": []
+      },
+      {
+        "step": 3,
+        "module_id": "user_sharing_preference",
+        "description": "User has set location sharing granularity preference",
+        "data_format": "granularity setting, per-contact overrides",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 4,
+        "module_id": "location_precision_reduction",
+        "description": "Raw GPS coordinates reduced to granularity level",
+        "data_format": "reduced_location (exact, block, neighborhood, or city)",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "persistence",
+        "description": "Location event stored in location_events table",
+        "data_format": "INSERT location_events (user_id, lat, lng, granularity, timestamp)",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "sharing_decision",
+        "description": "Location shared with visible_to contact list at appropriate granularity",
+        "data_format": "shared_location for each contact at their allowed granularity",
+        "dependencies": []
+      },
+      {
+        "step": 7,
+        "module_id": "audit_logging",
+        "description": "Every location access logged (who accessed, when, granularity, context)",
+        "data_format": "INSERT audit_log",
+        "dependencies": []
+      },
+      {
+        "step": 8,
+        "module_id": "display_on_map",
+        "description": "Location displayed on map page at allowed granularity per viewer",
+        "data_format": "map markers, each showing location granularity appropriate to viewer",
+        "dependencies": ["map-page"]
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Real-time location updates to many contacts (fan-out problem). Location precision reduction latency (should be fast). Audit logging at scale (every location access). Emergency override coordination (broadcast to affected users).",
+    "P2_defensibility": "Granularity-based sharing prevents pinpoint tracking. Per-contact overrides enable fine-grained control. Audit trail enables privacy transparency. Emergency override documented and audited. Default to least precise (city) for safety.",
+    "P3_confidence_level": "Very high confidence in granularity logic (deterministic). High confidence in audit logging (straightforward). Medium confidence on emergency override (requires legal review and careful testing).",
+    "P4_failure_modes": [
+      "Location granularity not applied → exact location exposed (mitigate: default to most restricted if error)",
+      "Audit log too slow → real-time location sharing blocked (mitigate: async audit logging, never block location sharing for audit)",
+      "Emergency override not revoked → location remains exposed after emergency (mitigate: auto-revert on event end, user manual revoke)",
+      "Contact override forgotten → user thinks location private but it's shared (mitigate: clear UI indication of current granularity)"
+    ],
+    "P5_backup_plan": "If granularity reduction fails: default to most restricted (city). If audit fails: log async, never block sharing. If emergency override fails: user can manually revert. If per-contact setting lost: fall back to default.",
+    "P6_backup_plan_test": "Simulate granularity reduction failure. Test audit logging under high throughput (1M location events/min). Test emergency override activation/deactivation. Test edge cases: location at boundary of granularity levels.",
+    "P7_testing_strategy": "Unit tests for granularity reduction algorithm (test coordinates at boundaries). Integration tests for per-contact overrides. Load tests for location broadcasting (10k users, each sharing with 100 contacts). End-to-end tests for full location workflow. Audit trail validation (spot-check random samples). Emergency override testing (simulate event, verify override, verify revert).",
+    "P8_benchmarks": "Granularity reduction: <50ms. Location broadcast: <2s for 100 recipients. Audit logging: <500ms (async). Emergency override: <5s activation. Per-contact override update: <1s. False positive (unintended sharing): 0%. Audit coverage: 100%."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for location sharing module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Location is highly sensitive PII. GDPR requires explicit consent per-use-case and granular controls. CCPA grants right to opt-out. Emergency override may be required by FEMA/ICS during declared emergencies, but requires legal authority documentation. Audit trail required for transparency.",
+    "L2_regulatory_frameworks": ["GDPR (location data, consent, right-to-delete)", "CCPA (opt-out)", "FEMA (emergency authority)", "ICS (interoperability)", "State privacy laws"],
+    "L3_consent_requirements": "Separate consent for: (1) location sensor access (GPS), (2) location sharing with contacts, (3) location history retention, (4) emergency location sharing (during declared emergency), (5) EMS access to location. All opt-in (no defaults). Granularity levels presented clearly (not abstract).",
+    "L4_liability_notes": "Granularity labeling must be accurate (if 'neighborhood' actually means 5-block radius, say so). Emergency override requires clear legal authority and documentation. Audit trail enables privacy compliance verification. User confusion about granularity could lead to unintended exposure (legal risk). Mitigation: clear, plain-language descriptions of each level."
+  },
+  "F": {
+    "F1_cost_considerations": "Location event storage: ~200B per event. At 10k users with 10 events/day, ~20MB/day = ~7GB/year storage. Audit log storage: ~500B per access. At 100k accesses/day, ~50MB/day = ~18GB/year. Total: ~25GB/year at 10k users.",
+    "F2_accounting_considerations": "Storage cost scales with user base and event frequency. Tiered retention (delete old events after 90 days) can reduce costs. Consider data compression for archived events.",
+    "F3_revenue_impact": "Location sharing enables group features and help matching (retention). Emergency response capability is competitive advantage. Positive impact."
+  },
+  "S": {
+    "S1_cybersecurity": "Location encrypted at rest (AES-256). Granularity reduction happens server-side (server never exposes high-precision location to unintended users). Emergency override requires authentication and audit trail. Rate limiting on location queries (prevent scanning).",
+    "S2_data_privacy": "Location data deletion: user can delete own location history. Granularity-based sharing prevents tracking. Audit log shows all accesses (transparency). Emergency override audited (accountability). Default to most restricted granularity if ambiguous.",
+    "S3_encryption_requirements": "Location encrypted at rest (AES-256). Transiting TLS. Location history encrypted (per-user encryption key).",
+    "S4_access_control": "Users see only location at their allowed granularity level. EMS access only during declared emergency (with audit trail). Admin cannot bypass granularity rules. Historical location access requires additional audit.",
+    "S5_audit_requirements": "Comprehensive audit log: every location access (who accessed, when, at what granularity, context). Emergency override activation/deactivation. Location consent changes. Audit trail retention: 7 years (legal requirement)."
+  },
+  "X": {
+    "X1_notes": "Location sharing is core to Beacon's value prop (help matching, group formation, emergency response). Granularity levels are privacy-safety tradeoff: finer granularity helps response, coarser granularity protects privacy. Audit trail enables both privacy compliance and emergency response accountability.",
+    "X2_open_questions": [
+      "Exact granularity definitions? (100m, 500m, 1mi, 10mi, city centroid?)",
+      "Emergency override scope? (all data to EMS? only location? only in event zone?)",
+      "Retention policy? (rolling 24h, rolling 7 days, keep until deleted?)",
+      "Retroactive access revocation? (user can see who accessed, but can't unsee - acceptable?)"
+    ],
+    "X3_related_research": "GDPR location data requirements. FEMA emergency protocols. Differential privacy for location. Geohashing. Location granularity-to-distance mapping. Privacy-preserving maps."
+  }
+}

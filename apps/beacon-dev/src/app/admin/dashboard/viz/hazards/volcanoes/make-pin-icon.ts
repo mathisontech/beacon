@@ -22,12 +22,14 @@ const SIZE: Record<AlertLevel, number> = {
   unknown: 22,
 };
 
-export function makePinIcon(L: LeafletLike, level: AlertLevel) {
+export function makePinIcon(L: LeafletLike, level: AlertLevel, evacuating = false) {
   const s = SIZE[level];
   const svg = volcanoSvg(level, s);
+  const evacClass = evacuating ? " evacuating" : "";
+  const evacBadge = evacuating ? `<span class="volcano-pin-evac">E</span>` : "";
   return L.divIcon({
     className: "",
-    html: `<div class="volcano-pin level-${level}">${svg}</div>`,
+    html: `<div class="volcano-pin level-${level}${evacClass}">${svg}${evacBadge}</div>`,
     iconSize: [s, s],
     iconAnchor: [s / 2, s - 3],
   });

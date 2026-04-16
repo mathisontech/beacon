@@ -1,0 +1,69 @@
+{
+  "module_id": "community.equipment.vehicles",
+  "module_name": "Vehicle Registry & Specs",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting vehicle spec database source (NHTSA API?). Multi-vehicle household logic needed.",
+    "priority": 2
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Equipment > Vehicles",
+    "M4_parent": "community.equipment",
+    "M5_children": [],
+    "M6_owner_history": [{ "who": "claude-agent", "role": "framework-builder", "from": "2026-04-04T00:00:00Z", "to": "current" }]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      { "name": "vehicle_entry", "source": "User adds vehicle (make, model, year)", "format": "JSON", "schema_ref": "{ make, model, year, length_cm?, width_cm?, height_cm?, clearance_cm?, seats, four_wd, snow_tires, tow_hitch?, roof_rack? }", "frequency": "on-demand", "dependencies": [] }
+    ],
+    "IO2_direct_outputs": [
+      { "name": "vehicle_list", "consumers": ["evacuation planning", "equipment registry"], "format": "JSON", "schema_ref": "[{ vehicle_id, make, model, year, specs, owner_id }]", "frequency": "on-demand", "dependencies": [] }
+    ],
+    "IO3_transformations": [
+      { "operation": "Auto-fill vehicle specs from database", "algorithm": "Match make/model/year in NHTSA or static database. Return dimensions, capacity.", "latency_sla": "<500ms", "accuracy_target": "95% match accuracy" }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      { "step": 1, "module_id": "user_profile", "description": "User account exists", "data_format": "user_id", "dependencies": ["community.identity.account-creation"] }
+    ],
+    "DW2_downstream_pipeline": [
+      { "step": 2, "module_id": "evacuation_planning", "description": "Vehicles used for evacuation capacity calculation", "data_format": "vehicle_specs", "dependencies": ["community.household.evacuation-profile"] }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Vehicle spec database lookup (should be <500ms). Manual spec override (user may know better).",
+    "P2_defensibility": "NHTSA database is authoritative. User can override if spec wrong. Multi-vehicle support for large households.",
+    "P3_confidence_level": "High confidence. NHTSA API is reliable source.",
+    "P4_failure_modes": [
+      "Database lookup fails → user enters specs manually (acceptable fallback)",
+      "Wrong vehicle matched (make/model ambiguity) → wrong specs used (mitigate: show matched vehicle, let user correct)"
+    ],
+    "P5_backup_plan": "If database unavailable: show manual entry form. Allow user override always.",
+    "P6_backup_plan_test": "Test with vehicles not in database (manual entry). Test user override. Test multi-vehicle.",
+    "P7_testing_strategy": "Unit tests for spec lookup. Integration tests with NHTSA API. Manual entry tests. Multi-vehicle tests.",
+    "P8_benchmarks": "Vehicle entry: <500ms (with database lookup). Auto-fill accuracy: 95%."
+  },
+  "CH": {
+    "CH1_change_log": [
+      { "date": "2026-04-04T00:00:00Z", "who": "claude-agent", "description": "Initial CONFolder for vehicles registry", "version": "1.0" }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": { "L1_legal_considerations": "NR", "L2_regulatory_frameworks": [], "L3_consent_requirements": "NR", "L4_liability_notes": "Vehicle specs used for evacuation planning (inaccuracy could affect routing). Mitigation: user can override." },
+  "F": { "F1_cost_considerations": "NHTSA API: free or low-cost. Vehicle storage: negligible.", "F2_accounting_considerations": "Operational cost.", "F3_revenue_impact": "Vehicle tracking enables evacuation planning (value driver)." },
+  "S": { "S1_cybersecurity": "NR", "S2_data_privacy": "Vehicle info visible to matched users (during evacuation).", "S3_encryption_requirements": "NR", "S4_access_control": "User controls own vehicles. Admin can see vehicles for support.", "S5_audit_requirements": "Log vehicle additions/changes." },
+  "X": {
+    "X1_notes": "Vehicle specs critical for evacuation planning (capacity, clearance, 4WD). NHTSA database provides authoritative data. User override important (user knows their vehicle better). Multi-vehicle households supported.",
+    "X2_open_questions": [
+      "Vehicle spec database: NHTSA API, static dataset, user input only? (API is best, has cost)",
+      "RV/trailer support: separate registry? (future enhancement)",
+      "Vehicle maintenance: track fuel, tires, readiness? (future, not MVP)"
+    ],
+    "X3_related_research": "NHTSA API. Vehicle dimension standards. Evacuation vehicle capacity estimation."
+  }
+}

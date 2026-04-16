@@ -1,0 +1,228 @@
+{
+  "module_id": "community",
+  "module_name": "Community Module",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting verification of all sub-module integrations and cross-module data flow validation",
+    "priority": 1
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function-folder",
+    "M3_hierarchy_path": "Product Manager > Community",
+    "M4_parent": null,
+    "M5_children": ["community.messages", "community.contacts", "community.groups", "community.household", "community.identity", "community.legal", "community.equipment", "community.mesh", "community.history"],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "user_profile_data",
+        "source": "registration flow, profile editing, sensor APIs",
+        "format": "JSON",
+        "schema_ref": "users table + user_profiles table",
+        "frequency": "on-demand",
+        "dependencies": ["community.identity.account-creation", "community.identity.selfie-capture", "community.identity.face-match"]
+      },
+      {
+        "name": "contact_data",
+        "source": "phone contacts import, trusted neighbor requests, emergency contact entry",
+        "format": "JSON",
+        "schema_ref": "emergency_contacts, trusted_neighbors, contact_invites tables",
+        "frequency": "on-demand",
+        "dependencies": ["community.contacts.emergency", "community.contacts.trusted-neighbors"]
+      },
+      {
+        "name": "group_membership_requests",
+        "source": "group discovery, invite codes, join requests",
+        "format": "JSON",
+        "schema_ref": "groups, group_members, group_invites tables",
+        "frequency": "on-demand",
+        "dependencies": ["community.groups.types", "community.groups.roles", "community.groups.invite-codes"]
+      },
+      {
+        "name": "message_input",
+        "source": "user typed messages, template selection, status updates, mesh relay packets",
+        "format": "JSON",
+        "schema_ref": "messages, direct_messages, message_templates tables",
+        "frequency": "real-time",
+        "dependencies": ["community.messages.encryption", "community.messages.templates", "community.mesh.protocol"]
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "user_profile_state",
+        "consumers": ["map-page", "alerts-page", "help-page", "settings-page"],
+        "format": "JSON",
+        "schema_ref": "users, user_profiles, user_settings tables",
+        "frequency": "on-demand",
+        "dependencies": ["community.identity.account-creation", "community.household.members"]
+      },
+      {
+        "name": "contact_state",
+        "consumers": ["community.groups", "community.messages", "help-request-routing"],
+        "format": "JSON",
+        "schema_ref": "emergency_contacts, trusted_neighbors tables",
+        "frequency": "on-demand",
+        "dependencies": ["community.contacts.emergency", "community.contacts.location-sharing"]
+      },
+      {
+        "name": "group_state",
+        "consumers": ["community.messages", "map-page", "alerts-page"],
+        "format": "JSON",
+        "schema_ref": "groups, group_members, group_channels tables",
+        "frequency": "on-demand",
+        "dependencies": ["community.groups.types", "community.groups.roles", "community.groups.channels"]
+      },
+      {
+        "name": "message_state",
+        "consumers": ["UI display", "mesh relay", "notification system"],
+        "format": "JSON",
+        "schema_ref": "messages, direct_messages, user_status tables",
+        "frequency": "real-time",
+        "dependencies": ["community.messages.encryption", "community.messages.reactions", "community.mesh.offline-queue"]
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "User registration and profile enrichment",
+        "algorithm": "Multi-step identity verification pipeline",
+        "latency_sla": "Selfie+ID scan: <5s. Face match: <2s. Background check: <30s.",
+        "accuracy_target": "Face match >95% confidence. Background check 100% coverage of NSOPW."
+      },
+      {
+        "operation": "Contact import and matching",
+        "algorithm": "E.164 normalization, fuzzy phone/name matching, Beacon user lookup",
+        "latency_sla": "Contact import: <3s per 100 contacts.",
+        "accuracy_target": "Phone match 99%. Name match 90%+."
+      },
+      {
+        "operation": "Group suggestion and ranking",
+        "algorithm": "Score = (1/distance) × (1/area_covered) × relevance_weight",
+        "latency_sla": "<500ms for 50 nearby groups.",
+        "accuracy_target": "Rank top 5 suggestions within 1 mile radius with 90% relevance."
+      },
+      {
+        "operation": "Message encryption and routing",
+        "algorithm": "Signal Protocol for E2E encryption. Mesh relay with hop-limit and deduplication.",
+        "latency_sla": "Online: <200ms. Mesh relay: variable, queued until reconnection.",
+        "accuracy_target": "100% message delivery or clear queue status. Zero message loss."
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 0,
+        "module_id": "user-input",
+        "description": "User enters profile data, contacts, groups, messages",
+        "data_format": "form input, sensor APIs, camera captures",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "database-persistence",
+        "description": "All community data persisted to PostgreSQL (users, profiles, contacts, groups, messages)",
+        "data_format": "SQL inserts/updates",
+        "dependencies": ["community"]
+      },
+      {
+        "step": 2,
+        "module_id": "event-history-logging",
+        "description": "All actions logged to user_events and audit_log tables",
+        "data_format": "JSON event records",
+        "dependencies": ["community.history.events", "community.history.action-log"]
+      },
+      {
+        "step": 3,
+        "module_id": "mesh-relay",
+        "description": "Messages queued for offline relay or routed to connected peers",
+        "data_format": "encrypted mesh packets",
+        "dependencies": ["community.mesh.offline-queue", "community.mesh.protocol"]
+      },
+      {
+        "step": 4,
+        "module_id": "notification-dispatch",
+        "description": "Notifications sent via FCM, APNS, SMS (for critical)",
+        "data_format": "notification payloads",
+        "dependencies": ["community.messages.templates"]
+      },
+      {
+        "step": 5,
+        "module_id": "map-and-alert-integration",
+        "description": "Location updates and group status visible on map page. Alerts aggregated.",
+        "data_format": "GeoJSON, alert records",
+        "dependencies": ["community.contacts.location-sharing", "community.groups.channels"]
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Identity verification latency (especially background check API calls). Mesh relay reliability under high message volume. Encryption/decryption CPU on large message threads. Location sharing privacy granularity calculations.",
+    "P2_defensibility": "Modular architecture allows independent scaling of messaging, contacts, and groups. Signal Protocol provides proven E2E encryption. Mesh protocol designed for intermittent connectivity. Legal framework explicitly separates consent per feature.",
+    "P3_confidence_level": "High confidence in identity verification (uses proven APIs: Onfido/Veriff, AWS Rekognition). Medium confidence in mesh relay (bespoke implementation, requires field testing). High confidence in core messaging (Signal Protocol well-established).",
+    "P4_failure_modes": [
+      "Background check API unavailable → blocks account creation (mitigate with graceful degradation: allow partial verification)",
+      "Encryption key rotation during large group membership change → potential message loss (mitigate with offline queue + manual resync)",
+      "Mesh relay flooding with high message volume → battery drain (mitigate with rate limiting + battery-aware relay toggle)",
+      "Location sharing granularity mismatch between user setting and group policy → unintended exposure (mitigate with strict minimum-granularity rule)",
+      "Consent revocation cascade → orphaned data (mitigate with audit trail of all revocations)"
+    ],
+    "P5_backup_plan": "If background check unavailable: fall back to COPPA-style age-gate + email verification only. If mesh relay fails: queued messages stay local, manual resync on reconnection. If encryption unavailable: reject message send (fail-closed). Location sharing: default to most restrictive granularity if ambiguous.",
+    "P6_backup_plan_test": "Simulate API failures in staging. Test offline message queue under network partition. Verify consent cascade with database triggers. Test location granularity edge cases with policy conflict scenarios.",
+    "P7_testing_strategy": "Unit tests for identity verification pipeline (mock each API). Integration tests for message encryption with multiple users. Load tests for mesh relay with 100+ peers. End-to-end tests for contact import → group suggestion → message flow. Security audit of consent manager. Privacy audit of location sharing.",
+    "P8_benchmarks": "Account creation: <30s (including background check wait). Message send: <500ms online, queued offline. Contact import: <3s per 100 contacts. Group suggestion: <500ms for 50 nearby. Mesh relay: >95% message delivery within 5 minutes on reconnection."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder creation for community module framework",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Community module handles PII (name, phone, location, ID documents, biometric data). Must comply with CCPA, GDPR, COPPA (if children present). Requires explicit consent for location sharing, sensor access, and data processing. Background check integration subject to FCRA and state privacy laws. Emergency data sharing subject to FEMA/ICS interoperability requirements.",
+    "L2_regulatory_frameworks": ["CCPA", "GDPR", "COPPA", "FCRA", "FEMA", "ICS", "HIPAA (if medical data exchanged)", "State privacy laws (CA, VA, CO, CT, UT)"],
+    "L3_consent_requirements": "Separate consent for: (1) account creation and basic profile, (2) location sharing at each granularity level, (3) sensor data access (GPS, barometer, accelerometer, camera, microphone), (4) background check, (5) mesh relay participation, (6) EMS/emergency service access to data, (7) data retention and deletion policies. Per-feature toggles required.",
+    "L4_liability_notes": "Product liability for verified badge: users may rely on verification status for trust decisions. Mitigate with clear badge definitions and limitations. Skills registry: self-reported skills create liability if user relies on inaccurate data. Mitigation: clear disclaimers on skill verification levels. Location sharing: privacy expectations must be clearly set. Mitigation: granularity names must be unambiguous (not 'neighborhood' when it means 5-block radius). Emergency data sharing: must have legal authority documentation. Work with counsel on FEMA/ICS requirements before launch."
+  },
+  "F": {
+    "F1_cost_considerations": "Background check API: $1-3 per check (Checkr/GoodHire pricing). Onfido/Veriff for ID verification: $2-5 per verification. AWS Rekognition for face match: $0.001 per image comparison. Database storage: ~1KB per user profile record. Message storage: ~500B per message. Location history storage: ~200B per location event. Estimate: ~$50k/year for 10k active users (background checks, ID verification, API calls).",
+    "F2_accounting_considerations": "Costs allocated to Community module budget. Background check and ID verification are one-time per user (re-verify annually). Recurring costs: message storage, location event storage, API calls for contact matching. Consider subscription tier (freemium model) for premium contact/group features.",
+    "F3_revenue_impact": "Verified badge may increase user trust and retention. Equipment/skill matching may enable P2P services (helping economy). Group formation may increase user stickiness. No direct monetization planned in MVP."
+  },
+  "S": {
+    "S1_cybersecurity": "End-to-end encryption for messages using Signal Protocol. Hashed phone numbers for contact matching (no plaintext sent to server). API credentials for background check/ID verification stored in secure vault (AWS Secrets Manager). All community APIs require authentication (JWT tokens). Rate limiting on message send, contact import, group creation to prevent abuse.",
+    "S2_data_privacy": "Location data encrypted at rest. Verification photos deleted after match confirmation (keep hash only). Sensor consent granular per-sensor. Location history rolling 24-hour window (configurable). Right-to-delete: cascade delete on user account deletion. Audit log of all location accesses. Privacy-by-default: users must opt-in to location sharing.",
+    "S3_encryption_requirements": "Signal Protocol for messages (libsignal or custom AES-256-GCM). Location data encrypted with user's public key (searchable encryption for granularity). ID verification photos encrypted at rest (AES-256). API credentials in vault. TLS 1.3 for all network traffic.",
+    "S4_access_control": "Users can only see contacts they've added or accepted. Group members see only group-level data. Location access restricted by granularity setting. Admins can see member list and posted messages. EMS can access location only during declared emergency (with audit trail). Mesh relay nodes cannot decrypt messages (relay-encrypted).",
+    "S5_audit_requirements": "Audit log of location accesses (who accessed what, when, at what granularity). Audit log of consent changes (when user grants/revokes). Audit log of verification status changes. Audit log of group admin actions (member removal, channel creation). Audit log of emergency data access (EMS pulling location during event). Audit trail retention: 7 years for compliance."
+  },
+  "X": {
+    "X1_notes": "Community module is the largest feature in Beacon. Spans identity verification, messaging, contacts, groups, mesh networking, and legal compliance. Requires coordination across multiple vendor APIs and legal review before launch. Phone verification likely to be built in Wave A. Mesh protocol needs field testing with real devices.",
+    "X2_open_questions": [
+      "Which ID verification vendor to use? (Onfido vs Veriff vs Jumio) - requires budget and compliance review",
+      "Cloud face match vs on-device? (Rekognition vs TFLite) - tradeoff between accuracy and privacy",
+      "Background check frequency? (one-time, annual, never re-check)",
+      "Mesh protocol hardware support? (BLE/WiFi only vs LoRa hardware?)",
+      "Group member privacy? (can members see each other's names, location, skills?)",
+      "Emergency data access scope? (which data can EMS access, under what authority)",
+      "Skill verification workflow? (self-reported, credential upload, third-party verification)"
+    ],
+    "X3_related_research": "Signal Protocol specification (Double Ratchet). NIST SP 800-175B (location data privacy). FEMA/ICS emergency interoperability standards. State privacy laws (CCPA, GDPR, CPRA). Onfido/Veriff API documentation. AWS Rekognition documentation."
+  }
+}

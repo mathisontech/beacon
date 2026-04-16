@@ -1,0 +1,123 @@
+/* Volcano sidebar subtree — all rows share one font/size.
+   Hierarchy is shown via indentation, color, and a bullet on nested leaves.
+   Intentionally does NOT use .nav-item-nested so the shared !important
+   rules in dashboard.css can't shrink the font. */
+
+.vnav-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  text-transform: none;
+  text-decoration: none;
+  padding: 7px 16px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.15s, background 0.15s;
+}
+
+.vnav-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+}
+
+.vnav-row.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.vnav-row.active .vnav-label {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(255, 255, 255, 0.5);
+}
+
+.vnav-label { flex: 1 1 auto; }
+
+/* The top "Volcanoes" row. Sits at the same depth as other Hazards items. */
+.vnav-root {
+  padding-left: 28px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* Direct children of Volcanoes: UI Manager, Data Source Manager, etc. */
+.vnav-level-1 {
+  padding-left: 44px;
+}
+
+/* Group parents (Hazard Modeling, Awareness Maximizer, Event Operations Manager).
+   Deliberately styled identical to sibling leaves — the chevron is the only
+   visual indicator that they're expandable. This prevents them from reading
+   as children of whatever leaf sits directly above them. */
+.vnav-group-parent.has-active {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* Children inside a group. Same font, deeper indent, bullet marker, dimmer color. */
+.vnav-level-2 {
+  padding-left: 64px;
+  color: rgba(255, 255, 255, 0.58);
+}
+.vnav-level-2 .vnav-label::before {
+  content: "• ";
+  color: rgba(255, 255, 255, 0.3);
+  margin-right: 2px;
+}
+.vnav-level-2.active .vnav-label::before {
+  color: rgba(255, 158, 79, 0.85);
+}
+
+/* Third level (e.g. Yellowstone > Processing/Overviews). */
+.vnav-level-3 {
+  padding-left: 84px;
+  color: rgba(255, 255, 255, 0.5);
+}
+.vnav-level-3 .vnav-label::before {
+  content: "◦ ";
+  color: rgba(255, 255, 255, 0.28);
+  margin-right: 2px;
+}
+.vnav-level-3.active .vnav-label::before {
+  color: rgba(255, 158, 79, 0.85);
+}
+
+/* Split row: a leaf that has children. Chevron toggles expansion,
+   the label area is still a link to the leaf's own page. */
+.vnav-row-split {
+  padding: 0;
+}
+.vnav-row-split .vnav-expand {
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: 7px 4px 7px 16px;
+  cursor: pointer;
+  color: inherit;
+}
+.vnav-row-split .vnav-label-link {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 16px 7px 0;
+  color: inherit;
+  text-decoration: none;
+}
+.vnav-row-split.vnav-level-1 .vnav-expand { padding-left: 28px; }
+.vnav-row-split.vnav-level-2 .vnav-expand { padding-left: 48px; }
+.vnav-row-split.vnav-level-3 .vnav-expand { padding-left: 68px; }
+
+/* Chevron size stays visually small but the text doesn't shrink. */
+.vnav-chevron {
+  flex: 0 0 auto;
+  width: 13px;
+  height: 13px;
+  opacity: 0.7;
+}

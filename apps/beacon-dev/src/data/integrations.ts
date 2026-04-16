@@ -12,7 +12,7 @@ export interface Integration {
 export const integrations: Integration[] = [
   {
     key: 'google-drive',
-    label: 'Google Drive',
+    label: '1. Google Drive',
     description: 'Browse, upload, and reference files',
     icon: HardDrive,
     href: '/admin/dashboard/integrations/google-drive',
@@ -20,7 +20,7 @@ export const integrations: Integration[] = [
   },
   {
     key: 'github',
-    label: 'GitHub',
+    label: '2. GitHub',
     description: 'Repos, PRs, issues, and code review',
     icon: Github,
     href: '/admin/dashboard/integrations/github',
@@ -28,7 +28,7 @@ export const integrations: Integration[] = [
   },
   {
     key: 'slack',
-    label: 'Slack',
+    label: '3. Slack',
     description: 'Channels, messages, and notifications',
     icon: MessageSquare,
     href: '/admin/dashboard/integrations/slack',
@@ -36,7 +36,7 @@ export const integrations: Integration[] = [
   },
   {
     key: 'databases',
-    label: 'Beacon Databases',
+    label: '4. Beacon Databases',
     description: 'Query and manage training data',
     icon: Database,
     href: '/admin/dashboard/integrations/databases',

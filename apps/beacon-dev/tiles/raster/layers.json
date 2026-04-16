@@ -1,0 +1,196 @@
+{
+  "grid": {
+    "crs": "EPSG:3857",
+    "tile_size": 1024,
+    "pixel_res_m": 1,
+    "min_zoom": 0,
+    "max_zoom": 17
+  },
+  "layers": [
+    {
+      "name": "elevation",
+      "type": "continuous",
+      "encoding": "terrain-rgb",
+      "scale": 0.1,
+      "offset": -10000,
+      "unit": "m",
+      "sources": [
+        { "name": "3dep_10m",  "scope": "us",     "res_m": 10,  "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Elevation/1/TIFF/",  "format": "cog" },
+        { "name": "glo30",     "scope": "global",  "res_m": 30,  "url": "s3://copernicus-dem-30m/",  "format": "cog", "requester_pays": false }
+      ]
+    },
+    {
+      "name": "slope",
+      "type": "derived",
+      "derived_from": "elevation",
+      "encoding": "terrain-rgb",
+      "scale": 0.01,
+      "offset": 0,
+      "unit": "degrees"
+    },
+    {
+      "name": "aspect",
+      "type": "derived",
+      "derived_from": "elevation",
+      "encoding": "terrain-rgb",
+      "scale": 0.1,
+      "offset": 0,
+      "unit": "degrees"
+    },
+    {
+      "name": "tpi",
+      "type": "derived",
+      "derived_from": "elevation",
+      "encoding": "terrain-rgb",
+      "scale": 0.1,
+      "offset": -1000,
+      "unit": "m"
+    },
+    {
+      "name": "hand",
+      "type": "derived",
+      "derived_from": "elevation",
+      "encoding": "terrain-rgb",
+      "scale": 0.1,
+      "offset": 0,
+      "unit": "m"
+    },
+    {
+      "name": "landcover",
+      "type": "categorical",
+      "max_classes": 11,
+      "sources": [
+        { "name": "worldcover", "scope": "global", "res_m": 10, "url": "s3://esa-worldcover/v200/2021/map/", "format": "cog" }
+      ]
+    },
+    {
+      "name": "fuel_model",
+      "type": "categorical",
+      "max_classes": 256,
+      "sources": [
+        { "name": "landfire_fm40", "scope": "us",    "res_m": 30, "url": "https://landfire.gov/bulk/downloadfile.php?ESSION=LF2023_FBFM40_230_CONUS", "format": "tif" },
+        { "name": "worldcover_lut","scope": "global", "res_m": 10, "derived_from": "landcover", "lut": "lib/worldcover-to-fm40.json" }
+      ]
+    },
+    {
+      "name": "canopy_height",
+      "type": "continuous",
+      "encoding": "terrain-rgb",
+      "scale": 0.1,
+      "offset": 0,
+      "unit": "m",
+      "sources": [
+        { "name": "landfire_ch", "scope": "us",    "res_m": 30, "url": "https://landfire.gov/bulk/downloadfile.php?SESS=LF2023_CH_230_CONUS", "format": "tif" },
+        { "name": "potapov",     "scope": "global", "res_m": 30, "url": "https://storage.googleapis.com/earthenginepartners-hansen/GFC-2023-v1.11/Hansen_GFC-2023-v1.11_treecover2000_", "format": "tiles" }
+      ]
+    },
+    {
+      "name": "building_height",
+      "type": "continuous",
+      "encoding": "terrain-rgb",
+      "scale": 0.1,
+      "offset": 0,
+      "unit": "m",
+      "sources": [
+        { "name": "wsf3d",  "scope": "global", "res_m": 90, "url": "https://download.geoservice.dlr.de/WSF3D/", "format": "tif" }
+      ]
+    },
+    {
+      "name": "vs30",
+      "type": "continuous",
+      "encoding": "terrain-rgb",
+      "scale": 0.1,
+      "offset": 0,
+      "unit": "m/s",
+      "sources": [
+        { "name": "usgs_vs30", "scope": "global", "res_m": 1000, "url": "https://earthquake.usgs.gov/data/vs30/", "format": "tif" }
+      ]
+    },
+    {
+      "name": "population_density",
+      "type": "continuous",
+      "encoding": "terrain-rgb",
+      "scale": 0.01,
+      "offset": 0,
+      "unit": "people/km2",
+      "sources": [
+        { "name": "ghs_pop", "scope": "global", "res_m": 100, "url": "https://ghsl.jrc.ec.europa.eu/download.php?ds=pop&2025", "format": "tif" }
+      ]
+    },
+    {
+      "name": "admin_zone",
+      "type": "categorical",
+      "max_classes": 65535,
+      "sources": [
+        { "name": "tiger_states",  "scope": "us",     "vector": true, "burn_attr": "STATEFP" },
+        { "name": "tiger_counties","scope": "us",     "vector": true, "burn_attr": "GEOID" },
+        { "name": "overture_admin","scope": "global",  "vector": true, "burn_attr": "zone_id" }
+      ]
+    },
+    {
+      "name": "protected_area",
+      "type": "categorical",
+      "max_classes": 8,
+      "sources": [
+        { "name": "padus",  "scope": "us",     "vector": true, "burn_attr": "Category" },
+        { "name": "wdpa",   "scope": "global",  "vector": true, "burn_attr": "IUCN_CAT" }
+      ]
+    },
+    {
+      "name": "flood_zone",
+      "type": "categorical",
+      "max_classes": 8,
+      "sources": [
+        { "name": "fema_nfhl",     "scope": "us",     "vector": true, "burn_attr": "FLD_ZONE" },
+        { "name": "hand_derived",  "scope": "global",  "derived_from": "hand", "thresholds": [2, 5, 10] }
+      ]
+    },
+    {
+      "name": "dist_road",
+      "type": "distance",
+      "encoding": "terrain-rgb",
+      "scale": 1.0,
+      "offset": 0,
+      "unit": "m",
+      "sources": [
+        { "name": "tiger_roads",   "scope": "us",     "vector": true },
+        { "name": "overture_roads","scope": "global",  "vector": true }
+      ]
+    },
+    {
+      "name": "dist_water",
+      "type": "distance",
+      "encoding": "terrain-rgb",
+      "scale": 1.0,
+      "offset": 0,
+      "unit": "m",
+      "sources": [
+        { "name": "nhd",           "scope": "us",     "vector": true },
+        { "name": "hydrosheds",    "scope": "global",  "vector": true }
+      ]
+    },
+    {
+      "name": "dist_coast",
+      "type": "distance",
+      "encoding": "terrain-rgb",
+      "scale": 1.0,
+      "offset": 0,
+      "unit": "m",
+      "sources": [
+        { "name": "ne_coastline",  "scope": "global",  "vector": true }
+      ]
+    },
+    {
+      "name": "dist_fault",
+      "type": "distance",
+      "encoding": "terrain-rgb",
+      "scale": 1.0,
+      "offset": 0,
+      "unit": "m",
+      "sources": [
+        { "name": "usgs_qfaults", "scope": "us",     "vector": true },
+        { "name": "gem_faults",   "scope": "global",  "vector": true, "url": "https://github.com/GEMScienceTools/gem-global-active-faults" }
+      ]
+    }
+  ]
+}

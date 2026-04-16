@@ -1,0 +1,1 @@
+NOTE: LiDAR .laz files and large PDFs not copied. Original: beacon/maps/lahaina/lidar/

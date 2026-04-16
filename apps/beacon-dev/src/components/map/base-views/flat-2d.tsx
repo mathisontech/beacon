@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { altitudeToZoom, zoomToAltitude } from '@/lib/camera-state';
+import { beaconStyleUrl, beaconTransformRequest } from '@/lib/tiles/beacon-style';
 import type { OverlayType } from './overlay-toolbar';
 
 // SF default: ~12.5 zoom covers the city nicely
@@ -26,32 +27,15 @@ export default function Flat2D({ overlays }: Props) {
       if (cancelled || !containerRef.current) return;
       const cam = SF;
 
+      // Use Beacon's self-hosted vector basemap (served from
+      // /api/tiles/basemap/:z/:x/:y via the PMTiles archive). Style
+      // lives at /styles/beacon-basemap.json in public/.
       const map = new maplibregl.Map({
         container: containerRef.current,
-        style: {
-          version: 8,
-          sources: {
-            'osm': {
-              type: 'raster',
-              tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-              tileSize: 256,
-              attribution: '&copy; OpenStreetMap',
-            },
-          },
-          layers: [
-            {
-              id: 'osm-base',
-              type: 'raster',
-              source: 'osm',
-              paint: {
-                'raster-saturation': -0.8,
-                'raster-brightness-max': 0.55,
-              },
-            },
-          ],
-        },
+        style: beaconStyleUrl(),
         center: [cam.lng, cam.lat],
         zoom: altitudeToZoom(cam.altitude),
+        transformRequest: beaconTransformRequest,
       });
 
       mapRef.current = map;

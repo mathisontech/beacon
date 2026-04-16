@@ -1,0 +1,160 @@
+{
+  "module_id": "help.requests.location-recording",
+  "module_name": "Location Recording on Accept",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "updated_by": "claude-opus-4",
+  "bookmark": {
+    "status": "Safety-critical location recording for mutual aid",
+    "return_note": "in-progress",
+    "priority": [
+      "90-day retention policy",
+      "Dispute hold mechanism"
+    ]
+  },
+  "M": {
+    "M1_beacon_versions": [
+      "MVP"
+    ],
+    "M2_module_type": "service",
+    "M3_hierarchy_path": "Product Manager > Help > Requests > Location Recording",
+    "M4_parent": "help.requests",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-opus-4",
+        "role": "architect",
+        "from": "2026-04-04T14:58:58Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "help_accept_event",
+        "source": "help.requests.lifecycle",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "event-driven",
+        "dependencies": [
+          "help.requests.lifecycle"
+        ]
+      },
+      {
+        "name": "user_locations",
+        "source": "device GPS",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "every 60s",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "location_log",
+        "consumers": [
+          "help.admin",
+          "community.history"
+        ],
+        "format": "JSON",
+        "schema_ref": "help_location_log table",
+        "frequency": "every 60s",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Record both parties GPS coordinates at 60s intervals from accept to resolution",
+        "algorithm": "Background location service",
+        "latency_sla": "60s intervals",
+        "accuracy_target": "10m GPS accuracy"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.requests.lifecycle",
+        "description": "Helper accepts request",
+        "data_format": "JSON",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "community.legal.consent-manager",
+        "description": "Location recording consent verified",
+        "data_format": "boolean",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.admin",
+        "description": "Location logs available for safety review",
+        "data_format": "JSON",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "community.history.helping",
+        "description": "Location logs feed helping history",
+        "data_format": "JSON",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Battery drain from continuous GPS. Storage for high-frequency location data.",
+    "P2_defensibility": "60s interval balances safety record quality with battery impact. Encrypted at rest.",
+    "P3_confidence_level": "NR",
+    "P4_failure_modes": [
+      "GPS unavailable indoors",
+      "Battery death stops recording",
+      "User revokes location permission mid-help"
+    ],
+    "P5_backup_plan": "Fall back to cell-tower location if GPS unavailable. Log gaps in recording.",
+    "P6_backup_plan_test": "Simulate failure scenario in staging with mock data",
+    "P7_testing_strategy": "Test with simulated GPS in staging. Test battery impact over 4h continuous recording. Test consent revocation mid-session.",
+    "P8_benchmarks": "60s recording interval. <5% battery impact per hour. <10m accuracy."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T14:58:58Z",
+        "who": "claude-opus-4",
+        "description": "Initial CONFolder creation",
+        "version": "0.1"
+      }
+    ],
+    "CH2_current_version": "0.1"
+  },
+  "L": {
+    "L1_legal_considerations": "Critical privacy feature. Location data encrypted at rest with per-request keys. Auto-delete after 90 days unless dispute filed.",
+    "L2_regulatory_frameworks": [
+      "CCPA",
+      "GDPR",
+      "State surveillance laws"
+    ],
+    "L3_consent_requirements": "Explicit consent prompt before first help accept. Re-consent annually.",
+    "L4_liability_notes": "Location recording protects both parties. Beacon stores but does not monitor in real-time."
+  },
+  "F": {
+    "F1_cost_considerations": "Storage: ~1KB per location point. ~1440 points per day per user pair. Negligible cost.",
+    "F2_accounting_considerations": "Allocated to help module operational budget",
+    "F3_revenue_impact": "NR"
+  },
+  "S": {
+    "S1_cybersecurity": "Per-request encryption keys. AES-256 at rest. Only accessible by the two parties and admin with cause.",
+    "S2_data_privacy": "Exact location stored (not granularity-reduced). This is intentional for safety.",
+    "S3_encryption_requirements": "AES-256-GCM per-request key.",
+    "S4_access_control": "Two parties + admin with documented cause.",
+    "S5_audit_requirements": "Access log for every location log query. Retention audit at 90 days."
+  },
+  "X": {
+    "X1_notes": 1,
+    "X2_open_questions": "Define dispute hold policy that extends retention",
+    "X3_related_research": "NR"
+  }
+}

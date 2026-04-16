@@ -9,17 +9,17 @@ const MapIcon = ({ color }: { color: string }) => (
   </svg>
 );
 
-const UserReportsIcon = ({ color }: { color: string }) => (
+const FeedIcon = ({ color }: { color: string }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-    <circle cx="12" cy="12" r="3" />
+    <path d="M4 11a9 9 0 0 1 9 9" />
+    <path d="M4 4a16 16 0 0 1 16 16" />
+    <circle cx="5" cy="19" r="1" />
   </svg>
 );
 
-const AlertsIcon = ({ color }: { color: string }) => (
+const EventsIcon = ({ color }: { color: string }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
   </svg>
 );
 
@@ -42,9 +42,9 @@ const CommunityIcon = ({ color }: { color: string }) => (
 );
 
 const TABS = [
+  { id: "feed", label: "Home", Icon: FeedIcon },
   { id: "map", label: "Map", Icon: MapIcon },
-  { id: "reports", label: "User Reports", Icon: UserReportsIcon },
-  { id: "alerts", label: "Alerts", Icon: AlertsIcon },
+  { id: "events", label: "Events", Icon: EventsIcon },
   { id: "php", label: "Helping", Icon: HelpingIcon },
   { id: "community", label: "Community", Icon: CommunityIcon },
 ];

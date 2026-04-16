@@ -1,0 +1,153 @@
+{
+  "module_id": "help.routing.notifications",
+  "module_name": "Help Notification Routing & Privacy",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "updated_by": "claude-opus-4",
+  "bookmark": {
+    "status": "Privacy-preserving notification system for help requests",
+    "return_note": "in-progress",
+    "priority": [
+      "SMS fallback TCPA compliance",
+      "Notification frequency cap tuning"
+    ]
+  },
+  "M": {
+    "M1_beacon_versions": [
+      "MVP"
+    ],
+    "M2_module_type": "service",
+    "M3_hierarchy_path": "Product Manager > Help > Routing > Notifications",
+    "M4_parent": "help.routing",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-opus-4",
+        "role": "architect",
+        "from": "2026-04-04T14:58:58Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "matched_helpers",
+        "source": "help.routing.capability",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "per-request",
+        "dependencies": [
+          "help.routing.capability"
+        ]
+      },
+      {
+        "name": "user_notification_prefs",
+        "source": "community.settings.notifications",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "push_notifications",
+        "consumers": [
+          "FCM",
+          "APNS"
+        ],
+        "format": "push payload",
+        "schema_ref": null,
+        "frequency": "event-driven",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Send notifications to matched helpers. Record swipe-aways locally only. Never expose decline to requester.",
+        "algorithm": "Staggered delivery: trusted first, verified second, general third",
+        "latency_sla": "<5s delivery",
+        "accuracy_target": null
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.routing.capability",
+        "description": "Helpers matched",
+        "data_format": "JSON",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "community.messages.notification-routing",
+        "description": "Push infrastructure",
+        "data_format": "push",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "public-app",
+        "description": "Helper sees notification, can accept or swipe away",
+        "data_format": "push notification",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Notification storms during mass events. Push service rate limits.",
+    "P2_defensibility": "Staggered delivery reduces noise. Swipe-away privacy critical for adoption.",
+    "P3_confidence_level": "NR",
+    "P4_failure_modes": [
+      "Push service outage",
+      "Notification fatigue causes users to disable",
+      "Rate limiting drops critical notifications"
+    ],
+    "P5_backup_plan": "SMS fallback for critical requests. Frequency cap: max 5 help notifications per hour per user.",
+    "P6_backup_plan_test": "Simulate failure scenario in staging with mock data",
+    "P7_testing_strategy": "Load test notification delivery at 10K concurrent requests. Test swipe-away privacy (verify no server-side recording of individual declines).",
+    "P8_benchmarks": "Delivery <5s. Frequency cap enforced. Zero decline data leakage."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T14:58:58Z",
+        "who": "claude-opus-4",
+        "description": "Initial CONFolder creation",
+        "version": "0.1"
+      }
+    ],
+    "CH2_current_version": "0.1"
+  },
+  "L": {
+    "L1_legal_considerations": "Swipe-away data NEVER stored server-side. Only local device analytics (aggregated).",
+    "L2_regulatory_frameworks": [
+      "CCPA",
+      "GDPR",
+      "TCPA (if SMS fallback)"
+    ],
+    "L3_consent_requirements": "Push notification consent via OS. SMS requires separate TCPA consent.",
+    "L4_liability_notes": "NR"
+  },
+  "F": {
+    "F1_cost_considerations": "FCM + APNS: free tier covers most usage. SMS fallback: $0.01/msg.",
+    "F2_accounting_considerations": "Allocated to help module operational budget",
+    "F3_revenue_impact": "NR"
+  },
+  "S": {
+    "S1_cybersecurity": "No PII in push payloads. Category + distance + brief description only.",
+    "S2_data_privacy": "Individual decline decisions never transmitted to server. Requester sees only aggregate ('X notified, Y responded').",
+    "S3_encryption_requirements": "TLS for push. No sensitive data in notification payload.",
+    "S4_access_control": "OS-level push permission.",
+    "S5_audit_requirements": "Audit trail on notification sends (not declines)."
+  },
+  "X": {
+    "X1_notes": 1,
+    "X2_open_questions": "Confirm TCPA compliance for SMS fallback",
+    "X3_related_research": "NR"
+  }
+}

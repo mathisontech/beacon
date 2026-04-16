@@ -1,0 +1,74 @@
+{
+  "version": 8,
+  "name": "Beacon Basemap",
+  "glyphs": "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+  "sources": {
+    "beacon": {
+      "type": "vector",
+      "tiles": ["/api/tiles/basemap/{z}/{x}/{y}.pbf"],
+      "minzoom": 0,
+      "maxzoom": 7,
+      "attribution": "Natural Earth | Beacon"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": { "background-color": "#0b1220" }
+    },
+    {
+      "id": "ocean",
+      "type": "fill",
+      "source": "beacon",
+      "source-layer": "ocean",
+      "paint": { "fill-color": "#0d1b2a" }
+    },
+    {
+      "id": "land",
+      "type": "fill",
+      "source": "beacon",
+      "source-layer": "land",
+      "paint": { "fill-color": "#1b2636" }
+    },
+    {
+      "id": "lakes",
+      "type": "fill",
+      "source": "beacon",
+      "source-layer": "lakes",
+      "paint": { "fill-color": "#0d1b2a" }
+    },
+    {
+      "id": "rivers",
+      "type": "line",
+      "source": "beacon",
+      "source-layer": "rivers",
+      "paint": {
+        "line-color": "#1f3a55",
+        "line-width": 0.6
+      }
+    },
+    {
+      "id": "states",
+      "type": "line",
+      "source": "beacon",
+      "source-layer": "states",
+      "minzoom": 3,
+      "paint": {
+        "line-color": "#2b3a4a",
+        "line-width": 0.5,
+        "line-dasharray": [2, 2]
+      }
+    },
+    {
+      "id": "countries",
+      "type": "line",
+      "source": "beacon",
+      "source-layer": "countries",
+      "paint": {
+        "line-color": "#3b4a5a",
+        "line-width": 0.8
+      }
+    }
+  ]
+}

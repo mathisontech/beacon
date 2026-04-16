@@ -35,22 +35,23 @@ export default function MapSightingReport() {
           position: "absolute",
           bottom: 16,
           right: 16,
-          width: 40,
-          height: 40,
-          borderRadius: 20,
-          background: "rgba(31,51,72,0.85)",
-          border: "1px solid rgba(255,255,255,0.15)",
+          width: 36,
+          height: 36,
+          borderRadius: 8,
+          background: "rgba(255,255,255,0.88)",
+          border: "1px solid rgba(0,0,0,0.08)",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           zIndex: 20,
-          backdropFilter: "blur(8px)",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+          backdropFilter: "blur(12px)",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+          padding: 0,
         }}
         title="Report Sighting"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1e293b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>

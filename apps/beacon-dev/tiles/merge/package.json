@@ -1,0 +1,8 @@
+{
+  "name": "beacon-tiles-merge",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@turf/turf": "^7.1.0"
+  }
+}

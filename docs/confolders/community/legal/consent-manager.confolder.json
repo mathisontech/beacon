@@ -1,0 +1,193 @@
+{
+  "module_id": "community.legal.consent-manager",
+  "module_name": "Consent Manager",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting definition of consent tiers (per-feature, per-sensor, per-use-case). Revocation workflow needs specification.",
+    "priority": 1
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Legal > Consent Manager",
+    "M4_parent": "community.legal",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "consent_request",
+        "source": "Feature requires consent (messaging, location sharing, sensor access, etc)",
+        "format": "JSON",
+        "schema_ref": "{ feature: 'messaging'|'location'|'gps'|'camera'|etc, user_id }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "user_consent_action",
+        "source": "User grants or revokes consent",
+        "format": "JSON",
+        "schema_ref": "{ consent_id, action: 'grant'|'revoke', method: 'tap'|'scroll'|'e-sign' }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "consent_check",
+        "consumers": ["feature executors (messaging, location, sensors)"],
+        "format": "JSON",
+        "schema_ref": "{ feature, user_id, has_consent: bool }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "consent_modal",
+        "consumers": ["UI consent prompt"],
+        "format": "JSON",
+        "schema_ref": "{ feature, title, description, legal_link, buttons: ['accept', 'decline'] }",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "consent_audit_log",
+        "consumers": ["audit system, user privacy review"],
+        "format": "JSON",
+        "schema_ref": "{ user_id, feature, action, timestamp, method, ip_address?, device_id? }",
+        "frequency": "real-time",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Check if user has valid consent",
+        "algorithm": "Query user_consents table. Check if granted_at exists and revoked_at is null.",
+        "latency_sla": "<100ms",
+        "accuracy_target": "100% correct consent state"
+      },
+      {
+        "operation": "Grant consent",
+        "algorithm": "INSERT user_consents record with timestamp, method. Log to audit trail.",
+        "latency_sla": "<200ms",
+        "accuracy_target": "100% consent recorded"
+      },
+      {
+        "operation": "Revoke consent",
+        "algorithm": "UPDATE user_consents set revoked_at. Cascade to feature (stop location sharing, stop sensor access).",
+        "latency_sla": "<500ms",
+        "accuracy_target": "100% revocation, no delayed access"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "feature_access_request",
+        "description": "User or system requests access to feature (messaging, location, sensors)",
+        "data_format": "feature_id, user_id",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 2,
+        "module_id": "consent_check",
+        "description": "Check if user has granted consent",
+        "data_format": "has_consent: bool",
+        "dependencies": []
+      },
+      {
+        "step": 3,
+        "module_id": "consent_prompt_or_feature",
+        "description": "If no consent: show consent modal. If consent: allow feature.",
+        "data_format": "modal or feature access",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "consent_recording",
+        "description": "If user grants: record in user_consents table and audit log",
+        "data_format": "consent_id, audit_entry",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "feature_execution",
+        "description": "Feature executes with confirmed consent",
+        "data_format": "feature result",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "revocation_cascade",
+        "description": "If user revokes consent: feature immediately stops (location sharing disabled, sensors stopped)",
+        "data_format": "revocation_cascade status",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Consent check on every feature access (should be <100ms). Consent revocation cascade (may take several seconds). Audit logging at scale (real-time writes).",
+    "P2_defensibility": "Explicit consent for each feature. Granular control (per-sensor, per-feature). Audit trail for transparency. Easy revocation (no friction).",
+    "P3_confidence_level": "Very high confidence. Simple consent tracking. Well-established pattern.",
+    "P4_failure_modes": [
+      "Consent check fails → feature blocked even though consent granted (mitigate: default to 'allowed' after first verification)",
+      "Revocation not propagated → feature continues after revoke (mitigate: explicit stop signal, periodic re-check)",
+      "Audit logging fails → no legal record (mitigate: async audit, never block consent for audit failure)",
+      "User forgets they granted consent → privacy concern (mitigate: consent management page shows all active consents)"
+    ],
+    "P5_backup_plan": "If consent check fails: allow feature (trust local cache). If revocation fails: escalate to manual intervention. If audit fails: async retry.",
+    "P6_backup_plan_test": "Simulate consent check failure. Test revocation cascade on all features. Test audit logging failure. Test concurrent grant/revoke.",
+    "P7_testing_strategy": "Unit tests for consent check logic. Integration tests for grant/revoke. Load tests for concurrent consent operations (1000/s). End-to-end tests for full consent flow. Cascade tests (revoke one feature, verify others unaffected). Audit accuracy tests.",
+    "P8_benchmarks": "Consent check: <100ms. Grant consent: <200ms. Revoke consent: <500ms (including cascade). Audit logging: <500ms (async). Revocation accuracy: 100% (feature stops immediately). Audit coverage: 100%."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for consent manager module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "GDPR requires explicit, informed, granular consent. CCPA grants right to opt-out. User must be able to revoke easily. Consent method documented (scroll, tap, e-sign). Audit trail proves consent was given.",
+    "L2_regulatory_frameworks": ["GDPR (explicit consent)", "CCPA (opt-out rights)", "COPPA (parental consent for children)", "HIPAA (if medical data)", "State privacy laws"],
+    "L3_consent_requirements": "Per-feature or per-sensor granularity required. User must see clear description of what's being consented to. Consent method recorded. Ability to revoke at any time.",
+    "L4_liability_notes": "Consent is legal evidence of user authorization. Improper consent is regulatory violation. Auditing consent changes is critical for defense. Revocation must be immediate and complete."
+  },
+  "F": {
+    "F1_cost_considerations": "Consent storage: ~100B per consent per user. Audit logging: ~500B per event. At 10k users with 10 consents each, 1k events/day: ~100KB/day storage. Negligible cost.",
+    "F2_accounting_considerations": "Operational cost, no special accounting.",
+    "F3_revenue_impact": "User trust increases with clear consent management (positive impact). Regulatory compliance enables operation (required, not optional)."
+  },
+  "S": {
+    "S1_cybersecurity": "Consent records stored plaintext (low sensitivity, not credentials). Audit log written securely. Consent revocation immediate (no delay). Rate limiting on consent changes (prevent spam).",
+    "S2_data_privacy": "User sees own consent list. Admin sees only consent status (not audit details unless needed). Revocation is right-to-delete trigger (data stops being collected immediately).",
+    "S3_encryption_requirements": "Audit log encrypted in transit (TLS). Audit log may be encrypted at rest (not strictly required, but good practice).",
+    "S4_access_control": "User sees and controls own consent. Admin sees consent status for support/debugging. Legal can access audit log for compliance.",
+    "S5_audit_requirements": "Complete audit log of all consent grants/revokes: who, when, method, outcome. Audit trail retention: 7 years (legal requirement)."
+  },
+  "X": {
+    "X1_notes": "Consent manager is critical for GDPR/CCPA compliance and user trust. Granular consent (per-sensor, per-feature) gives users control. Audit trail proves compliance. Revocation cascade ensures respected user wishes. Integration with all features (messaging, location, sensors) is essential.",
+    "X2_open_questions": [
+      "Consent granularity: per-feature or per-sensor? (per-sensor is more granular but more complex)",
+      "Default state: opt-in or opt-out? (opt-in = safer, opt-out = higher adoption)",
+      "Consent method: scroll to accept, or explicit checkbox? (scroll has UX issues, checkbox clearer)"
+    ],
+    "X3_related_research": "GDPR consent requirements. CCPA opt-out mechanisms. Consent management platforms. Legal audit trail requirements. Privacy-by-design principles."
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Beacon Emergency GPS",
+  "short_name": "Beacon GPS",
+  "description": "Emergency GPS Navigation System with OpenStreetMap",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#dc2626",
+  "icons": [
+    {
+      "src": "beacon_logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["navigation", "utilities", "productivity"],
+  "orientation": "portrait-primary"
+}

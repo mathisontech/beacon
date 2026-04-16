@@ -1,0 +1,202 @@
+{
+  "module_id": "community.messages.encryption",
+  "module_name": "Message Encryption (E2E)",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "blocked",
+    "return_note": "Awaiting vendor selection: Signal Protocol (libsignal) vs custom AES-256-GCM implementation. Requires security audit before deployment.",
+    "priority": 1
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Messages > Encryption",
+    "M4_parent": "community.messages",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "plaintext_message",
+        "source": "user input or system status update",
+        "format": "JSON",
+        "schema_ref": "{ text: string, thread_id: string }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "thread_public_key",
+        "source": "thread key establishment (on first message or member join)",
+        "format": "PEM-encoded public key",
+        "schema_ref": "ECDH public key or RSA public key",
+        "frequency": "on-demand",
+        "dependencies": []
+      },
+      {
+        "name": "encrypted_message_blob",
+        "source": "incoming message from peer or server",
+        "format": "binary ciphertext with ephemeral key and MAC",
+        "schema_ref": "{ ephemeral_key, ciphertext, mac, nonce }",
+        "frequency": "real-time",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "encrypted_blob",
+        "consumers": ["messages table storage", "mesh relay", "recipients"],
+        "format": "binary ciphertext",
+        "schema_ref": "{ ephemeral_key, ciphertext, mac, nonce }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "decrypted_plaintext",
+        "consumers": ["message display in UI", "local search index"],
+        "format": "JSON",
+        "schema_ref": "{ text: string, timestamp: ISO-8601 }",
+        "frequency": "real-time",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Encrypt plaintext with thread public key",
+        "algorithm": "Signal Protocol (Double Ratchet) or AES-256-GCM with HPKE",
+        "latency_sla": "<100ms per message encryption",
+        "accuracy_target": "100% ciphertext integrity. Zero plaintext leakage."
+      },
+      {
+        "operation": "Decrypt ciphertext with thread private key",
+        "algorithm": "Signal Protocol decryption or AES-256-GCM decryption",
+        "latency_sla": "<100ms per message decryption",
+        "accuracy_target": "Authentic decryption only (MAC verified). Reject tampered ciphertexts."
+      },
+      {
+        "operation": "Key rotation on group member changes",
+        "algorithm": "Derive new key from group membership hash + timestamp",
+        "latency_sla": "<500ms for key rotation",
+        "accuracy_target": "All old messages remain readable with old key. All new messages use new key."
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "thread_establishment",
+        "description": "Thread created (DM or group channel). Key pair generated.",
+        "data_format": "thread_id, public_key, private_key (stored securely)",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "key_distribution",
+        "description": "Public key shared with all thread members (out-of-band or via key exchange protocol)",
+        "data_format": "public_key broadcast",
+        "dependencies": []
+      },
+      {
+        "step": 3,
+        "module_id": "plaintext_message",
+        "description": "User composes message",
+        "data_format": "text, metadata",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 4,
+        "module_id": "encryption",
+        "description": "Plaintext encrypted with thread public key",
+        "data_format": "ciphertext + ephemeral_key + MAC",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "persistence",
+        "description": "Encrypted blob stored in messages table",
+        "data_format": "encrypted_blob column",
+        "dependencies": []
+      },
+      {
+        "step": 6,
+        "module_id": "delivery",
+        "description": "Ciphertext sent to recipients (online) or queued (offline)",
+        "data_format": "encrypted blob via HTTP or mesh protocol",
+        "dependencies": []
+      },
+      {
+        "step": 7,
+        "module_id": "recipient_decryption",
+        "description": "Recipient decrypts with their copy of thread private key",
+        "data_format": "plaintext message displayed in UI",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "CPU cost for encryption/decryption on large threads. Ephemeral key generation per message (random number generation overhead). Key rotation coordination during group member changes (all members must update). Forward secrecy ratcheting per message (higher complexity).",
+    "P2_defensibility": "Signal Protocol has undergone extensive security audit (used by WhatsApp, Signal app). AES-256-GCM is NIST-approved symmetric cipher. Key rotation ensures past messages stay secret if key is compromised. Perfect forward secrecy via ratcheting.",
+    "P3_confidence_level": "Very high confidence if using Signal Protocol (proven library). High confidence if using AES-256-GCM with proper key derivation. Medium confidence in custom key rotation logic (requires security review).",
+    "P4_failure_modes": [
+      "Key rotation during group member add → some members have old key, cannot decrypt new messages (mitigate: use Sender Keys pattern where possible)",
+      "Loss of private key → cannot decrypt historical messages (mitigate: backup encrypted private key to secure server)",
+      "Insufficient entropy in random number generation → weak ephemeral keys (mitigate: use OS crypto (SecureRandom on Android/iOS))",
+      "Incorrect MAC verification → accept tampered messages (mitigate: strict MAC validation, reject on any MAC mismatch)",
+      "Plaintext accidentally stored in memory → exposed in crash dumps (mitigate: zero memory on sensitive operations)"
+    ],
+    "P5_backup_plan": "If encryption unavailable: fail-closed, reject send. If key rotation fails: fall back to old key until manual user intervention. If private key lost: warn user historical messages cannot be decrypted (educate on backup importance). If MAC fails: drop message, log security event.",
+    "P6_backup_plan_test": "Simulate key rotation failure (mock key derivation failure). Test MAC rejection (inject tampered ciphertexts). Test memory zeroization (inspect memory after encryption operation). Test insufficient entropy (seeded RNG with known seed).",
+    "P7_testing_strategy": "Unit tests for encryption/decryption (test vectors from Signal/NIST). Integration tests for key rotation (add/remove group members). Load tests for encryption CPU (encrypt 1000 messages, measure latency). Security audit by third-party (essential before launch). Penetration test on key exchange protocol.",
+    "P8_benchmarks": "Encrypt 1000 messages: <100s (100ms each). Decrypt 1000 messages: <100s. Key rotation: <500ms for group of 50 members. MAC verification: <10ms. Zero crashes due to memory corruption (sanitizer clean)."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for encryption module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "E2E encryption prevents Beacon from reading message content. Creates law enforcement compliance complexity. Beacon cannot produce plaintext in response to legal requests. Users own encryption keys, user is responsible for key management. No backdoor mechanism exists.",
+    "L2_regulatory_frameworks": ["ECPA (Electronic Communications Privacy Act)", "GDPR (encryption requirements)", "FIPS 140-2 (if government contracting)"],
+    "L3_consent_requirements": "Users implicitly consent to E2E encryption by sending messages. No separate consent needed (encryption is privacy-protective).",
+    "L4_liability_notes": "Encryption cannot be broken by Beacon. If user loses private key, messages are unrecoverable (user's responsibility). Encryption key management must be transparent in UX (not hidden). If government seeks data: Beacon cannot produce plaintext. Users may face legal requests to decrypt their own messages."
+  },
+  "F": {
+    "F1_cost_considerations": "Encryption CPU: negligible with hardware acceleration. Key storage: ~1KB per thread. Ephemeral key generation: <1ms per message (OS-level random). No external API costs.",
+    "F2_accounting_considerations": "Encryption cost is operational (included in app runtime). No incremental SaaS cost.",
+    "F3_revenue_impact": "Strong privacy messaging is competitive advantage. May increase user trust and retention."
+  },
+  "S": {
+    "S1_cybersecurity": "Encryption algorithm: Signal Protocol or AES-256-GCM. Key derivation: HPKE or custom KDF with high entropy. Ephemeral keys: generated with OS crypto (SecureRandom). Private key storage: platform keystore (iOS Keychain, Android Keystore). Message authentication: HMAC-SHA256 or GCM MAC.",
+    "S2_data_privacy": "Plaintext never stored server-side. Only ciphertext persisted. Private keys never leave device. Forward secrecy: old messages remain secret if current key is compromised.",
+    "S3_encryption_requirements": "Signal Protocol Double Ratchet (preferred) or AES-256-GCM with per-message nonce. Key rotation on group member changes. Perfect forward secrecy via ratcheting.",
+    "S4_access_control": "Only recipient with matching private key can decrypt. Server cannot decrypt. Admins cannot override encryption.",
+    "S5_audit_requirements": "Log all key rotation events. Log all failed MAC verifications (potential tampering). Audit trail retention: 1 year."
+  },
+  "X": {
+    "X1_notes": "Encryption is foundational to Beacon's privacy promise. E2E encryption is non-negotiable. Key management is critical UX challenge (must be transparent to users). Sender Keys optimization may be needed for large groups (reduce per-user overhead).",
+    "X2_open_questions": [
+      "Signal Protocol or custom AES-256-GCM? (both are defensible, signal adds security audit)",
+      "Per-user encryption in groups or single shared key? (per-user is more private, higher CPU)",
+      "Key backup mechanism? (encrypted backup to server? iCloud? user-managed?)",
+      "What if user loses device with private key? (can they decrypt old messages on new device?)"
+    ],
+    "X3_related_research": "Signal Protocol Double Ratchet specification. HPKE (Hybrid Public Key Encryption) RFC 9180. NIST SP 800-38D (GCM mode). Perfect Forward Secrecy in TLS 1.3. Post-quantum cryptography implications (future-proofing)."
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "module_id": "community.messages.templates",
+  "module_name": "Message Templates (Status Messages & Mesh Optimization)",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting finalization of template taxonomy and compression codec choice (Varint vs fixed-length codes)",
+    "priority": 2
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Messages > Templates",
+    "M4_parent": "community.messages",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "template_selection",
+        "source": "User selects pre-composed status message from template UI",
+        "format": "JSON",
+        "schema_ref": "{ template_key: string, context?: { location?, status? } }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "custom_message",
+        "source": "User types custom message",
+        "format": "JSON",
+        "schema_ref": "{ text: string }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "mesh_environment",
+        "source": "System detects offline/mesh mode",
+        "format": "JSON",
+        "schema_ref": "{ mode: 'online'|'mesh', bandwidth_constraint?: 'high'|'low' }",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "compressed_payload",
+        "consumers": ["mesh relay", "storage"],
+        "format": "binary",
+        "schema_ref": "2-byte template code or variable-length delta-encoded message",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "template_list",
+        "consumers": ["UI template selector"],
+        "format": "JSON",
+        "schema_ref": "[{ key, icon, text, category }]",
+        "frequency": "on-demand",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Resolve template key to full text",
+        "algorithm": "Template lookup in static registry. Context variable substitution.",
+        "latency_sla": "<50ms",
+        "accuracy_target": "100% correct template resolution"
+      },
+      {
+        "operation": "Compress message for mesh",
+        "algorithm": "If template: 2-byte code. If custom: delta encoding of text with Huffman or Varint.",
+        "latency_sla": "<100ms",
+        "accuracy_target": "80%+ compression ratio vs plaintext JSON"
+      },
+      {
+        "operation": "Decompress message on receive",
+        "algorithm": "Reverse compression codec. Template lookup for codes.",
+        "latency_sla": "<50ms",
+        "accuracy_target": "100% decompression correctness"
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "user_action",
+        "description": "User selects template or types custom message",
+        "data_format": "template_key or text",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "system_state",
+        "description": "System detects online vs mesh mode",
+        "data_format": "mode: 'online'|'mesh'",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 3,
+        "module_id": "template_resolution",
+        "description": "If template: lookup key. If custom: use plaintext.",
+        "data_format": "resolved_text",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "compression",
+        "description": "If mesh mode: compress. If online: normal message.",
+        "data_format": "compressed_payload or normal_message",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "encryption",
+        "description": "Message encrypted",
+        "data_format": "encrypted_blob",
+        "dependencies": ["community.messages.encryption"]
+      },
+      {
+        "step": 6,
+        "module_id": "delivery",
+        "description": "Message sent (online) or queued (mesh)",
+        "data_format": "message_id, delivery_status",
+        "dependencies": ["community.mesh.offline-queue", "community.mesh.protocol"]
+      },
+      {
+        "step": 7,
+        "module_id": "recipient_decompression",
+        "description": "If mesh mode message: decompress on receive",
+        "data_format": "plaintext_message",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Compression codec performance (especially on low-power devices in mesh mode). Template lookup latency (should be negligible with static registry). Delta encoding complexity for highly variable custom messages. Decompression on large message batches (offline sync).",
+    "P2_defensibility": "Templates pre-compose common emergency messages (safe, privacy-friendly). Compression reduces mesh bandwidth by 80%+ (critical for intermittent connectivity). 2-byte codes for template messages are extremely efficient. Fallback to plaintext for custom messages (no loss of functionality).",
+    "P3_confidence_level": "Very high confidence in template system (lookup is trivial). High confidence in 2-byte template codes (proven technique). Medium confidence in delta encoding compression (tuning needed for custom messages).",
+    "P4_failure_modes": [
+      "Template key not found → fallback to plaintext (safe, but defeats optimization)",
+      "Compression fails on malformed input → message not sent (mitigate: try uncompressed fallback)",
+      "Decompression failure on receive → message unreadable (mitigate: flag corrupted message, ask user to resend)",
+      "Context variables not substituted → template shows '{location}' instead of actual location (mitigate: sanitize templates, test before deploy)"
+    ],
+    "P5_backup_plan": "If compression unavailable: send uncompressed (higher mesh bandwidth). If decompression fails: show raw message and ask resend. If template not found: use template_key as fallback display (user sees technical code).",
+    "P6_backup_plan_test": "Simulate compression failure (mock codec error). Test decompression failure (corrupt payload). Test template not found (reference invalid key). Test context variable failure (missing location, null status).",
+    "P7_testing_strategy": "Unit tests for template lookup. Unit tests for compression/decompression (test vectors). Integration tests for compression in mesh mode. Load tests for compression on 1000 messages. End-to-end tests for template message flow. Stress test: custom messages with 10k characters (extreme delta encoding).",
+    "P8_benchmarks": "Template lookup: <50ms. Compression (template): 1 message → 2 bytes. Compression (custom): 80%+ ratio vs plaintext. Decompression: <50ms per message. Compression CPU: <5% on device. Mesh bandwidth: 80%+ reduction vs uncompressed."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for templates module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Templates are system-provided. No legal risk from templates themselves. Custom messages inherit same encryption and legal protections as regular messages.",
+    "L2_regulatory_frameworks": ["GDPR (data compression)", "Accessibility (templates must have text alternatives)"],
+    "L3_consent_requirements": "Users implicitly consent to template use by selecting them. No separate consent.",
+    "L4_liability_notes": "None significant. Templates are optional (user can type custom message). Template wording must be neutral and non-discriminatory."
+  },
+  "F": {
+    "F1_cost_considerations": "Template registry: ~10KB static data. Compression CPU: negligible (client-side, algorithm-limited). No API or storage costs.",
+    "F2_accounting_considerations": "Operational cost (client runtime), no special accounting.",
+    "F3_revenue_impact": "Compression enables mesh networking (key differentiator). Improves offline experience and user satisfaction."
+  },
+  "S": {
+    "S1_cybersecurity": "Template codes are predictable (feature, not vulnerability). Compression happens before encryption (compression is metadata operation). No security added by encryption after compression (payload already entropy-reduced).",
+    "S2_data_privacy": "Templates may reveal message intent (template code in plaintext before encryption). Acceptable risk (adversary can infer intent anyway). Custom messages encrypted same as all messages.",
+    "S3_encryption_requirements": "Templates encrypted same as messages: Signal Protocol or AES-256-GCM",
+    "S4_access_control": "Templates public (everyone uses same templates). Custom message compression per-user (each message has own encoded state).",
+    "S5_audit_requirements": "Log when templates are used (for analytics, not security)."
+  },
+  "X": {
+    "X1_notes": "Templates are key to mesh efficiency. Emergency messages (safe, need help, evacuating) are critical use cases. 2-byte codes reduce bandwidth from ~1KB to 2 bytes (500x improvement). Pre-composed messages reduce user cognitive load during crisis. Context substitution (location, status) keeps messages personalized.",
+    "X2_open_questions": [
+      "Template taxonomy? (status, help request, evacuation, all-clear, etc.)",
+      "Which context variables to support? (location, timestamp, group name, status?)",
+      "Compression codec? (Varint, Huffman, LZ4, brotli?)",
+      "Custom message compression or only templates? (custom adds complexity, but helps offline)"
+    ],
+    "X3_related_research": "Huffman coding. Varint encoding (protobuf). LZ4 compression. Delta encoding. Mesh protocol literature. Emergency communication studies."
+  }
+}

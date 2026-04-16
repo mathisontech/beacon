@@ -1,0 +1,15 @@
+{
+  "layers": [
+    { "name": "land",       "source": "https://naciscdn.org/naturalearth/10m/physical/ne_10m_land.zip",                     "minzoom": 0, "maxzoom": 6 },
+    { "name": "ocean",      "source": "https://naciscdn.org/naturalearth/10m/physical/ne_10m_ocean.zip",                    "minzoom": 0, "maxzoom": 6 },
+    { "name": "coastline",  "source": "https://naciscdn.org/naturalearth/10m/physical/ne_10m_coastline.zip",                "minzoom": 0, "maxzoom": 8 },
+    { "name": "countries",  "source": "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_admin_0_countries.zip",        "minzoom": 0, "maxzoom": 8 },
+    { "name": "disputed",   "source": "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_admin_0_disputed_areas.zip",   "minzoom": 2, "maxzoom": 8 },
+    { "name": "states",     "source": "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_admin_1_states_provinces.zip", "minzoom": 2, "maxzoom": 8 },
+    { "name": "rivers",     "source": "https://naciscdn.org/naturalearth/10m/physical/ne_10m_rivers_lake_centerlines.zip",  "minzoom": 3, "maxzoom": 9 },
+    { "name": "lakes",      "source": "https://naciscdn.org/naturalearth/10m/physical/ne_10m_lakes.zip",                    "minzoom": 3, "maxzoom": 9 },
+    { "name": "urban",      "source": "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_urban_areas.zip",              "minzoom": 4, "maxzoom": 10 },
+    { "name": "roads",      "source": "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_roads.zip",                    "minzoom": 4, "maxzoom": 10 },
+    { "name": "populated",  "source": "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_populated_places.zip",         "minzoom": 2, "maxzoom": 10 }
+  ]
+}

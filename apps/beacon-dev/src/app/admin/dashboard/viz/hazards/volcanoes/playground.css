@@ -1278,3 +1278,197 @@
   color: rgba(255,255,255,0.65);
   font-style: italic;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   TWEAK ZONE 13 — Volcanoes of interest
+   Side panel (right edge) + legend swatch + evacuation E badge.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Legend swatch for the "Of interest" row */
+.vp-root .sw.sw-of-interest {
+  background: radial-gradient(circle at 30% 30%, #ff6a4f 0%, #d62728 60%, #7a1011 100%);
+  border: 1.5px solid rgba(255,255,255,0.85);
+  box-shadow: 0 0 0 2px rgba(214,39,40,0.25);
+}
+
+/* Evacuation "E" badge in the corner of a pin */
+.volcano-pin.evacuating { position: relative; }
+.volcano-pin-evac {
+  position: absolute;
+  top: -3px;
+  right: -5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  color: #d62728;
+  font-size: 9px;
+  font-weight: 800;
+  font-family: system-ui, -apple-system, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  letter-spacing: 0;
+  box-shadow:
+    0 0 0 1.5px #d62728,
+    0 1px 3px rgba(0,0,0,0.7);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Of Interest flyout — right side, open by default.
+   Narrower than the VolcanoDetailPanel (380px), which slides over it
+   when a pin is clicked and reveals it again on close. */
+.vp-root .vp-oi-flyout {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 300px;
+  max-height: calc(100vh - 48px);
+  background: rgba(18,22,30,0.94);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 220ms ease, opacity 220ms ease;
+  z-index: 450;
+}
+.vp-root .vp-oi-flyout.open {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.vp-root .vp-oi-head {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  position: relative;
+}
+.vp-root .vp-oi-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.3px;
+}
+.vp-root .vp-oi-sub {
+  font-size: 10px;
+  color: rgba(255,255,255,0.55);
+  margin-top: 2px;
+}
+.vp-root .vp-oi-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+}
+.vp-root .vp-oi-close:hover { color: #fff; }
+
+.vp-root .vp-oi-body {
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.vp-root .vp-oi-empty {
+  padding: 16px 14px;
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+}
+
+.vp-root .vp-oi-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.vp-root .vp-oi-row:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.vp-root .vp-oi-icon {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+.vp-root .vp-oi-icon svg { width: 22px; height: 22px; }
+
+.vp-root .vp-oi-meta {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.vp-root .vp-oi-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vp-root .vp-oi-region {
+  font-size: 10px;
+  color: rgba(255,255,255,0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+.vp-root .vp-oi-note {
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.68);
+  line-height: 1.35;
+  margin-top: 4px;
+}
+.vp-root .vp-oi-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.vp-root .vp-oi-tag {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.75);
+  background: rgba(255,255,255,0.04);
+}
+.vp-root .vp-oi-tag.tag-erupting {
+  color: #ff9a6e;
+  border-color: rgba(255,127,14,0.55);
+  background: rgba(255,127,14,0.12);
+}
+.vp-root .vp-oi-tag.tag-high-risk {
+  color: #ff8b8b;
+  border-color: rgba(214,39,40,0.55);
+  background: rgba(214,39,40,0.12);
+}
+.vp-root .vp-oi-tag.tag-evacuation {
+  color: #fff;
+  border-color: rgba(255,255,255,0.6);
+  background: rgba(214,39,40,0.35);
+}

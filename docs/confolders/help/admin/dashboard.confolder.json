@@ -1,0 +1,142 @@
+{
+  "module_id": "help.admin",
+  "module_name": "Help Manager (beacon-dev)",
+  "last_updated": "2026-04-04T14:58:58Z",
+  "updated_by": "claude-opus-4",
+  "bookmark": {
+    "status": "beacon-dev admin dashboard for help module management",
+    "return_note": "placeholder",
+    "priority": [
+      "Moderator role permissions",
+      "Dashboard metric selection"
+    ]
+  },
+  "M": {
+    "M1_beacon_versions": [
+      "Beta"
+    ],
+    "M2_module_type": "component",
+    "M3_hierarchy_path": "Product Manager > Help > Admin",
+    "M4_parent": "help",
+    "M5_children": [
+      "help.admin.moderation-queue",
+      "help.admin.stories-admin",
+      "help.admin.analytics"
+    ],
+    "M6_owner_history": [
+      {
+        "who": "claude-opus-4",
+        "role": "architect",
+        "from": "2026-04-04T14:58:58Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "all_help_data",
+        "source": "help.*",
+        "format": "JSON",
+        "schema_ref": null,
+        "frequency": "real-time",
+        "dependencies": [
+          "help.requests",
+          "help.feed",
+          "help.stories",
+          "help.missing"
+        ]
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "admin_views",
+        "consumers": [
+          "beacon-dev.product.help"
+        ],
+        "format": "React pages",
+        "schema_ref": null,
+        "frequency": "real-time",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Aggregate metrics, surface moderation queue, manage stories and missing reports",
+        "algorithm": null,
+        "latency_sla": "<500ms dashboard load",
+        "accuracy_target": null
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "help.*",
+        "description": "All help module data",
+        "data_format": "JSON",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "beacon-dev",
+        "description": "Admin dashboard pages",
+        "data_format": "React",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Dashboard aggregation across all help tables.",
+    "P2_defensibility": "Centralized management reduces operational overhead.",
+    "P3_confidence_level": "NR",
+    "P4_failure_modes": [
+      "Dashboard lag during high-volume events",
+      "Moderator queue overflow"
+    ],
+    "P5_backup_plan": "Pre-computed metrics with 5min cache. Moderator queue prioritization.",
+    "P6_backup_plan_test": "Simulate failure scenario in staging with mock data",
+    "P7_testing_strategy": "Test dashboard with 10K requests. Test moderation queue at scale.",
+    "P8_benchmarks": "Dashboard load <500ms. Moderation queue real-time."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T14:58:58Z",
+        "who": "claude-opus-4",
+        "description": "Initial CONFolder creation",
+        "version": "0.1"
+      }
+    ],
+    "CH2_current_version": "0.1"
+  },
+  "L": {
+    "L1_legal_considerations": "Admin access to all help data including location logs. Audit required.",
+    "L2_regulatory_frameworks": [
+      "CCPA",
+      "GDPR"
+    ],
+    "L3_consent_requirements": "Admin access governed by role-based permissions.",
+    "L4_liability_notes": "NR"
+  },
+  "F": {
+    "F1_cost_considerations": "Dashboard compute + caching.",
+    "F2_accounting_considerations": "Allocated to help module operational budget",
+    "F3_revenue_impact": "NR"
+  },
+  "S": {
+    "S1_cybersecurity": "Admins see more data than public users. Access logged.",
+    "S2_data_privacy": "Admin access to location logs requires documented cause.",
+    "S3_encryption_requirements": "NR",
+    "S4_access_control": "Beacon staff + designated community moderators.",
+    "S5_audit_requirements": "Full audit trail on all admin actions."
+  },
+  "X": {
+    "X1_notes": 3,
+    "X2_open_questions": null,
+    "X3_related_research": "NR"
+  }
+}

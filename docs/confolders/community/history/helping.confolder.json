@@ -1,0 +1,57 @@
+{
+  "module_id": "community.history.helping",
+  "module_name": "History Helping",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "placeholder",
+    "return_note": "Awaiting event taxonomy and helping reputation algorithm spec.",
+    "priority": 3
+  },
+  "M": {
+    "M1_beacon_versions": ["V1+"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > History > Helping",
+    "M4_parent": "community.history",
+    "M5_children": [],
+    "M6_owner_history": [{ "who": "claude-agent", "role": "framework-builder", "from": "2026-04-04T00:00:00Z", "to": "current" }]
+  },
+  "IO": {
+    "IO1_direct_inputs": [{ "name": "event_data", "source": "All community actions and events", "format": "JSON", "schema_ref": "event_type, timestamp, details", "frequency": "real-time", "dependencies": [] }],
+    "IO2_direct_outputs": [{ "name": "history_timeline", "consumers": ["user profile", "analytics"], "format": "JSON", "schema_ref": "[{ event_type, timestamp, details }]", "frequency": "on-demand", "dependencies": [] }],
+    "IO3_transformations": [{ "operation": "Log event with all context", "algorithm": "INSERT user_events table. Timestamp, event_type, details.", "latency_sla": "<500ms", "accuracy_target": "100% event logging" }]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [{ "step": 1, "module_id": "user_action", "description": "User action (message, help offer, resource share) occurs", "data_format": "action context", "dependencies": [] }],
+    "DW2_downstream_pipeline": [{ "step": 2, "module_id": "event_logging", "description": "Event logged to user_events table", "data_format": "event_id", "dependencies": [] }]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Event logging at scale (every action). Async logging prevents blocking.",
+    "P2_defensibility": "Comprehensive audit trail. User can review history. Transparency.",
+    "P3_confidence_level": "Straightforward logging.",
+    "P4_failure_modes": [
+      "Event logging fails silently → history incomplete (mitigate: async with retry, alerts on repeated failures)"
+    ],
+    "P5_backup_plan": "If logging fails: queue async retry. Never block user action.",
+    "P6_backup_plan_test": "Test async logging under load. Test database failure handling.",
+    "P7_testing_strategy": "Integration tests for logging all event types. Load tests for concurrent logging (100k/s).",
+    "P8_benchmarks": "Event logging: <500ms (async). History retrieval: <1s for 1000 events."
+  },
+  "CH": {
+    "CH1_change_log": [
+      { "date": "2026-04-04T00:00:00Z", "who": "claude-agent", "description": "Initial placeholder CONFolder for history MODULE", "version": "1.0" }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": { "L1_legal_considerations": "Audit trail for compliance. Retention policy for privacy (delete old events).", "L2_regulatory_frameworks": ["GDPR (data retention, right-to-delete)"], "L3_consent_requirements": "NR (logging is system operation).", "L4_liability_notes": "History transparency builds user trust. Over-retention violates privacy." },
+  "F": { "F1_cost_considerations": "Event storage: ~500B per event. At 100k users with 10 events/day: ~500MB/day = 180GB/year.", "F2_accounting_considerations": "Storage cost grows. Archive old events.", "F3_revenue_impact": "Transparency builds trust (positive impact)." },
+  "S": { "S1_cybersecurity": "Events logged securely. Privacy events (location access) logged for transparency.", "S2_data_privacy": "User can see own history. Retention policy limits old events.", "S3_encryption_requirements": "Events encrypted at rest.", "S4_access_control": "User sees own history. Admin sees only for support.", "S5_audit_requirements": "Events ARE audit trail." },
+  "X": {
+    "X1_notes": "Event history provides transparency and enables analytics. Helping reputation prevents gaming (track actual help given/received).",
+    "X2_open_questions": [
+      "Event taxonomy: what events to log? (all actions, or filtered?)",
+      "Reputation algorithm: how to weight help events? (prevents fraud)"
+    ],
+    "X3_related_research": "Event logging systems. Audit trails. Reputation algorithms in peer-to-peer platforms."
+  }
+}

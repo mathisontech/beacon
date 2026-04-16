@@ -1,16 +1,17 @@
-import type { LayerConfig } from "@/types/map";
-
-export const DEFAULT_LAYERS: LayerConfig[] = [
-  {
-    id: "nws-alerts",
-    name: "NWS Active Alerts",
-    category: "Weather",
-    enabled: true,
-    opacity: 0.6,
-    zIndex: 10,
-    source: "https://api.weather.gov/alerts/active",
-    updateInterval: 60,
-    lastUpdated: null,
-    status: "loading",
-  },
-];
+// Legacy re-export — all layer definitions live in ./layers/
+export {
+  type Layer,
+  type HazardLayer,
+  type HazardSublayers,
+  type HazardCategory,
+  type LayerCategory,
+  type LayerRegistry,
+  BASE_MAP,
+  WEATHER,
+  HAZARDS,
+  REFERENCE,
+  LIVE,
+  FUN,
+  LAYER_REGISTRY,
+  countLayers,
+} from "./layers/index";

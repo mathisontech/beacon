@@ -1,0 +1,178 @@
+{
+  "module_id": "community.messages.reactions",
+  "module_name": "Message Reactions",
+  "last_updated": "2026-04-04T00:00:00Z",
+  "updated_by": "claude-agent",
+  "bookmark": {
+    "status": "in-progress",
+    "return_note": "Awaiting decision on fixed emoji set vs custom. Moderation strategy for reaction-based harassment.",
+    "priority": 3
+  },
+  "M": {
+    "M1_beacon_versions": ["Beta", "V1"],
+    "M2_module_type": "function",
+    "M3_hierarchy_path": "Product Manager > Community > Messages > Reactions",
+    "M4_parent": "community.messages",
+    "M5_children": [],
+    "M6_owner_history": [
+      {
+        "who": "claude-agent",
+        "role": "framework-builder",
+        "from": "2026-04-04T00:00:00Z",
+        "to": "current"
+      }
+    ]
+  },
+  "IO": {
+    "IO1_direct_inputs": [
+      {
+        "name": "reaction_input",
+        "source": "User taps reaction emoji on message",
+        "format": "JSON",
+        "schema_ref": "{ message_id, user_id, emoji }",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "reaction_removal",
+        "source": "User removes their reaction by tapping again",
+        "format": "JSON",
+        "schema_ref": "{ message_id, user_id, emoji }",
+        "frequency": "real-time",
+        "dependencies": []
+      }
+    ],
+    "IO2_direct_outputs": [
+      {
+        "name": "reaction_list",
+        "consumers": ["message display UI"],
+        "format": "JSON",
+        "schema_ref": "[{ emoji, count, user_reacted: bool }]",
+        "frequency": "real-time",
+        "dependencies": []
+      },
+      {
+        "name": "reaction_notification",
+        "consumers": ["notification system"],
+        "format": "JSON",
+        "schema_ref": "{ message_id, reacting_user_id, emoji }",
+        "frequency": "real-time",
+        "dependencies": []
+      }
+    ],
+    "IO3_transformations": [
+      {
+        "operation": "Add reaction to message",
+        "algorithm": "Check user_id not already reacted with same emoji. Insert into reactions table. Increment count.",
+        "latency_sla": "<200ms",
+        "accuracy_target": "No duplicate reactions. Correct count."
+      },
+      {
+        "operation": "Remove reaction from message",
+        "algorithm": "Delete reaction from table. Decrement count.",
+        "latency_sla": "<200ms",
+        "accuracy_target": "Reaction removed, count updated."
+      },
+      {
+        "operation": "Aggregate reactions for message display",
+        "algorithm": "Group reactions by emoji. Count per emoji. Check current user's reactions.",
+        "latency_sla": "<100ms",
+        "accuracy_target": "Correct counts and user reaction status."
+      }
+    ]
+  },
+  "DW": {
+    "DW1_upstream_pipeline": [
+      {
+        "step": 1,
+        "module_id": "community.messages.encryption",
+        "description": "Message exists and is decrypted",
+        "data_format": "message_id, plaintext",
+        "dependencies": []
+      },
+      {
+        "step": 2,
+        "module_id": "user_action",
+        "description": "User taps reaction button on message",
+        "data_format": "message_id, emoji, user_id",
+        "dependencies": []
+      }
+    ],
+    "DW2_downstream_pipeline": [
+      {
+        "step": 3,
+        "module_id": "persistence",
+        "description": "Reaction inserted/deleted in reactions table",
+        "data_format": "INSERT/DELETE reactions (message_id, user_id, emoji, created_at)",
+        "dependencies": []
+      },
+      {
+        "step": 4,
+        "module_id": "real-time_update",
+        "description": "Reaction list updated for all thread members viewing message",
+        "data_format": "WebSocket or poll update with reaction counts",
+        "dependencies": []
+      },
+      {
+        "step": 5,
+        "module_id": "notification",
+        "description": "Optional: notify message author that someone reacted",
+        "data_format": "notification payload",
+        "dependencies": []
+      }
+    ]
+  },
+  "P": {
+    "P1_bottleneck_analysis": "Real-time sync of reaction counts across multiple users (WebSocket or polling). Duplicate reaction prevention (database constraint). Reaction notification delivery (should not spam author).",
+    "P2_defensibility": "Fixed emoji set (OK, !, ?, +1, thumbs-down) prevents misuse and is culturally neutral. Database unique constraint prevents duplicates. Real-time sync is expected for modern UX. Notifications optional (can mute).",
+    "P3_confidence_level": "Very high confidence. Simple CRUD operations. Real-time sync is well-established pattern.",
+    "P4_failure_modes": [
+      "Duplicate reaction creation → count is wrong (mitigate: unique constraint on (message_id, user_id, emoji))",
+      "Reaction count out of sync across devices → user confusion (mitigate: periodic recount on reconnection)",
+      "Reaction notification spam → user disables all notifications (mitigate: rate limit (max 1 notification per minute per message))"
+    ],
+    "P5_backup_plan": "If reaction fails: show error, user can retry. If sync fails: user sees stale count until refresh. If notification fails: user still sees reaction count updated.",
+    "P6_backup_plan_test": "Simulate database constraint violation (try duplicate reaction). Simulate sync failure (disconnect network). Simulate notification failure (mock FCM). Test edge case: remove own reaction while notification sending.",
+    "P7_testing_strategy": "Unit tests for reaction CRUD. Integration tests for sync across multiple users. Load tests for high-traffic messages (100+ reactions per second). End-to-end tests for full user flow (add, remove, see count update). Stress test: 10k users all reacting to same message simultaneously.",
+    "P8_benchmarks": "Add/remove reaction: <200ms. Sync to other users: <500ms (WebSocket) or <2s (polling). Count accuracy: 100%. No duplicates (database enforced). Notification delivery: >95% within 10s."
+  },
+  "CH": {
+    "CH1_change_log": [
+      {
+        "date": "2026-04-04T00:00:00Z",
+        "who": "claude-agent",
+        "description": "Initial CONFolder for reactions module",
+        "version": "1.0"
+      }
+    ],
+    "CH2_current_version": "1.0"
+  },
+  "L": {
+    "L1_legal_considerations": "Reactions can enable harassment (e.g., multiple users reacting negatively to isolate a user). Mitigate with moderation tools (admin can remove reactions). Emoji misinterpretation across cultures (mitigate: use simple, unambiguous emoji only).",
+    "L2_regulatory_frameworks": ["GDPR (data subject rights)", "Accessibility (emoji must have text alt)"],
+    "L3_consent_requirements": "Users implicitly consent to reactions by participating in messages. No separate consent.",
+    "L4_liability_notes": "Harassment via reactions is possible. Mitigation: moderation tools, ability to mute threads, reporting workflow. Clear community guidelines on reaction misuse."
+  },
+  "F": {
+    "F1_cost_considerations": "Reactions table storage: ~100B per reaction. Negligible compute cost.",
+    "F2_accounting_considerations": "Operational cost, no special tracking.",
+    "F3_revenue_impact": "Reactions increase engagement and stickiness. Minor positive impact."
+  },
+  "S": {
+    "S1_cybersecurity": "No sensitive data in reactions. Rate limiting on reaction send (prevent abuse: max 10 reactions per user per message per hour). User cannot remove others' reactions.",
+    "S2_data_privacy": "Reaction data is public within thread. User identity revealed (who reacted). Archive/delete message cascade-deletes reactions.",
+    "S3_encryption_requirements": "Reactions stored plaintext (not encrypted). Metadata only, no content risk.",
+    "S4_access_control": "Only user can remove their own reaction. Thread members can see all reactions. Admin can moderate (remove reactions if harassment).",
+    "S5_audit_requirements": "Audit log of reaction additions/removals (for moderation investigation). Audit trail retention: 1 year."
+  },
+  "X": {
+    "X1_notes": "Reactions are lightweight engagement feature. Fixed emoji set is more secure than custom emoji (prevents malicious content). Real-time sync expectations are high for modern apps. Moderation tools important for preventing harassment.",
+    "X2_open_questions": [
+      "Fixed emoji set or custom? (fixed is simpler and safer)",
+      "Which emoji to include? (OK, !, ?, +1, thumbs-down, or expand?)",
+      "Notification for every reaction or rate-limited? (rate limit probably needed)",
+      "Can admins remove reactions? (for moderation, yes)"
+    ],
+    "X3_related_research": "Slack reactions. Discord reactions. Harassment and engagement patterns in social platforms. Emoji accessibility guidelines."
+  }
+}
