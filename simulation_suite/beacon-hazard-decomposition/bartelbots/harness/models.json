@@ -1,0 +1,67 @@
+{
+  "_comment": "The registry of callable models. This file IS the allowlist — the router refuses any model not listed here (and provenance.mjs refuses any listed model whose family isn't approved). Endpoints are OpenAI-compatible; anything that speaks that API works: Ollama (local), vLLM, LM Studio, or a hosted gateway (Mistral La Plateforme, Together, Fireworks, Groq, NVIDIA NIM). base_url_env names the env var holding the endpoint; api_key_env the key (omit for keyless local).",
+  "task_classes": {
+    "verify.researcher": "local-default",
+    "verify.skeptic": "diverse-mid",
+    "draft": "local-default",
+    "judge": "diverse-mid",
+    "boss": "hosted-boss"
+  },
+  "aliases": {
+    "local-default": "gpt-oss-20b",
+    "local-tools": "granite-3.3-8b",
+    "diverse-mid": "mistral-small",
+    "hosted-boss": "gpt-oss-120b"
+  },
+  "_tool_calling_note": "For the agentic --tools path prefer a model post-trained for function calling: granite-3.3-8b (IBM, built for tool use + RAG), gpt-oss-20b, or llama3.1-8b. Reliability comes from constrained decoding (response_format json_schema, set per model by supports_json_schema) plus a tool-trained model — NOT from fine-tuning. Fine-tune later (Tinker LoRA on llama3.1-8b) only once BARTLE_TRACE=1 has logged a corpus and a Bartle-eval shows a gap prompting+constraints didn't close.",
+  "models": {
+    "gpt-oss-20b": {
+      "provider": "openai",
+      "origin": "US",
+      "tier": "local",
+      "base_url_env": "LOCAL_BASE_URL",
+      "base_url_default": "http://localhost:11434/v1",
+      "api_key_env": "LOCAL_API_KEY",
+      "supports_json_schema": true,
+      "note": "OpenAI gpt-oss-20b, Apache 2.0. Local default via Ollama on the spare machine."
+    },
+    "granite-3.3-8b": {
+      "provider": "openai",
+      "origin": "US",
+      "tier": "local",
+      "base_url_env": "LOCAL_BASE_URL",
+      "base_url_default": "http://localhost:11434/v1",
+      "supports_json_schema": true,
+      "note": "IBM Granite 3.3 8B. Small local tier / CPU-friendlier alternative."
+    },
+    "llama3.1-8b": {
+      "provider": "openai",
+      "origin": "US",
+      "tier": "local",
+      "base_url_env": "LOCAL_BASE_URL",
+      "base_url_default": "http://localhost:11434/v1",
+      "supports_json_schema": true,
+      "note": "Meta Llama 3.1 8B. Tinker LoRA fine-tune base."
+    },
+    "mistral-small": {
+      "provider": "openai",
+      "origin": "EU-FR",
+      "tier": "hosted",
+      "base_url_env": "MISTRAL_BASE_URL",
+      "base_url_default": "https://api.mistral.ai/v1",
+      "api_key_env": "MISTRAL_API_KEY",
+      "supports_json_schema": true,
+      "note": "Mistral Small. Used as the SKEPTIC by default — different lineage from the gpt-oss researcher gives genuine adversarial diversity."
+    },
+    "gpt-oss-120b": {
+      "provider": "openai",
+      "origin": "US",
+      "tier": "hosted",
+      "base_url_env": "HOSTED_BASE_URL",
+      "base_url_default": "https://api.together.xyz/v1",
+      "api_key_env": "HOSTED_API_KEY",
+      "supports_json_schema": true,
+      "note": "OpenAI gpt-oss-120b via any hosted OpenAI-compatible gateway. Boss tier."
+    }
+  }
+}
