@@ -68,6 +68,33 @@ and hands results in (works on any model). `--mock` runs the whole pipeline
 (Bartlebrain read → schema validate → inbox write → SPO log) with no model or
 network, for structure testing.
 
+## Rent and measure cost (current plan, 2026-07-20)
+
+No local hardware yet (the spare machine is 8GB — too small). The data at this
+stage is public hazard science, not customer data, so there's no privacy reason
+to run local: rent hosted open-model compute, measure the real cost, then decide
+hardware. Everything runs hosted, US/EU-provenance only:
+
+```bash
+export HOSTED_BASE_URL=https://api.together.xyz/v1   # or Groq / Fireworks
+export HOSTED_API_KEY=...                             # your rented endpoint
+export MISTRAL_API_KEY=...                            # skeptic (different lineage)
+export WEBSEARCH_PROVIDER=tavily TAVILY_API_KEY=...   # grounding
+
+# researcher + skeptic both hosted:
+node workflows/verify_overview.mjs FR2 --researcher gpt-oss-120b --skeptic mistral-small
+
+# after a few, see what it actually costs:
+node cost_report.mjs      # totals by model + projects the 144-subhazard backlog
+```
+
+The router reads `price_in`/`price_out` from `models.json` (editable estimates —
+set them to your provider's real rates), computes USD per call from the API
+`usage` counts, ledgers every call to `costs.jsonl`, and each run prints its
+cost. `cost_report.mjs` sums the ledger and extrapolates the backlog — the
+number that decides rent vs. buy. (Sensitive customer data is the later trigger
+to re-judge local hardware with real cost numbers in hand.)
+
 ## Model choice & fine-tuning (decided 2026-07-20)
 
 **Pick a tool-trained model now; do NOT fine-tune yet.**

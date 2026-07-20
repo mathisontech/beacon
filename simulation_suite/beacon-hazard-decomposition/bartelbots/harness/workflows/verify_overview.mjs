@@ -78,6 +78,7 @@ async function run() {
   const runners = { web_search: (a) => webSearch(a.query, { maxResults: 4 }) }
   const mockResult = (spec) => ({
     data: { code, verdict: 'needs_revision', corrections: [], confirmations: [{ field: 'what_is', claim: `mock run via ${spec.id}`, source: 'mock://' }], summary: `Mock ${spec.id} run — pipeline + schema + inbox verified, no model called.` },
+    inTok: 0, outTok: 0, costUSD: 0,
   })
 
   // One verification pass. In --tools mode the model drives web_search itself;
@@ -113,8 +114,12 @@ async function run() {
   const out = join(INBOX, `${code}.json`)
   writeFileSync(out, JSON.stringify(final, null, 2) + '\n')
   logSPO(code, { subject: `harness.verify`, predicate: 'wrote', object: `inbox/${code}.json`, context: `verdict=${final.verdict} corrections=${final.corrections.length} researcher=${r1.model || 'mock'} skeptic=${r2.model || 'mock'}` })
+  const tokens = (r1.inTok || 0) + (r1.outTok || 0) + (r2.inTok || 0) + (r2.outTok || 0)
+  const costUSD = (r1.costUSD || 0) + (r2.costUSD || 0)
+  logSPO(code, { subject: 'harness.verify', predicate: 'cost', object: `$${costUSD.toFixed(4)}`, context: `tokens=${tokens} researcher=${r1.model || 'mock'} skeptic=${r2.model || 'mock'}` })
   console.log(`${code}: ${final.verdict}, ${final.corrections.length} corrections -> ${out}`)
   console.log(`  researcher=${r1.model || 'mock'} skeptic=${r2.model || 'mock'} evidence=${evidence.filter((e) => e.configured && e.results.length).length}/${evidence.length} fields grounded`)
+  console.log(`  cost: $${costUSD.toFixed(4)} (${tokens.toLocaleString()} tokens) — ledger: harness/costs.jsonl · × ~144 draft subhazards left`)
   console.log(`  apply with: cd ${APP} && node scripts/apply-inbox.mjs`)
 }
 

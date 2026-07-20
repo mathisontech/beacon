@@ -22,8 +22,24 @@ export function resolveModel(taskClassOrId) {
   assertProvenance(id) // hard gate: blocklist + approved-family allowlist
   const baseUrl = process.env[spec.base_url_env] || spec.base_url_default
   const apiKey = spec.api_key_env ? process.env[spec.api_key_env] : undefined
-  return { id, baseUrl, apiKey, supportsJsonSchema: !!spec.supports_json_schema, tier: spec.tier, origin: spec.origin }
+  return { id, baseUrl, apiKey, supportsJsonSchema: !!spec.supports_json_schema, tier: spec.tier, origin: spec.origin, priceIn: spec.price_in ?? 0, priceOut: spec.price_out ?? 0 }
 }
+
+// USD cost of one call from the provider's usage counts and the registered
+// per-Mtok price. Local models price to 0. Ledgered to costs.jsonl so a batch
+// can be summed — the number that decides whether owning hardware beats renting.
+function accountCost(spec, usage) {
+  const inTok = usage?.prompt_tokens ?? 0
+  const outTok = usage?.completion_tokens ?? 0
+  const costUSD = (inTok / 1e6) * spec.priceIn + (outTok / 1e6) * spec.priceOut
+  if (process.env.BARTLE_COST !== '0') {
+    try {
+      appendFileSync(join(HERE, 'costs.jsonl'), JSON.stringify({ ts: new Date().toISOString(), model: spec.id, tier: spec.tier, in: inTok, out: outTok, usd: round4(costUSD) }) + '\n')
+    } catch { /* ledger is best-effort */ }
+  }
+  return { inTok, outTok, costUSD }
+}
+const round4 = (n) => Math.round(n * 1e4) / 1e4
 
 // One chat completion. If `schema` is given, requests JSON output and returns
 // the parsed object; otherwise returns the assistant text. Retries transient
@@ -55,8 +71,9 @@ export async function chat({ taskClass, model, messages, schema, temperature = 0
       if (!res.ok) throw new Error(`${spec.id} HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`)
       const data = await res.json()
       const text = data.choices?.[0]?.message?.content ?? ''
-      if (!schema) return { text, model: spec.id }
-      return { data: parseJson(text), text, model: spec.id }
+      const cost = accountCost(spec, data.usage)
+      if (!schema) return { text, model: spec.id, ...cost }
+      return { data: parseJson(text), text, model: spec.id, ...cost }
     } catch (err) {
       lastErr = err
       if (attempt < 3) await sleep(500 * attempt)
@@ -75,6 +92,7 @@ export async function chatAgentic({ taskClass, model, messages, tools, runners, 
   const spec = resolveModel(model ?? taskClass)
   if (mock) return mock(spec, messages)
   const convo = [...messages]
+  let inTok = 0, outTok = 0, costUSD = 0 // accumulate across tool rounds
 
   for (let round = 1; round <= maxRounds; round++) {
     const finalTurn = round === maxRounds
@@ -89,12 +107,15 @@ export async function chatAgentic({ taskClass, model, messages, tools, runners, 
     const data = await post(spec, body)
     const msg = data.choices?.[0]?.message ?? {}
     trace(spec, body, msg, round)
+    const c = accountCost(spec, data.usage)
+    inTok += c.inTok; outTok += c.outTok; costUSD += c.costUSD
     convo.push(msg)
 
     const calls = msg.tool_calls ?? []
     if (!calls.length || finalTurn) {
-      if (schema) return { data: parseJson(msg.content ?? ''), rounds: round, model: spec.id }
-      return { text: msg.content ?? '', rounds: round, model: spec.id }
+      const acc = { rounds: round, model: spec.id, inTok, outTok, costUSD }
+      if (schema) return { data: parseJson(msg.content ?? ''), ...acc }
+      return { text: msg.content ?? '', ...acc }
     }
     for (const call of calls) {
       const name = call.function?.name
