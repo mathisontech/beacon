@@ -60,6 +60,25 @@ Nothing from the earlier design is lost. The one-row engine poster survives with
 
 The seismic solver's "earthquake" is a residual against the expected waveform for a shallow event, which spawns the landslide hypothesis. The gauges going silent together is a residual against expected readings, which confirms a flood front. A photo of brown water at Betrawati localizes the front. Dynamics roll it forward to the school at plus fifty minutes. Planning picks "walk uphill now." The actor sends it with the place and the time in it.
 
+## How the product lines use it
+
+Every product is a question asked of the world state, and a bridge that pays data back into it. The product is creating and reinforcing **data bridges**, then building the unified picture that makes those bridges worth crossing.
+
+![How the product lines use the hazard world model](hazard-world-model-products.svg)
+
+| Product use | Who | Phase, axis | Asks the world state | Brings back |
+|---|---|---|---|---|
+| Household hardening | premium households | before · could | High-resolution scenario runs on one parcel; which upgrades change the outcome | parcel, construction, photos, home sensors |
+| Town, city, business hardening | officials, businesses | before · could | Burn-together and flood-together zones; which shared fixes save the most per dollar, where | inventories, plans, budgets, mitigations built |
+| Emergency operations bridge | emergency services | during · is, will | Which roads pass; where units are and are needed; who is already helped by neighbors and who needs professionals | unit positions, dispatch, tasking, what each team saw each minute |
+| Public and family app | the public | during · is, will | What do I do now, which way out, where are my people; guidance cached before towers fall | photos, location, need help or can help |
+| After-action review | emergency investigators | after · was | Replay with the reconstructed state beside each team's actual picture; what would the full picture have changed | logs, radio, timelines, findings that become hardening priors |
+| Research and API | scientists, partners | after · was | The world state and replays as data; validate models | new models, verified datasets |
+
+The "who needs professionals" question in operations is answerable only because the public app feeds the living-things layer of the world state. The after-action review is the four-track record from the posters, generated rather than reconstructed months later.
+
+**The bridges compound.** What the public reports during feeds the operations picture. Operations logs feed the review. Review findings feed hardening priors. Hardened homes and towns change how the next event unfolds.
+
 ## Published copy
 
 https://claude.ai/code/artifact/a5a21d1d-36e5-418d-8ad7-6f3a752c7089
