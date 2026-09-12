@@ -7,21 +7,21 @@
 --pu-f:#EEE8FA;--pu-s:#6C4BB8;--pu-t:#3A2478;--pu-t2:#5B3FA0;
 --am-f:#FBF0D6;--am-s:#B7791F;--am-t:#6B4308;--am-t2:#8C5A12;
 --gr-f:#E3F3E4;--gr-s:#2E8B45;--gr-t:#14512A;--gr-t2:#256E3A;
---gy-f:#F3F3F3;--gy-s:#8A8A8A;--gy-t:#222;--gy-t2:#555}
+--gy-f:#F3F3F3;--gy-s:#8A8A8A;--gy-t:#222;--gy-t2:#555;--co-f:#FBE4E0;--co-s:#C2502F;--co-t:#6B2412;--co-t2:#8A3A20;--col-s:#8a8a8a}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#131313;--ink:#f1f1ee;--ink2:#c9c9c4;--ink3:#8f8f8a;--hair:#333;--tint:#1c1c1b;--arrow:#aaa;
 --bl-f:#0F2A45;--bl-s:#5B9BE0;--bl-t:#CFE3FA;
 --te-f:#0E3330;--te-s:#3FBFAE;--te-t:#C8F1EB;--te-t2:#8ED8CB;
 --pu-f:#251A45;--pu-s:#9F86E6;--pu-t:#E4DBFA;--pu-t2:#BCA8F0;
 --am-f:#3A2A0C;--am-s:#E0A93A;--am-t:#F8E5B8;--am-t2:#E5C67A;
 --gr-f:#103019;--gr-s:#57B36B;--gr-t:#CDEFD4;--gr-t2:#8FD3A0;
---gy-f:#262626;--gy-s:#777;--gy-t:#e6e6e6;--gy-t2:#b5b5b5}}
+--gy-f:#262626;--gy-s:#777;--gy-t:#e6e6e6;--gy-t2:#b5b5b5;--co-f:#3B1A12;--co-s:#E8846A;--co-t:#F8D6CC;--co-t2:#F0B4A2;--col-s:#666}}
 :root[data-theme="dark"]{--paper:#131313;--ink:#f1f1ee;--ink2:#c9c9c4;--ink3:#8f8f8a;--hair:#333;--tint:#1c1c1b;--arrow:#aaa;
 --bl-f:#0F2A45;--bl-s:#5B9BE0;--bl-t:#CFE3FA;
 --te-f:#0E3330;--te-s:#3FBFAE;--te-t:#C8F1EB;--te-t2:#8ED8CB;
 --pu-f:#251A45;--pu-s:#9F86E6;--pu-t:#E4DBFA;--pu-t2:#BCA8F0;
 --am-f:#3A2A0C;--am-s:#E0A93A;--am-t:#F8E5B8;--am-t2:#E5C67A;
 --gr-f:#103019;--gr-s:#57B36B;--gr-t:#CDEFD4;--gr-t2:#8FD3A0;
---gy-f:#262626;--gy-s:#777;--gy-t:#e6e6e6;--gy-t2:#b5b5b5}
+--gy-f:#262626;--gy-s:#777;--gy-t:#e6e6e6;--gy-t2:#b5b5b5;--co-f:#3B1A12;--co-s:#E8846A;--co-t:#F8D6CC;--co-t2:#F0B4A2;--col-s:#666}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:Manrope,"Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.6;font-weight:500}
 .wrap{max-width:760px;margin:0 auto;padding:40px 24px 80px;display:flex;flex-direction:column;gap:36px}
@@ -39,7 +39,17 @@ svg .pu rect{fill:var(--pu-f);stroke:var(--pu-s)} svg .pu .h{fill:var(--pu-t)} s
 svg .am rect{fill:var(--am-f);stroke:var(--am-s)} svg .am .h{fill:var(--am-t)} svg .am .s{fill:var(--am-t2)}
 svg .gr rect{fill:var(--gr-f);stroke:var(--gr-s)} svg .gr .h{fill:var(--gr-t)} svg .gr .s{fill:var(--gr-t2)}
 svg .gy rect{fill:var(--gy-f);stroke:var(--gy-s)} svg .gy .h{fill:var(--gy-t)} svg .gy .s{fill:var(--gy-t2)}
-svg .h{font-size:14px;font-weight:700} svg .s{font-size:12px;font-weight:500}
+svg .co rect{fill:var(--co-f);stroke:var(--co-s)} svg .co .h,svg .co .b{fill:var(--co-t)} svg .co .s{fill:var(--co-t2)}
+svg .am .b{fill:var(--am-t)} svg .te .b{fill:var(--te-t)}
+svg .col rect{fill:none;stroke:var(--col-s)} svg .col .h{fill:var(--ink)} svg .col .s{fill:var(--ink3)}
+svg .h{font-size:14px;font-weight:700} svg .s{font-size:12px;font-weight:500} svg .b{font-size:12px;font-weight:700}
+figure.wide svg{min-width:900px}
+.uses{display:grid;grid-template-columns:1fr;gap:10px}
+.use{border:1.5px solid var(--hair);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:150px 1fr;gap:14px}
+.use b{font-size:15px;font-weight:800;line-height:1.25}
+.use b small{display:block;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:500;margin-top:4px}
+.use span{color:var(--ink2);font-size:15px}
+.use span i{font-style:normal;color:var(--ink);font-weight:700}
 svg line{stroke:var(--arrow);stroke-width:1.5} svg marker path{stroke:var(--arrow)}
 section{display:flex;flex-direction:column;gap:12px}
 h2{font-size:24px;line-height:1.15;font-weight:800;letter-spacing:-.015em;margin:0;text-wrap:balance}
@@ -150,8 +160,63 @@ code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;backgroun
     <p class="q">The seismic solver's "earthquake" is a residual against the expected waveform for a shallow event, which spawns the landslide hypothesis. The gauges going silent together is a residual against expected readings, which confirms a flood front. A photo of brown water at Betrawati localizes the front. Dynamics roll it forward to the school at plus fifty minutes. Planning picks "walk uphill now." The actor sends it with the place and the time in it.</p>
   </section>
 
+  <section>
+    <div class="k">How the product lines use it</div>
+    <h2>Every product is a question asked of the world state, and a bridge that pays data back into it.</h2>
+    <p>The product is not the chart above. The product is creating and reinforcing <b>data bridges</b>, then building the unified picture that makes those bridges worth crossing. Each product line asks the world state a different question on a different time axis, and each brings back data the picture did not have.</p>
+    <figure class="wide">
+      <svg viewBox="0 0 1000 590" role="img" aria-labelledby="pt pd"><title id="pt">How the product lines use the hazard world model</title><desc id="pd">Six product uses in three phases. Before: household hardening and town, city, business hardening query the could axis. During: the emergency operations bridge and the public and family app query the is and will axes. After: after-action review and research and API query the was axis. All connect through the world state to the core loop, and every product is a data bridge that pulls a view out and pushes signals back in.</desc>
+<defs><marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<!-- Before -->
+<g class="col"><rect x="40" y="30" width="300" height="262" rx="14" stroke-width="0.75" stroke-dasharray="5 4"/><text class="h" x="60" y="50" dominant-baseline="central">Before</text><text class="s" x="60" y="68" dominant-baseline="central">hazard hardening · the could axis</text></g>
+<g class="am"><rect x="52" y="86" width="276" height="92" rx="8" stroke-width="0.75"/><text class="h" x="64" y="104" dominant-baseline="central">Household hardening</text><text class="s" x="64" y="126" dominant-baseline="central">Which upgrades change my home's outcome?</text><text class="s" x="64" y="142" dominant-baseline="central">High-resolution runs on one parcel</text><text class="b" x="64" y="162" dominant-baseline="central">brings: parcel, construction, sensors</text></g>
+<g class="am"><rect x="52" y="190" width="276" height="92" rx="8" stroke-width="0.75"/><text class="h" x="64" y="208" dominant-baseline="central">Town, city, business hardening</text><text class="s" x="64" y="230" dominant-baseline="central">Which shared fixes save the most, where?</text><text class="s" x="64" y="246" dominant-baseline="central">Burn-together and flood-together zones</text><text class="b" x="64" y="266" dominant-baseline="central">brings: inventories, plans, budgets</text></g>
+<!-- During -->
+<g class="col"><rect x="355" y="30" width="300" height="262" rx="14" stroke-width="0.75" stroke-dasharray="5 4"/><text class="h" x="375" y="50" dominant-baseline="central">During</text><text class="s" x="375" y="68" dominant-baseline="central">the information bridge · the is and will axes</text></g>
+<g class="co"><rect x="367" y="86" width="276" height="92" rx="8" stroke-width="0.75"/><text class="h" x="379" y="104" dominant-baseline="central">Emergency operations bridge</text><text class="s" x="379" y="126" dominant-baseline="central">Which roads pass? Where are units needed?</text><text class="s" x="379" y="142" dominant-baseline="central">Who is helped already, who needs pros?</text><text class="b" x="379" y="162" dominant-baseline="central">brings: unit positions, dispatch, tasking</text></g>
+<g class="co"><rect x="367" y="190" width="276" height="92" rx="8" stroke-width="0.75"/><text class="h" x="379" y="208" dominant-baseline="central">Public and family app</text><text class="s" x="379" y="230" dominant-baseline="central">What do I do now? Where are my people?</text><text class="s" x="379" y="246" dominant-baseline="central">Guidance cached before towers fall</text><text class="b" x="379" y="266" dominant-baseline="central">brings: photos, location, need or can help</text></g>
+<!-- After -->
+<g class="col"><rect x="670" y="30" width="300" height="262" rx="14" stroke-width="0.75" stroke-dasharray="5 4"/><text class="h" x="690" y="50" dominant-baseline="central">After</text><text class="s" x="690" y="68" dominant-baseline="central">review and research · the was axis</text></g>
+<g class="te"><rect x="682" y="86" width="276" height="92" rx="8" stroke-width="0.75"/><text class="h" x="694" y="104" dominant-baseline="central">After-action review</text><text class="s" x="694" y="126" dominant-baseline="central">What would the full picture have changed?</text><text class="s" x="694" y="142" dominant-baseline="central">Replay what each team saw, by the minute</text><text class="b" x="694" y="162" dominant-baseline="central">brings: logs, radio, timelines</text></g>
+<g class="te"><rect x="682" y="190" width="276" height="92" rx="8" stroke-width="0.75"/><text class="h" x="694" y="208" dominant-baseline="central">Research and API</text><text class="s" x="694" y="230" dominant-baseline="central">The world state and its replays as data</text><text class="s" x="694" y="246" dominant-baseline="central">Validate and improve the models</text><text class="b" x="694" y="266" dominant-baseline="central">brings: new models, verified datasets</text></g>
+<!-- bridges: view out, signals in -->
+<line x1="190" y1="292" x2="190" y2="318" marker-start="url(#arrow2)" marker-end="url(#arrow2)"/>
+<line x1="505" y1="292" x2="505" y2="318" marker-start="url(#arrow2)" marker-end="url(#arrow2)"/>
+<line x1="820" y1="292" x2="820" y2="318" marker-start="url(#arrow2)" marker-end="url(#arrow2)"/>
+<!-- world state bar -->
+<g class="pu"><rect x="40" y="320" width="300" height="50" rx="8" stroke-width="0.75"/><text class="h" x="190" y="338" text-anchor="middle" dominant-baseline="central">World state · could</text><text class="s" x="190" y="356" text-anchor="middle" dominant-baseline="central">what-if scenarios, one parcel to one region</text></g>
+<g class="pu"><rect x="355" y="320" width="300" height="50" rx="8" stroke-width="0.75"/><text class="h" x="505" y="338" text-anchor="middle" dominant-baseline="central">World state · is and will</text><text class="s" x="505" y="356" text-anchor="middle" dominant-baseline="central">the live picture and what comes next</text></g>
+<g class="pu"><rect x="670" y="320" width="300" height="50" rx="8" stroke-width="0.75"/><text class="h" x="820" y="338" text-anchor="middle" dominant-baseline="central">World state · was</text><text class="s" x="820" y="356" text-anchor="middle" dominant-baseline="central">replay, with each team's picture beside it</text></g>
+<!-- state <-> core -->
+<line x1="505" y1="370" x2="505" y2="402" marker-start="url(#arrow2)" marker-end="url(#arrow2)"/>
+<!-- the core loop -->
+<g class="bl"><rect x="40" y="404" width="270" height="56" rx="8" stroke-width="0.75"/><text class="h" x="175" y="422" text-anchor="middle" dominant-baseline="central">Hazard world model</text><text class="s" x="175" y="440" text-anchor="middle" dominant-baseline="central">dynamics · observation · priors</text></g>
+<g class="gr"><rect x="340" y="404" width="140" height="56" rx="8" stroke-width="0.75"/><text class="h" x="410" y="422" text-anchor="middle" dominant-baseline="central">Perception</text><text class="s" x="410" y="440" text-anchor="middle" dominant-baseline="central">expected vs seen</text></g>
+<g class="gr"><rect x="500" y="404" width="140" height="56" rx="8" stroke-width="0.75"/><text class="h" x="570" y="422" text-anchor="middle" dominant-baseline="central">Inference</text><text class="s" x="570" y="440" text-anchor="middle" dominant-baseline="central">reweight scenarios</text></g>
+<g class="gr"><rect x="660" y="404" width="140" height="56" rx="8" stroke-width="0.75"/><text class="h" x="730" y="422" text-anchor="middle" dominant-baseline="central">Planning</text><text class="s" x="730" y="440" text-anchor="middle" dominant-baseline="central">options and plan</text></g>
+<g class="gr"><rect x="820" y="404" width="150" height="56" rx="8" stroke-width="0.75"/><text class="h" x="895" y="422" text-anchor="middle" dominant-baseline="central">Actor</text><text class="s" x="895" y="440" text-anchor="middle" dominant-baseline="central">alerts and tasking</text></g>
+<line x1="310" y1="432" x2="338" y2="432" marker-end="url(#arrow2)"/>
+<line x1="480" y1="432" x2="498" y2="432" marker-end="url(#arrow2)"/>
+<line x1="640" y1="432" x2="658" y2="432" marker-end="url(#arrow2)"/>
+<line x1="800" y1="432" x2="818" y2="432" marker-end="url(#arrow2)"/>
+<!-- the bridge thesis -->
+<g class="gy"><rect x="40" y="490" width="930" height="72" rx="8" stroke-width="0.75"/><text class="h" x="505" y="510" text-anchor="middle" dominant-baseline="central">Every product is a data bridge: it pulls a view out of the picture and pushes signals back in.</text><text class="s" x="505" y="530" text-anchor="middle" dominant-baseline="central">Bridges compound. What the public reports during feeds the operations picture. Operations logs feed the review.</text><text class="s" x="505" y="546" text-anchor="middle" dominant-baseline="central">Review findings feed hardening priors. Hardened homes and towns change how the next event unfolds.</text></g>
+</svg>
+      <figcaption>Six uses, three phases, one world state. The double arrows are the bridges: a view out, signals in.</figcaption>
+    </figure>
+    <div class="uses">
+      <div class="use"><b>Household hardening<small>premium households · before · could axis</small></b><span>A paying household runs <i>high-resolution scenario analysis</i> on its own parcel: this fire, this flood, this wind, this shaking, against this construction and this lot. The planning engine ranks upgrades by how much they change the outcome. <i>Brings back:</i> parcel details, construction class, photos, home sensors, which sharpen the priors for the whole street.</span></div>
+      <div class="use"><b>Town, city, business hardening<small>officials, businesses · before · could axis</small></b><span>The same analysis at scale. Burn-together and flood-together zones show that risk is shared at the neighborhood level even though we prepare as individuals, so the question becomes which <i>shared</i> fixes save the most per dollar and where. <i>Brings back:</i> infrastructure inventories, plans, budgets, and the mitigations actually built.</span></div>
+      <div class="use"><b>Emergency operations bridge<small>emergency services · during · is and will axes</small></b><span>The information bridge between services and the public in real time. Which roads are passable. Where units are and where they are needed. Which residents are already being helped adequately by neighbors, and who needs professional resources. That last question is answerable only because the public app is feeding the living-things layer of the world state. <i>Brings back:</i> unit positions, dispatch, tasking, and what each team could see at each minute.</span></div>
+      <div class="use"><b>Public and family app<small>the public · during · is and will axes</small></b><span>What do I do now, which way is out, where are my people. Guidance and expected signals are cached to the phone before towers fall. People are sensors: a photo, a location, a status of need help or can help. <i>Brings back:</i> the ground truth the operations bridge runs on.</span></div>
+      <div class="use"><b>After-action review<small>emergency investigators · after · was axis</small></b><span>Replay the hazard with the reconstructed world state beside the picture each team actually had, minute by minute. Ask what the full picture would have changed and where the bridges failed. This is the four-track record from the posters, generated rather than reconstructed months later. <i>Brings back:</i> logs, radio, timelines, and the findings that become next year's hardening priors.</span></div>
+      <div class="use"><b>Research and API<small>scientists, partners · after · was axis</small></b><span>The world state and its replays offered as data. Models are validated against what actually happened and better ones come back into the libraries. <i>Brings back:</i> new models and verified datasets.</span></div>
+    </div>
+    <p class="q">The bridges compound. What the public reports during feeds the operations picture. Operations logs feed the review. Review findings feed hardening priors. Hardened homes and towns change how the next event unfolds. Every product makes every other product's bridge more worth crossing.</p>
+  </section>
+
   <section class="core">
     <div class="k">Where this lives</div>
-    <p>Repo: <code>docs/architecture/hazard-world-model.md</code> and <code>hazard-world-model.svg</code> in the beacon application. This page is the same content, published.</p>
+    <p>Repo: <code>docs/architecture/hazard-world-model.md</code>, <code>hazard-world-model.svg</code>, and <code>hazard-world-model-products.svg</code> in the beacon application. This page is the same content, published.</p>
   </section>
 </div>
