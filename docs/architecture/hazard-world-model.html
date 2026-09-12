@@ -1,0 +1,157 @@
+<title>Hazard World Model</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+:root{--paper:#ffffff;--ink:#121212;--ink2:#454545;--ink3:#7a7a7a;--hair:#d9d9d6;--tint:#f5f5f2;--arrow:#555;
+--bl-f:#E8F1FB;--bl-s:#2F6FB3;--bl-t:#0C447C;
+--te-f:#DDF3F0;--te-s:#1F8A7A;--te-t:#0B4F46;--te-t2:#1F6E62;
+--pu-f:#EEE8FA;--pu-s:#6C4BB8;--pu-t:#3A2478;--pu-t2:#5B3FA0;
+--am-f:#FBF0D6;--am-s:#B7791F;--am-t:#6B4308;--am-t2:#8C5A12;
+--gr-f:#E3F3E4;--gr-s:#2E8B45;--gr-t:#14512A;--gr-t2:#256E3A;
+--gy-f:#F3F3F3;--gy-s:#8A8A8A;--gy-t:#222;--gy-t2:#555}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#131313;--ink:#f1f1ee;--ink2:#c9c9c4;--ink3:#8f8f8a;--hair:#333;--tint:#1c1c1b;--arrow:#aaa;
+--bl-f:#0F2A45;--bl-s:#5B9BE0;--bl-t:#CFE3FA;
+--te-f:#0E3330;--te-s:#3FBFAE;--te-t:#C8F1EB;--te-t2:#8ED8CB;
+--pu-f:#251A45;--pu-s:#9F86E6;--pu-t:#E4DBFA;--pu-t2:#BCA8F0;
+--am-f:#3A2A0C;--am-s:#E0A93A;--am-t:#F8E5B8;--am-t2:#E5C67A;
+--gr-f:#103019;--gr-s:#57B36B;--gr-t:#CDEFD4;--gr-t2:#8FD3A0;
+--gy-f:#262626;--gy-s:#777;--gy-t:#e6e6e6;--gy-t2:#b5b5b5}}
+:root[data-theme="dark"]{--paper:#131313;--ink:#f1f1ee;--ink2:#c9c9c4;--ink3:#8f8f8a;--hair:#333;--tint:#1c1c1b;--arrow:#aaa;
+--bl-f:#0F2A45;--bl-s:#5B9BE0;--bl-t:#CFE3FA;
+--te-f:#0E3330;--te-s:#3FBFAE;--te-t:#C8F1EB;--te-t2:#8ED8CB;
+--pu-f:#251A45;--pu-s:#9F86E6;--pu-t:#E4DBFA;--pu-t2:#BCA8F0;
+--am-f:#3A2A0C;--am-s:#E0A93A;--am-t:#F8E5B8;--am-t2:#E5C67A;
+--gr-f:#103019;--gr-s:#57B36B;--gr-t:#CDEFD4;--gr-t2:#8FD3A0;
+--gy-f:#262626;--gy-s:#777;--gy-t:#e6e6e6;--gy-t2:#b5b5b5}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Manrope,"Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.6;font-weight:500}
+.wrap{max-width:760px;margin:0 auto;padding:40px 24px 80px;display:flex;flex-direction:column;gap:36px}
+.k{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+header{display:flex;flex-direction:column;gap:10px;border-bottom:1.5px solid var(--ink);padding-bottom:20px}
+h1{font-size:40px;line-height:1.02;font-weight:800;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.lede{font-size:18px;color:var(--ink2);margin:0;max-width:62ch}
+.lede b{color:var(--ink);font-weight:700}
+figure{margin:0;border:1.5px solid var(--hair);border-radius:12px;padding:14px;background:var(--paper);overflow-x:auto}
+figure svg{width:100%;height:auto;display:block;min-width:560px;font-family:Manrope,"Segoe UI",system-ui,sans-serif}
+figcaption{font-size:13px;color:var(--ink3);margin-top:8px}
+svg .bl rect{fill:var(--bl-f);stroke:var(--bl-s)} svg .bl text{fill:var(--bl-t)}
+svg .te rect{fill:var(--te-f);stroke:var(--te-s)} svg .te .h{fill:var(--te-t)} svg .te .s{fill:var(--te-t2)}
+svg .pu rect{fill:var(--pu-f);stroke:var(--pu-s)} svg .pu .h{fill:var(--pu-t)} svg .pu .s{fill:var(--pu-t2)}
+svg .am rect{fill:var(--am-f);stroke:var(--am-s)} svg .am .h{fill:var(--am-t)} svg .am .s{fill:var(--am-t2)}
+svg .gr rect{fill:var(--gr-f);stroke:var(--gr-s)} svg .gr .h{fill:var(--gr-t)} svg .gr .s{fill:var(--gr-t2)}
+svg .gy rect{fill:var(--gy-f);stroke:var(--gy-s)} svg .gy .h{fill:var(--gy-t)} svg .gy .s{fill:var(--gy-t2)}
+svg .h{font-size:14px;font-weight:700} svg .s{font-size:12px;font-weight:500}
+svg line{stroke:var(--arrow);stroke-width:1.5} svg marker path{stroke:var(--arrow)}
+section{display:flex;flex-direction:column;gap:12px}
+h2{font-size:24px;line-height:1.15;font-weight:800;letter-spacing:-.015em;margin:0;text-wrap:balance}
+p{margin:0;max-width:66ch}
+p b,li b{font-weight:700;color:var(--ink)}
+.mods{display:grid;grid-template-columns:1fr;gap:10px}
+.mod{border:1.5px solid var(--hair);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:start}
+.mod b{font-size:15px;font-weight:800;line-height:1.25}
+.mod span{color:var(--ink2);font-size:15px}
+.mod span i{font-style:normal;color:var(--ink);font-weight:700}
+ol,ul{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;color:var(--ink2)}
+li{max-width:64ch}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--hair);vertical-align:top}
+th{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:500}
+.q{border-left:3px solid var(--ink);padding-left:16px;font-size:17px;line-height:1.5;max-width:60ch}
+.core{background:var(--tint);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+.core p{font-size:15px;color:var(--ink2)}
+code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;background:var(--tint);padding:1px 6px;border-radius:4px}
+@media (max-width:600px){.mod{grid-template-columns:1fr}h1{font-size:32px}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="k">beacon · engine · the core · set 2026-09-12</div>
+    <h1>Beacon is a hazard world model.</h1>
+    <p class="lede">A model of how hazards unfold given physics and human behavior, and of how any state of the world would look to a satellite, a gauge, or a person's phone. It keeps a running world state. <b>Everything Beacon does is a use of that one object.</b></p>
+  </header>
+
+  <figure>
+    <svg viewBox="0 0 680 500" role="img" aria-labelledby="dt dd"><title id="dt">Beacon as a hazard world model</title><desc id="dd">The world model maintains a world state, which renders expected signals. Perception compares incoming data against them, inference reweights scenarios, planning chooses actions, the actor sends signals back down. Sources and Beacon's products feed in.</desc>
+      <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+      <g class="bl"><rect x="40" y="40" width="600" height="110" rx="20" stroke-width="0.75"/><text class="h" x="60" y="60" dominant-baseline="central">Hazard world model</text></g>
+      <g class="te"><rect x="60" y="76" width="170" height="54" rx="8" stroke-width="0.75"/><text class="h" x="145" y="94" text-anchor="middle" dominant-baseline="central">Hazard dynamics</text><text class="s" x="145" y="114" text-anchor="middle" dominant-baseline="central">physics, human behavior</text></g>
+      <g class="te"><rect x="246" y="76" width="170" height="54" rx="8" stroke-width="0.75"/><text class="h" x="331" y="94" text-anchor="middle" dominant-baseline="central">Observation model</text><text class="s" x="331" y="114" text-anchor="middle" dominant-baseline="central">what a sensor would see</text></g>
+      <g class="te"><rect x="432" y="76" width="170" height="54" rx="8" stroke-width="0.75"/><text class="h" x="517" y="94" text-anchor="middle" dominant-baseline="central">World priors</text><text class="s" x="517" y="114" text-anchor="middle" dominant-baseline="central">terrain, people, routes</text></g>
+      <line x1="350" y1="150" x2="350" y2="188" marker-end="url(#arrow)"/>
+      <g class="pu"><rect x="230" y="190" width="240" height="56" rx="8" stroke-width="0.75"/><text class="h" x="350" y="208" text-anchor="middle" dominant-baseline="central">World state</text><text class="s" x="350" y="226" text-anchor="middle" dominant-baseline="central">past, present, future scenarios</text></g>
+      <g class="am"><rect x="40" y="190" width="160" height="56" rx="8" stroke-width="0.75"/><text class="h" x="120" y="208" text-anchor="middle" dominant-baseline="central">Expected signals</text><text class="s" x="120" y="226" text-anchor="middle" dominant-baseline="central">by place, time, sensor</text></g>
+      <line x1="230" y1="218" x2="202" y2="218" marker-end="url(#arrow)"/>
+      <line x1="120" y1="246" x2="120" y2="298" marker-end="url(#arrow)"/>
+      <line x1="259" y1="300" x2="259" y2="248" marker-end="url(#arrow)"/>
+      <line x1="417" y1="246" x2="417" y2="298" marker-end="url(#arrow)"/>
+      <g class="gr"><rect x="40" y="300" width="122" height="56" rx="8" stroke-width="0.75"/><text class="h" x="101" y="318" text-anchor="middle" dominant-baseline="central">Perception</text><text class="s" x="101" y="336" text-anchor="middle" dominant-baseline="central">expected vs seen</text></g>
+      <g class="gr"><rect x="198" y="300" width="122" height="56" rx="8" stroke-width="0.75"/><text class="h" x="259" y="318" text-anchor="middle" dominant-baseline="central">Inference</text><text class="s" x="259" y="336" text-anchor="middle" dominant-baseline="central">reweight scenarios</text></g>
+      <g class="gr"><rect x="356" y="300" width="122" height="56" rx="8" stroke-width="0.75"/><text class="h" x="417" y="318" text-anchor="middle" dominant-baseline="central">Planning</text><text class="s" x="417" y="336" text-anchor="middle" dominant-baseline="central">options and plan</text></g>
+      <g class="gr"><rect x="514" y="300" width="122" height="56" rx="8" stroke-width="0.75"/><text class="h" x="575" y="318" text-anchor="middle" dominant-baseline="central">Actor</text><text class="s" x="575" y="336" text-anchor="middle" dominant-baseline="central">alerts and tasking</text></g>
+      <line x1="162" y1="328" x2="196" y2="328" marker-end="url(#arrow)"/>
+      <line x1="320" y1="328" x2="354" y2="328" marker-end="url(#arrow)"/>
+      <line x1="478" y1="328" x2="512" y2="328" marker-end="url(#arrow)"/>
+      <line x1="101" y1="420" x2="101" y2="358" marker-end="url(#arrow)"/>
+      <line x1="575" y1="356" x2="575" y2="418" marker-end="url(#arrow)"/>
+      <g class="gy"><rect x="40" y="420" width="260" height="56" rx="8" stroke-width="0.75"/><text class="h" x="170" y="438" text-anchor="middle" dominant-baseline="central">Sources and products</text><text class="s" x="170" y="456" text-anchor="middle" dominant-baseline="central">satellites, gauges, phones, our apps</text></g>
+      <g class="gy"><rect x="380" y="420" width="256" height="56" rx="8" stroke-width="0.75"/><text class="h" x="508" y="438" text-anchor="middle" dominant-baseline="central">Signals back down</text><text class="s" x="508" y="456" text-anchor="middle" dominant-baseline="central">phones, agencies, responders</text></g>
+    </svg>
+    <figcaption>Data from every source and from Beacon's own products aggregates into the world model. The world state decides what to do. Signals go back down.</figcaption>
+  </figure>
+
+  <section>
+    <div class="k">The modules</div>
+    <div class="mods">
+      <div class="mod"><b>Hazard world model</b><span>Three functions, kept separate. <i>Hazard dynamics</i> rolls a hazard state forward under physics and human behavior. The <i>observation model</i> renders any state into what each sensor would report: a satellite pass, a gauge reading, a seismometer trace, a phone photo from a given spot. <i>World priors</i> are terrain, buildings, people, and routes.</span></div>
+      <div class="mod"><b>World state</b><span>A weighted set of scenarios across three times: what happened, what is happening, what comes next. Not a single map. In Nepal, "earthquake" and "landslide" were both live for four days; a single-answer state would have picked wrong.</span></div>
+      <div class="mod"><b>Expected signals</b><span>Predicted observations, rendered from the world state by the observation model, indexed by place, time, and sensor. Held in a cache because four modules consume the same object.</span></div>
+      <div class="mod"><b>Perception engine</b><span>New data is compared against the expected signal for that place, time, and sensor. <i>We expect a dry hill. The hill is wet.</i> The residual is the output. Absence counts: three gauges expected to report and all silent is a large residual, which is exactly the Nepal failure nobody was watching for.</span></div>
+      <div class="mod"><b>Inference engine</b><span>Triggered by surprise. Given what is being seen, reweight the scenarios for what happened, what is happening, and what is likely next. Spawn new hypotheses from a library of hazard scenario templates, never freely. Roll the dynamics forward. Write the updated world state.</span></div>
+      <div class="mod"><b>Planning engine</b><span>Over the scenario distribution, weigh warning, guidance, and mitigation options: lives saved, timing, false-alarm cost. Produce a plan.</span></div>
+      <div class="mod"><b>Actor</b><span>Executes the plan: alerts, guidance, tasking. Sends signals back down to phones, agencies, and responders.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="k">Where the expected signals go</div>
+    <h2>One object, four consumers. That is why it lives in a cache.</h2>
+    <ol>
+      <li><b>Perception</b> uses them as the comparator, including absence as a signal.</li>
+      <li><b>Planning</b> uses them as a sensing plan. Whichever expected signal would most separate the live hypotheses is the one worth tasking: ask phones inside a geofence for a photo, request a drone pass. This is active perception, and it is the mechanism behind viewshed and geofence corroboration.</li>
+      <li><b>The actor and products</b> use them as guidance content. "Water expected at Betrawati around 09:20" is an expected signal handed to a person. Pre-caching them to phones is what keeps guidance working when towers fall.</li>
+      <li><b>Training</b> uses expected versus realized as the calibration signal for the world model itself.</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="k">Mapping to the five-step loop</div>
+    <table>
+      <tr><th>Loop step (Sept 2)</th><th>World-model module</th></tr>
+      <tr><td>Collect</td><td>Ingestion into perception</td></tr>
+      <tr><td>Interpret</td><td>Perception engine</td></tr>
+      <tr><td>Reconcile</td><td>Inference engine</td></tr>
+      <tr><td>Simulate</td><td>Hazard dynamics, run forward</td></tr>
+      <tr><td>Decide</td><td>Planning engine</td></tr>
+      <tr><td>Send back down</td><td>Actor</td></tr>
+      <tr><td>Unified Picture</td><td>World state</td></tr>
+    </table>
+    <p>Nothing from the earlier design is lost. The one-row engine poster survives with new labels.</p>
+  </section>
+
+  <section>
+    <div class="k">Two cautions for the build</div>
+    <ul>
+      <li><b>Hypothesis explosion.</b> Inference must draw from a library of hazard scenario templates. The three model libraries by world layer (geophysical, structure and infrastructure, living things) are that library. Without it, one surprising photo spawns unbounded explanations.</li>
+      <li><b>Cost lives in the world model, not in perception.</b> Rendering expectations is what makes perception cheap enough to run at the edge, including on a phone with no signal. Design the cache so a phone can hold the expectations for its own area.</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="k">The Nepal morning, run through it</div>
+    <p class="q">The seismic solver's "earthquake" is a residual against the expected waveform for a shallow event, which spawns the landslide hypothesis. The gauges going silent together is a residual against expected readings, which confirms a flood front. A photo of brown water at Betrawati localizes the front. Dynamics roll it forward to the school at plus fifty minutes. Planning picks "walk uphill now." The actor sends it with the place and the time in it.</p>
+  </section>
+
+  <section class="core">
+    <div class="k">Where this lives</div>
+    <p>Repo: <code>docs/architecture/hazard-world-model.md</code> and <code>hazard-world-model.svg</code> in the beacon application. This page is the same content, published.</p>
+  </section>
+</div>
