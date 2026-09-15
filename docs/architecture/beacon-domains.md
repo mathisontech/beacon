@@ -8,7 +8,7 @@
 
 - **Mathison Technologies** is the parent company. Beacon is a child.
 - **Beacon strategy** holds the c-suite responsibilities and the shared services: HR and agentic ops, finance and accounting, legal and compliance. They serve all four domains.
-- **Four domains**, in the order the data flows: data lakehouse, backend development, product development, deployed product.
+- **Four domains**, in the order the data flows: data lakehouse, world model development, product development, deployed product.
 - **Three handoffs forward**, one return. The return is the loop from the core drawn as an org chart.
 
 ## Read it as the core
@@ -16,7 +16,7 @@
 | Domain | Boxes in the core it owns | The question it answers |
 |---|---|---|
 | Data lakehouse | Sources and products, in. Storage for the world state and the expected-signals cache. Compute for the dynamics. | Is every feed arriving, trusted, and affordable? |
-| Backend development | Hazard dynamics, observation model, world priors. World state. Expected signals. Perception, inference, planning. | Is the picture right, and does it know when it is wrong? |
+| World model development | Hazard dynamics, observation model, world priors. World state. Expected signals. Perception, inference, planning. | Is the picture right, and does it know when it is wrong? |
 | Product development | The actor's surfaces: public and family app, operations bridge, hardening tools, after-action review, API. Guidance packs cached to phones. | Can a person act on the picture in the time they have? |
 | Deployed product | Signals back down, actually received. Bridges crossed and data paid back. Expected versus realized, observed in the field. | Did the signal land, and what came back? |
 
@@ -40,11 +40,11 @@ The data and the compute. Home of IT and cyber. Owns everything before the model
 - **Security.** Perimeter, identity, secrets, audit. Beacon holds where people are and what their homes are made of, and sends messages people act on; both must be unforgeable. Agents run monitoring, patching, access reviews, audit logs. Humans own policy and incident command.
 - **Internal compute.** Capacity, cost, and scheduling for dynamics runs, cache renders, replays. Reports cost per run to finance. Agents run scheduling, autoscaling, forecasts. Humans own capacity planning and vendors.
 
-**Proof of done:** a data contract per feed that the backend's tests import, and a replay of a real event that reproduces the feeds minute by minute inside a stated compute budget.
+**Proof of done:** a data contract per feed that the world model team's tests import, and a replay of a real event that reproduces the feeds minute by minute inside a stated compute budget.
 
-## Domain 2: Backend development
+## Domain 2: World model development
 
-The model and the loop. Home of AI and data science. Owns the core diagram itself and delivers it as versioned services with a scorecard.
+The model and the loop. Home of AI and data science. Named for what it builds, not where it sits: every product has a backend in the software sense, so "backend development" would have been ambiguous. The people here are the world model builders. Owns the core diagram itself and delivers it as versioned services with a scorecard.
 
 - **AI team.** Hazard dynamics, the observation model, the world priors. The scenario template library (the three model libraries by world layer), the only place inference may draw hypotheses from. The three engines. Agents run experiments, surrogate training, regression evals, cache renders. Humans own model design, what enters the template library, and the thresholds at which planning may issue a warning.
 - **Data science team.** Calibration: expected versus realized, the fourth consumer of the cache, turned into a number per model per event. Replays as the standing benchmark. The metrics every domain reports against. Agents run the analysis, replays, scorecards. Humans own what the metrics mean and the validation studies behind them.
@@ -75,8 +75,8 @@ The field. Home of sales and external relationships, marketing and PR, product m
 
 | From → to | What crosses | The contract | The test |
 |---|---|---|---|
-| Lakehouse → Backend | Feeds, storage, compute | A data contract per feed: schema, freshness, lineage, replayability. A compute budget per run type. | Backend tests import the contracts. A replay reproduces the feeds inside budget. |
-| Backend → Product | World state, expected signals, plans | Versioned service interfaces with a scorecard attached to every version. | Product replay suites run against the pinned version. No version ships without its scorecard. |
+| Lakehouse → World model | Feeds, storage, compute | A data contract per feed: schema, freshness, lineage, replayability. A compute budget per run type. | World-model tests import the contracts. A replay reproduces the feeds inside budget. |
+| World model → Product | World state, expected signals, plans | Versioned service interfaces with a scorecard attached to every version. | Product replay suites run against the pinned version. No version ships without its scorecard. |
 | Product → Deployed | Releases, runbooks, guidance packs | A release with a passing replay suite, a runbook, and a defined return path. | Liaison rehearsal on the replay. Field test with a partner agency. |
 | Deployed → Lakehouse | Telemetry and bridge data | What clients brought, what people reported, what actually happened, under the same data contracts as any feed. | The return data appears in the next replay and the next scorecard. |
 
@@ -94,13 +94,13 @@ Agents run the repeatable. Humans own the calls where a life or a liability sits
 
 ## The shared fixture
 
-One replay, four test suites. Lahaina 2023 and Nepal 2026 are the first fixtures. The lakehouse replays their feeds at the original timestamps. The backend scores its picture against what happened. Product runs every surface against the replay. Deployed rehearses the liaison runbook on it. Every domain tests against the same recorded morning.
+One replay, four test suites. Lahaina 2023 and Nepal 2026 are the first fixtures. The lakehouse replays their feeds at the original timestamps. The world model team scores its picture against what happened. Product runs every surface against the replay. Deployed rehearses the liaison runbook on it. Every domain tests against the same recorded morning.
 
 ## The first slice, by domain: the Nepal flood, one basin
 
 - **Strategy.** Legal reviews what a warning to a school may say and in whose name. Finance sets the compute budget. Agentic ops provisions each team's agents with their boundary written.
 - **Lakehouse.** The basin's feeds replayable at original timestamps: gauges, seismic, imagery, weather, phone photos. Data contracts for each. A compute budget the dynamics fit inside.
-- **Backend.** Flood dynamics for the basin. An observation model for gauges and phone photos. A template library holding earthquake, landslide, outburst flood. An expected-signals cache for the basin. The four engines on the replay, scored.
+- **World model.** Flood dynamics for the basin. An observation model for gauges and phone photos. A template library holding earthquake, landslide, outburst flood. An expected-signals cache for the basin. The four engines on the replay, scored.
 - **Product.** The public app with the basin's guidance pack cached offline. The operations bridge showing passable roads and where units are needed. The review replay of that morning next to what each team actually saw.
 - **Deployed.** One partner agency onboarded with its dispatch data. A liaison runbook rehearsed on the replay. Monitoring that reports whether the guidance would have arrived, and what came back.
 

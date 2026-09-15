@@ -33,15 +33,15 @@ h1{font-size:40px;line-height:1.02;font-weight:800;letter-spacing:-.02em;margin:
 figure{margin:0;border:1.5px solid var(--hair);border-radius:12px;padding:14px;background:var(--paper);overflow-x:auto}
 figure svg{width:100%;height:auto;display:block;min-width:560px;font-family:Manrope,"Segoe UI",system-ui,sans-serif}
 figcaption{font-size:13px;color:var(--ink3);margin-top:8px}
-svg .bl rect{fill:var(--bl-f);stroke:var(--bl-s)} svg .bl text{fill:var(--bl-t)}
-svg .te rect{fill:var(--te-f);stroke:var(--te-s)} svg .te .h{fill:var(--te-t)} svg .te .s{fill:var(--te-t2)}
-svg .pu rect{fill:var(--pu-f);stroke:var(--pu-s)} svg .pu .h{fill:var(--pu-t)} svg .pu .s{fill:var(--pu-t2)}
-svg .am rect{fill:var(--am-f);stroke:var(--am-s)} svg .am .h{fill:var(--am-t)} svg .am .s{fill:var(--am-t2)}
-svg .gr rect{fill:var(--gr-f);stroke:var(--gr-s)} svg .gr .h{fill:var(--gr-t)} svg .gr .s{fill:var(--gr-t2)}
-svg .gy rect{fill:var(--gy-f);stroke:var(--gy-s)} svg .gy .h{fill:var(--gy-t)} svg .gy .s{fill:var(--gy-t2)}
-svg .co rect{fill:var(--co-f);stroke:var(--co-s)} svg .co .h,svg .co .b{fill:var(--co-t)} svg .co .s{fill:var(--co-t2)}
+svg .bl rect,svg .bl path,svg .bl ellipse{fill:var(--bl-f);stroke:var(--bl-s)} svg .bl text{fill:var(--bl-t)}
+svg .te rect,svg .te path,svg .te ellipse{fill:var(--te-f);stroke:var(--te-s)} svg .te .h{fill:var(--te-t)} svg .te .s{fill:var(--te-t2)}
+svg .pu rect,svg .pu path,svg .pu ellipse{fill:var(--pu-f);stroke:var(--pu-s)} svg .pu .h{fill:var(--pu-t)} svg .pu .s{fill:var(--pu-t2)}
+svg .am rect,svg .am path,svg .am ellipse{fill:var(--am-f);stroke:var(--am-s)} svg .am .h{fill:var(--am-t)} svg .am .s{fill:var(--am-t2)}
+svg .gr rect,svg .gr path,svg .gr ellipse{fill:var(--gr-f);stroke:var(--gr-s)} svg .gr .h{fill:var(--gr-t)} svg .gr .s{fill:var(--gr-t2)}
+svg .gy rect,svg .gy path,svg .gy ellipse{fill:var(--gy-f);stroke:var(--gy-s)} svg .gy .h{fill:var(--gy-t)} svg .gy .s{fill:var(--gy-t2)}
+svg .co rect,svg .co path,svg .co ellipse{fill:var(--co-f);stroke:var(--co-s)} svg .co .h,svg .co .b{fill:var(--co-t)} svg .co .s{fill:var(--co-t2)}
 svg .am .b{fill:var(--am-t)} svg .te .b{fill:var(--te-t)}
-svg .col rect{fill:none;stroke:var(--col-s)} svg .col .h{fill:var(--ink)} svg .col .s{fill:var(--ink3)}
+svg .col rect,svg .col path,svg .col ellipse{fill:none;stroke:var(--col-s)} svg .col .h{fill:var(--ink)} svg .col .s{fill:var(--ink3)}
 svg .h{font-size:14px;font-weight:700} svg .s{font-size:12px;font-weight:500} svg .b{font-size:12px;font-weight:700}
 figure.wide svg{min-width:900px}
 .uses{display:grid;grid-template-columns:1fr;gap:10px}
@@ -50,7 +50,7 @@ figure.wide svg{min-width:900px}
 .use b small{display:block;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:500;margin-top:4px}
 .use span{color:var(--ink2);font-size:15px}
 .use span i{font-style:normal;color:var(--ink);font-weight:700}
-svg line{stroke:var(--arrow);stroke-width:1.5} svg marker path{stroke:var(--arrow)}
+svg line,svg path[fill="none"]{stroke:var(--arrow);stroke-width:1.5} svg marker path{stroke:var(--arrow)}
 section{display:flex;flex-direction:column;gap:12px}
 h2{font-size:24px;line-height:1.15;font-weight:800;letter-spacing:-.015em;margin:0;text-wrap:balance}
 p{margin:0;max-width:66ch}
@@ -81,7 +81,7 @@ a{color:inherit}
   </header>
 
   <figure class="wide">
-    <svg viewBox="0 0 1000 730" role="img" aria-labelledby="ot od"><title id="ot">Beacon domains and teams</title><desc id="od">Mathison Technologies is the parent. Beacon strategy sits at c-suite level with HR and agentic ops, finance and accounting, and legal and compliance. Four domains below: data lakehouse (IT and cyber: data pipelines, security, internal compute), backend development (AI and data science), product development (software engineering, UI research and design, product testing), deployed product (sales and relationships, marketing and PR, monitoring and analytics). Handoffs run left to right: data contracts, model services, releases and runbooks. Telemetry and bridge data return from the field to the lakehouse and close the loop.</desc>
+    <svg viewBox="0 0 1000 730" role="img" aria-labelledby="ot od"><title id="ot">Beacon domains and teams</title><desc id="od">Mathison Technologies is the parent. Beacon strategy sits at c-suite level with HR and agentic ops, finance and accounting, and legal and compliance. Four domains below: data lakehouse (IT and cyber: data pipelines, security, internal compute), world model development (AI and data science), product development (software engineering, UI research and design, product testing), deployed product (sales and relationships, marketing and PR, monitoring and analytics). Handoffs run left to right: data contracts, model services, releases and runbooks. Telemetry and bridge data return from the field to the lakehouse and close the loop.</desc>
 <defs><marker id="arrow3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
 <!-- parent -->
 <g class="gy"><rect x="40" y="20" width="920" height="40" rx="8" stroke-width="0.75"/><text class="h" x="500" y="40" text-anchor="middle" dominant-baseline="central">Mathison Technologies · parent company</text></g>
@@ -99,8 +99,8 @@ a{color:inherit}
 <g class="gy"><rect x="52" y="342" width="191" height="46" rx="8" stroke-width="0.75"/><text class="h" x="64" y="360" dominant-baseline="central">Security</text><text class="s" x="64" y="377" dominant-baseline="central">perimeter, identity, audit</text></g>
 <g class="gy"><rect x="52" y="396" width="191" height="46" rx="8" stroke-width="0.75"/><text class="h" x="64" y="414" dominant-baseline="central">Internal compute</text><text class="s" x="64" y="431" dominant-baseline="central">capacity, cost, scheduling</text></g>
 <g class="pu"><rect x="52" y="458" width="191" height="76" rx="8" stroke-width="0.75"/><text class="b" x="64" y="474" dominant-baseline="central">Owns in the core</text><text class="s" x="64" y="491" dominant-baseline="central">sources and products, in</text><text class="s" x="64" y="506" dominant-baseline="central">state and cache storage</text><text class="s" x="64" y="521" dominant-baseline="central">compute for the dynamics</text></g>
-<!-- domain 2: backend -->
-<g class="col"><rect x="275" y="218" width="215" height="330" rx="14" stroke-width="0.75" stroke-dasharray="5 4"/><text class="h" x="289" y="238" dominant-baseline="central">Backend development</text><text class="s" x="289" y="256" dominant-baseline="central">the model and the loop</text><text class="s" x="289" y="272" dominant-baseline="central">AI and data science</text></g>
+<!-- domain 2: world model -->
+<g class="col"><rect x="275" y="218" width="215" height="330" rx="14" stroke-width="0.75" stroke-dasharray="5 4"/><text class="h" x="289" y="238" dominant-baseline="central">World model development</text><text class="s" x="289" y="256" dominant-baseline="central">the model and the loop</text><text class="s" x="289" y="272" dominant-baseline="central">AI and data science</text></g>
 <g class="te"><rect x="287" y="288" width="191" height="73" rx="8" stroke-width="0.75"/><text class="h" x="299" y="306" dominant-baseline="central">AI team</text><text class="s" x="299" y="324" dominant-baseline="central">the world model, the engines,</text><text class="s" x="299" y="340" dominant-baseline="central">the scenario template library</text></g>
 <g class="te"><rect x="287" y="369" width="191" height="73" rx="8" stroke-width="0.75"/><text class="h" x="299" y="387" dominant-baseline="central">Data science team</text><text class="s" x="299" y="405" dominant-baseline="central">calibration, replays, metrics,</text><text class="s" x="299" y="421" dominant-baseline="central">expected versus realized</text></g>
 <g class="pu"><rect x="287" y="458" width="191" height="76" rx="8" stroke-width="0.75"/><text class="b" x="299" y="474" dominant-baseline="central">Owns in the core</text><text class="s" x="299" y="491" dominant-baseline="central">world model and world state</text><text class="s" x="299" y="506" dominant-baseline="central">expected signals</text><text class="s" x="299" y="521" dominant-baseline="central">perception, inference, planning</text></g>
@@ -137,7 +137,7 @@ a{color:inherit}
     <table>
       <tr><th>Domain</th><th>Boxes in the core it owns</th><th>The question it answers</th></tr>
       <tr><td><b>Data lakehouse</b></td><td>Sources and products, in. Storage for the world state and the expected-signals cache. Compute for the dynamics.</td><td>Is every feed arriving, trusted, and affordable?</td></tr>
-      <tr><td><b>Backend development</b></td><td>Hazard dynamics, observation model, world priors. World state. Expected signals. Perception, inference, planning.</td><td>Is the picture right, and does it know when it is wrong?</td></tr>
+      <tr><td><b>World model development</b></td><td>Hazard dynamics, observation model, world priors. World state. Expected signals. Perception, inference, planning.</td><td>Is the picture right, and does it know when it is wrong?</td></tr>
       <tr><td><b>Product development</b></td><td>The actor's surfaces: the public and family app, the operations bridge, hardening tools, after-action review, the API. Guidance packs cached to phones.</td><td>Can a person act on the picture in the time they have?</td></tr>
       <tr><td><b>Deployed product</b></td><td>Signals back down, actually received. Bridges crossed and data paid back. Expected versus realized, observed in the field.</td><td>Did the signal land, and what came back?</td></tr>
     </table>
@@ -158,19 +158,19 @@ a{color:inherit}
   <section>
     <div class="k">Domain 1 · Data lakehouse</div>
     <h2>The data and the compute. Home of IT and cyber.</h2>
-    <p>Owns everything before the model touches it and everything the model runs on. If the lakehouse is right, the backend never has to ask where a number came from or whether there is room to run.</p>
+    <p>Owns everything before the model touches it and everything the model runs on. If the lakehouse is right, the world model team never has to ask where a number came from or whether there is room to run.</p>
     <div class="mods">
       <div class="mod"><b>Data pipelines</b><span>Every feed in: satellites, gauges, seismometers, weather, phones, and the data each product brings back. Schemas, freshness, lineage, and replay. A feed is not done until it can be replayed at its original timestamps. <i>Agents run:</i> ingestion, schema-drift detection, backfills, freshness checks. <i>Humans own:</i> onboarding a new source and the contract with whoever provides it.</span></div>
       <div class="mod"><b>Security</b><span>Perimeter, identity, secrets, audit. Beacon holds where people are and what their homes are made of, and it sends messages people will act on. Both must be unforgeable. <i>Agents run:</i> monitoring, patching, access reviews, audit logs. <i>Humans own:</i> policy and incident command.</span></div>
       <div class="mod"><b>Internal compute</b><span>Capacity, cost, and scheduling for the dynamics runs, the cache renders, and the replays. Reports cost per run to finance. <i>Agents run:</i> scheduling, autoscaling, cost forecasts. <i>Humans own:</i> capacity planning and vendors.</span></div>
     </div>
-    <p><b>Proof of done:</b> a data contract per feed that the backend's tests import, and a replay of a real event that reproduces the feeds minute by minute, inside a stated compute budget.</p>
+    <p><b>Proof of done:</b> a data contract per feed that the world model team's tests import, and a replay of a real event that reproduces the feeds minute by minute, inside a stated compute budget.</p>
   </section>
 
   <section>
-    <div class="k">Domain 2 · Backend development</div>
+    <div class="k">Domain 2 · World model development</div>
     <h2>The model and the loop. Home of AI and data science.</h2>
-    <p>Owns the core diagram itself: the three parts of the hazard world model, the world state, the expected-signals cache, and the perception, inference, and planning engines. Delivers them as versioned services with a scorecard.</p>
+    <p>Named for what it builds, not where it sits: every product has a backend in the software sense, so "backend development" would have been ambiguous. The people here are the world model builders. They own the core diagram itself: the three parts of the hazard world model, the world state, the expected-signals cache, and the perception, inference, and planning engines. Delivers them as versioned services with a scorecard.</p>
     <div class="mods">
       <div class="mod"><b>AI team</b><span>Hazard dynamics, the observation model, the world priors. The scenario template library, which is the three model libraries by world layer and the only place inference may draw hypotheses from. The three engines. <i>Agents run:</i> experiments, surrogate training, regression evals, cache renders. <i>Humans own:</i> model design, what goes in the template library, and the thresholds at which planning may issue a warning.</span></div>
       <div class="mod"><b>Data science team</b><span>Calibration: expected versus realized, the fourth consumer of the cache, turned into a number per model per event. Replays as the standing benchmark. The metrics every other domain reports against. <i>Agents run:</i> the analysis, the replays, the scorecards. <i>Humans own:</i> what the metrics mean and the validation studies behind them.</span></div>
@@ -207,8 +207,8 @@ a{color:inherit}
     <h2>Three forward, one back. Each is a contract with a test.</h2>
     <table>
       <tr><th>From → to</th><th>What crosses</th><th>The contract</th><th>The test</th></tr>
-      <tr><td>Lakehouse → Backend</td><td>Feeds, storage, compute</td><td>A data contract per feed: schema, freshness, lineage, replayability. A compute budget per run type.</td><td>Backend tests import the contracts. A replay reproduces the feeds inside budget.</td></tr>
-      <tr><td>Backend → Product</td><td>World state, expected signals, plans</td><td>Versioned service interfaces with a scorecard attached to every version.</td><td>Product's replay suites run against the pinned version. A version cannot ship without its scorecard.</td></tr>
+      <tr><td>Lakehouse → World model</td><td>Feeds, storage, compute</td><td>A data contract per feed: schema, freshness, lineage, replayability. A compute budget per run type.</td><td>World-model tests import the contracts. A replay reproduces the feeds inside budget.</td></tr>
+      <tr><td>World model → Product</td><td>World state, expected signals, plans</td><td>Versioned service interfaces with a scorecard attached to every version.</td><td>Product's replay suites run against the pinned version. A version cannot ship without its scorecard.</td></tr>
       <tr><td>Product → Deployed</td><td>Releases, runbooks, guidance packs</td><td>A release with a passing replay suite, a runbook, and a defined return path.</td><td>Liaison rehearsal on the replay. Field test with a partner agency.</td></tr>
       <tr><td>Deployed → Lakehouse</td><td>Telemetry and bridge data</td><td>What clients brought, what people reported, what actually happened, under the same data contracts as any feed.</td><td>The return data appears in the next replay, and the next scorecard.</td></tr>
     </table>
@@ -231,7 +231,7 @@ a{color:inherit}
   <section>
     <div class="k">The shared fixture</div>
     <h2>One replay, four test suites.</h2>
-    <p>Lahaina 2023 and Nepal 2026 are the first fixtures. The lakehouse replays their feeds at the original timestamps. The backend scores its picture against what happened. Product runs every surface against the replay and asks who would have seen what, when. Deployed rehearses the liaison runbook on it. Every domain tests against the same recorded morning, which is what keeps four teams building one system.</p>
+    <p>Lahaina 2023 and Nepal 2026 are the first fixtures. The lakehouse replays their feeds at the original timestamps. The world model team scores its picture against what happened. Product runs every surface against the replay and asks who would have seen what, when. Deployed rehearses the liaison runbook on it. Every domain tests against the same recorded morning, which is what keeps four teams building one system.</p>
   </section>
 
   <section>
@@ -240,7 +240,7 @@ a{color:inherit}
     <div class="mods">
       <div class="mod"><b>Strategy</b><span>Legal reviews what a warning to a school may say and in whose name. Finance sets the compute budget for the basin. Agentic ops provisions the agents for each team with their boundary written.</span></div>
       <div class="mod"><b>Lakehouse</b><span>The basin's feeds, replayable at original timestamps: gauges, seismic, imagery, weather, phone photos. Data contracts for each. A compute budget that the dynamics fit inside.</span></div>
-      <div class="mod"><b>Backend</b><span>Flood dynamics for the basin. An observation model for gauges and phone photos. A template library holding earthquake, landslide, and outburst flood. An expected-signals cache for the basin. The four engines running on the replay, scored.</span></div>
+      <div class="mod"><b>World model</b><span>Flood dynamics for the basin. An observation model for gauges and phone photos. A template library holding earthquake, landslide, and outburst flood. An expected-signals cache for the basin. The four engines running on the replay, scored.</span></div>
       <div class="mod"><b>Product</b><span>The public app with the basin's guidance pack cached offline. The operations bridge showing passable roads and where units are needed. The review replay of that morning, next to what each team actually saw.</span></div>
       <div class="mod"><b>Deployed</b><span>One partner agency onboarded with its dispatch data. A liaison runbook rehearsed on the replay. Monitoring that reports whether the guidance would have arrived, and what came back.</span></div>
     </div>
